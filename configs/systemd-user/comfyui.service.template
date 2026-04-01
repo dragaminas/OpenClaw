@@ -1,0 +1,16 @@
+[Unit]
+Description=ComfyUI (user service)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=__COMFYUI_DIR__
+ExecStart=__COMFYUI_VENV_DIR__/bin/python __COMFYUI_DIR__/main.py --listen __COMFYUI_HOST__ --port __COMFYUI_PORT__
+Restart=on-failure
+RestartSec=5
+Environment=HOME=__WORK_HOME__
+Environment=PATH=__COMFYUI_VENV_DIR__/bin:/usr/local/bin:/usr/bin:/bin
+
+[Install]
+WantedBy=default.target

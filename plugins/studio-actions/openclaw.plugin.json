@@ -1,0 +1,25 @@
+{
+  "id": "studio-actions",
+  "name": "Studio Actions",
+  "description": "Puente seguro entre WhatsApp y wrappers locales para Blender.",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "commandPrefix": {
+        "type": "string",
+        "minLength": 1
+      },
+      "channels": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allowGroupMessages": {
+        "type": "boolean"
+      }
+    }
+  }
+}
