@@ -24,6 +24,10 @@ Lenguaje natural:
 - `studio crea proyecto <nombre>`
 - `studio abre proyecto <nombre>`
 - `studio haz una prueba de blender`
+- `studio abre comfyui`
+- `studio inicia comfyui`
+- `studio como esta comfyui`
+- `studio para comfyui`
 
 Modo tecnico:
 
@@ -32,6 +36,11 @@ Modo tecnico:
 - `studio blender new <nombre>`
 - `studio blender open <nombre>`
 - `studio blender smoke-test <nombre>`
+- `studio comfyui status`
+- `studio comfyui start`
+- `studio comfyui open`
+- `studio comfyui stop`
+- `studio comfyui url`
 
 ## Principios
 
@@ -74,9 +83,13 @@ Implementado hoy:
 - creacion de proyecto nuevo
 - apertura de proyecto existente
 - smoke test de Blender
+- estado de ComfyUI
+- arranque de ComfyUI
+- apertura de la UI web de ComfyUI
+- parada controlada de ComfyUI
 
 Pendiente:
 
-- capa equivalente para ComfyUI
+- primer workflow real de ComfyUI orientado a imagen o video
 - perfiles de acciones por usuario o por modo de uso
 - mas wrappers para archivos y herramientas creativas

@@ -54,7 +54,6 @@ Bloqueos actuales observados en este sistema:
 
 - el usuario `eric` sigue en grupos sensibles como `sudo` y `adm`
 - falta confirmacion real por WhatsApp despues del ultimo fix del parser con wake word
-- ComfyUI sigue sin estar validado en servicio estable ni en el puerto `8188`
 - `openclaw-node.service` puede quedar temporalmente en `activating` durante pairing o reconexion
 
 ## Registro as-built fuera del plan original
@@ -150,8 +149,8 @@ Tareas:
 - [done] Crear script para detectar Blender instalado
 - [done] Crear script para lanzar Blender con un proyecto nuevo o existente
 - [done] Crear script para detectar ComfyUI
-- [in progress] Crear script para arrancar ComfyUI como servicio local o proceso controlado
-- [in progress] Crear script para comprobar puertos, modelos y rutas de salida de ComfyUI
+- [done] Crear script para arrancar ComfyUI como servicio local o proceso controlado
+- [done] Crear script para comprobar puertos, modelos y rutas de salida de ComfyUI
 - [done] Evaluar integracion con Krita, GIMP o Inkscape
 - [done] Definir carpeta de trabajo estandar para proyectos y exportaciones
 - [done] Crear wrappers pensados para ser invocados por acciones seguras desde chat
@@ -161,11 +160,12 @@ Tareas:
 Entregables:
 
 - [done] `scripts/apps/blender.sh`
-- [in progress] `scripts/apps/comfyui.sh`
+- [done] `scripts/apps/comfyui.sh`
 - [done] `scripts/apps/design-tools.sh`
 - [done] `scripts/actions/blender-action.sh`
+- [done] `scripts/actions/comfyui-action.sh`
 - [in progress] `configs/comfyui/`
-- [in progress] documentacion operativa en `docs/operations/`
+- [done] documentacion operativa en `docs/operations/`
 - [done] `scripts/apps/install-comfyui-manager.sh`
 - [done] `scripts/services/install-comfyui-service.sh`
 
@@ -183,6 +183,7 @@ Tareas:
 - [done] Evitar ejecucion arbitraria de comandos del sistema
 - [done] Diseñar mensajes de respuesta legibles para usuario no tecnico
 - [done] Conectar el primer puente `WhatsApp -> before_dispatch -> Blender`
+- [done] Conectar el primer puente `WhatsApp -> before_dispatch -> ComfyUI`
 - [done] Exigir wake word al inicio y permitir lenguaje natural despues
 - [done] Ignorar en WhatsApp cualquier mensaje sin wake word
 
@@ -243,7 +244,7 @@ Tareas:
 - [in progress] Probar que `OpenClaw` arranca sin consola
 - [in progress] Probar enlace y uso por WhatsApp
 - [done] Probar lanzamiento de Blender
-- [pending] Probar arranque y ejecucion de ComfyUI
+- [done] Probar arranque y ejecucion de ComfyUI
 - [in progress] Probar bloqueo de discos no montados
 - [done] Probar que GNOME no automonta unidades
 - [in progress] Probar flujos reales con comandos seguros desde chat

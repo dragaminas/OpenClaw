@@ -239,10 +239,11 @@ Implementado:
 - consumo silencioso de mensajes sin wake word en WhatsApp
 - cierre del onboarding inicial de OpenClaw con `bootstrapPending=false`
 - prueba local del puente seguro con Blender
+- ComfyUI funcionando como servicio local en `127.0.0.1:8188`
+- acciones seguras minimas de ComfyUI para `status`, `start`, `open` y `stop`
 
 Pendiente para cierre final:
 
 - validacion real extremo a extremo por WhatsApp despues del ultimo ajuste
 - usuario runtime dedicado en lugar de `eric`
-- integrar ComfyUI en la misma capa segura
-- estabilizar la puesta en servicio de ComfyUI
+- exponer un primer workflow real de ComfyUI para video

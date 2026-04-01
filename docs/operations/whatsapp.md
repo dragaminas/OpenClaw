@@ -27,6 +27,10 @@ Despues de `studio`, el lenguaje puede ser natural y simple.
 - `studio crea proyecto castillo`
 - `studio abre proyecto castillo`
 - `studio haz una prueba de blender`
+- `studio abre comfyui`
+- `studio inicia comfyui`
+- `studio como esta comfyui`
+- `studio para comfyui`
 
 ## Que pasa sin wake word
 

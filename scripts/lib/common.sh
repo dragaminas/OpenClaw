@@ -94,3 +94,54 @@ ensure_mode() {
 systemd_user_dir() {
   printf '%s/.config/systemd/user' "$WORK_HOME"
 }
+
+user_session_env_value() {
+  local key="$1"
+  if [[ -n "${!key:-}" ]]; then
+    printf '%s\n' "${!key}"
+    return 0
+  fi
+
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl --user show-environment 2>/dev/null | sed -n "s/^${key}=//p" | head -n 1
+  fi
+}
+
+tcp_port_is_listening() {
+  local host="$1"
+  local port="$2"
+
+  python3 - "$host" "$port" <<'PY' >/dev/null 2>&1
+import socket
+import sys
+
+host = sys.argv[1]
+port = int(sys.argv[2])
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+    sock.settimeout(1.0)
+    try:
+        sock.connect((host, port))
+    except OSError:
+        raise SystemExit(1)
+
+raise SystemExit(0)
+PY
+}
+
+wait_for_tcp_port() {
+  local host="$1"
+  local port="$2"
+  local timeout_seconds="${3:-60}"
+  local elapsed=0
+
+  while (( elapsed < timeout_seconds )); do
+    if tcp_port_is_listening "$host" "$port"; then
+      return 0
+    fi
+    sleep 1
+    elapsed=$((elapsed + 1))
+  done
+
+  return 1
+}

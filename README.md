@@ -56,10 +56,10 @@ Hoy el repo ya implementa y documenta:
 - hardening de discos, montajes y GNOME
 - hardening base de `~/.openclaw`
 - provision de `systemd --user` para OpenClaw
-- provision base de ComfyUI y `ComfyUI-Manager`
+- provision operativa de ComfyUI y `ComfyUI-Manager`
 - wrappers locales para Blender y ComfyUI
 - plugin local `studio-actions` para `before_dispatch`
-- primer puente seguro `WhatsApp -> Blender`
+- primeras acciones seguras para Blender y ComfyUI
 
 Validado en este sistema:
 
@@ -69,13 +69,15 @@ Validado en este sistema:
 - mensajes sin wake word en WhatsApp se consumen en silencio y no pasan al agente general
 - `scripts/apps/blender.sh smoke-test` genera `.blend` y `.png`
 - `scripts/openclaw/test-studio-actions-plugin.sh` ejecuta acciones seguras de Blender
+- `comfyui.service` queda `enabled` y escucha en `127.0.0.1:8188`
+- `scripts/openclaw/test-studio-actions-plugin.sh` ejecuta acciones seguras de ComfyUI
 - GNOME con `automount=false` y `automount-open=false`
 
 Pendiente de cierre final:
 
 - crear y migrar al usuario runtime dedicado en lugar de `eric`
 - validacion real extremo a extremo por WhatsApp despues del ultimo fix del parser
-- poner ComfyUI en servicio estable y validarlo por puerto
+- exponer el primer workflow real de video en ComfyUI
 
 ## Estructura del repo
 
@@ -161,6 +163,9 @@ Despues de la wake word ya se admite lenguaje natural sencillo:
 - `studio crea proyecto castillo`
 - `studio abre proyecto castillo`
 - `studio haz una prueba de blender`
+- `studio abre comfyui`
+- `studio inicia comfyui`
+- `studio como esta comfyui`
 
 Tambien existe modo tecnico:
 
@@ -169,6 +174,10 @@ Tambien existe modo tecnico:
 - `studio blender new castillo`
 - `studio blender open castillo`
 - `studio blender smoke-test prueba-ws`
+- `studio comfyui status`
+- `studio comfyui start`
+- `studio comfyui open`
+- `studio comfyui stop`
 
 Comportamiento importante:
 
@@ -184,9 +193,13 @@ scripts/bootstrap/apply-workstation.sh audit
 scripts/doctor/openclaw-status.sh
 scripts/apps/blender.sh status
 scripts/apps/blender.sh smoke-test blender-smoke
+scripts/apps/comfyui.sh status
+scripts/apps/comfyui.sh open-ui
 scripts/openclaw/install-studio-actions-plugin.sh apply
 scripts/openclaw/test-studio-actions-plugin.sh "studio como esta blender"
 scripts/openclaw/test-studio-actions-plugin.sh "studio crea proyecto whatsapp-demo"
+scripts/openclaw/test-studio-actions-plugin.sh "studio como esta comfyui"
+scripts/openclaw/test-studio-actions-plugin.sh "studio abre comfyui"
 ```
 
 ## Documentacion

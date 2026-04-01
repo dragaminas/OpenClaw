@@ -3,7 +3,8 @@
 ## Estado actual
 
 El repo ya contempla una provision declarativa de ComfyUI y `ComfyUI-Manager`,
-pero todavia no expone ComfyUI por la misma capa segura de WhatsApp que Blender.
+y ahora expone una primera capa segura de ComfyUI por el mismo plugin de
+WhatsApp.
 
 Actualmente se cubre:
 
@@ -13,6 +14,9 @@ Actualmente se cubre:
 - instalacion opcional de `requirements`
 - provision de `comfyui.service` en `systemd --user`
 - instalacion de `ComfyUI-Manager`
+- arranque y parada controlados del servicio
+- apertura de la interfaz web local
+- acciones seguras minimas via `studio-actions`
 
 ## Flujo previsto
 
@@ -58,7 +62,33 @@ scripts/apps/comfyui.sh status
 scripts/apps/comfyui.sh manager-status
 scripts/apps/comfyui.sh check-port
 scripts/apps/comfyui.sh service-status
+scripts/apps/comfyui.sh start-service
+scripts/apps/comfyui.sh open-ui
 ```
+
+## Prueba del wrapper seguro
+
+```bash
+scripts/actions/comfyui-action.sh status
+scripts/actions/comfyui-action.sh start
+scripts/actions/comfyui-action.sh open
+scripts/actions/comfyui-action.sh stop
+```
+
+## Prueba del puente local
+
+```bash
+scripts/openclaw/test-studio-actions-plugin.sh "studio como esta comfyui"
+scripts/openclaw/test-studio-actions-plugin.sh "studio inicia comfyui"
+scripts/openclaw/test-studio-actions-plugin.sh "studio abre comfyui"
+```
+
+## Uso esperado desde WhatsApp
+
+- `studio como esta comfyui`
+- `studio inicia comfyui`
+- `studio abre comfyui`
+- `studio para comfyui`
 
 ## Nota sobre Python
 
@@ -67,6 +97,4 @@ Si el venv se crea sin `pip`, normalmente faltara `python3-venv` o
 
 ## Pendiente
 
-- validar arranque estable del servicio
-- validar escucha real en `COMFYUI_PORT`
-- exponer acciones seguras de ComfyUI por WhatsApp
+- exponer workflows reales de imagen o video sobre esta base

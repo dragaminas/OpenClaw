@@ -8,6 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..", "..");
 const blenderActionScript = path.join(repoRoot, "scripts", "actions", "blender-action.sh");
+const comfyuiActionScript = path.join(repoRoot, "scripts", "actions", "comfyui-action.sh");
 const defaultCommandPrefix = "studio";
 const defaultChannels = ["whatsapp"];
 
@@ -64,9 +65,13 @@ function buildHelpText(prefix) {
     `${prefix} crea proyecto castillo`,
     `${prefix} abre proyecto castillo`,
     `${prefix} haz una prueba de blender`,
+    `${prefix} abre comfyui`,
+    `${prefix} inicia comfyui`,
+    `${prefix} como esta comfyui`,
     "",
     "Tambien funciona el modo tecnico:",
-    `${prefix} blender status`
+    `${prefix} blender status`,
+    `${prefix} comfyui status`
   ].join("\n");
 }
 
@@ -74,12 +79,36 @@ function parseLegacyCommand(stripped, prefix) {
   const tokens = stripped.split(" ").filter(Boolean);
   if (tokens.length === 0) return { kind: "help" };
 
-  if (tokens[0].toLowerCase() !== "blender") {
-    return { kind: "unsupported", text: `Por ahora solo estan habilitadas acciones de Blender. Escribe "${prefix}" para ver ayuda.` };
+  const tool = tokens[0].toLowerCase();
+  if (tool !== "blender" && tool !== "comfyui") {
+    return {
+      kind: "unsupported",
+      text: `Por ahora solo estan habilitadas acciones de Blender y ComfyUI. Escribe "${prefix}" para ver ayuda.`
+    };
   }
 
   const action = tokens[1]?.toLowerCase() ?? "help";
   const rawArg = tokens.slice(2).join(" ").trim();
+
+  if (tool === "comfyui") {
+    switch (action) {
+      case "help":
+        return { kind: "help" };
+      case "status":
+        return { kind: "comfyui-status" };
+      case "start":
+      case "launch":
+        return { kind: "comfyui-start" };
+      case "open":
+        return { kind: "comfyui-open" };
+      case "stop":
+        return { kind: "comfyui-stop" };
+      case "url":
+        return { kind: "comfyui-url" };
+      default:
+        return { kind: "error", text: `No reconozco esa accion de ComfyUI. Escribe "${prefix}" para ver ayuda.` };
+    }
+  }
 
   switch (action) {
     case "help":
@@ -139,6 +168,45 @@ function parseNaturalSpanish(normalized) {
     "blender esta listo"
   ].includes(low)) {
     return { kind: "blender-status" };
+  }
+
+  if ([
+    "abre comfyui",
+    "abrir comfyui",
+    "abre la ui de comfyui",
+    "abre la interfaz de comfyui"
+  ].includes(low)) {
+    return { kind: "comfyui-open" };
+  }
+
+  if ([
+    "inicia comfyui",
+    "arranca comfyui",
+    "levanta comfyui",
+    "iniciar comfyui",
+    "arrancar comfyui"
+  ].includes(low)) {
+    return { kind: "comfyui-start" };
+  }
+
+  if ([
+    "estado comfyui",
+    "como esta comfyui",
+    "como está comfyui",
+    "comfyui status",
+    "estado de comfyui",
+    "comfyui esta listo"
+  ].includes(low)) {
+    return { kind: "comfyui-status" };
+  }
+
+  if ([
+    "para comfyui",
+    "deten comfyui",
+    "detener comfyui",
+    "stop comfyui"
+  ].includes(low)) {
+    return { kind: "comfyui-stop" };
   }
 
   const newProject = extractProjectName(normalized, [
@@ -243,6 +311,26 @@ async function runBlenderAction(args) {
   }
 }
 
+async function runComfyUIAction(args) {
+  try {
+    const { stdout, stderr } = await execFileAsync(comfyuiActionScript, args, {
+      cwd: repoRoot,
+      env: process.env,
+      maxBuffer: 1024 * 1024
+    });
+    const text = [stdout, stderr].map((value) => String(value ?? "").trim()).filter(Boolean).join("\n");
+    return {
+      handled: true,
+      text: text || "Accion completada."
+    };
+  } catch (error) {
+    return {
+      handled: true,
+      text: buildFailureText(error)
+    };
+  }
+}
+
 async function handleBeforeDispatch(event, ctx, pluginConfig = {}, logger = console) {
   const allowedChannels = normalizeChannels(pluginConfig);
   if (!allowedChannels.includes(ctx?.channelId ?? "")) return undefined;
@@ -270,6 +358,16 @@ async function handleBeforeDispatch(event, ctx, pluginConfig = {}, logger = cons
       return runBlenderAction(["open", parsed.arg]);
     case "blender-smoke-test":
       return runBlenderAction(["smoke-test", parsed.arg]);
+    case "comfyui-status":
+      return runComfyUIAction(["status"]);
+    case "comfyui-start":
+      return runComfyUIAction(["start"]);
+    case "comfyui-open":
+      return runComfyUIAction(["open"]);
+    case "comfyui-stop":
+      return runComfyUIAction(["stop"]);
+    case "comfyui-url":
+      return runComfyUIAction(["url"]);
     default:
       logger?.warn?.(`studio-actions: accion desconocida ${parsed.kind}`);
       return { handled: true, text: `No reconozco esa accion segura. Usa "${prefix} help".` };

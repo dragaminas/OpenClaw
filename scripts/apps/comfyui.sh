@@ -6,12 +6,39 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 
 cmd="${1:-status}"
+comfyui_url="http://${COMFYUI_HOST}:${COMFYUI_PORT}/"
+
+open_browser() {
+  local url="$1"
+  local display_value wayland_value dbus_value
+
+  display_value="$(user_session_env_value DISPLAY)"
+  wayland_value="$(user_session_env_value WAYLAND_DISPLAY)"
+  dbus_value="$(user_session_env_value DBUS_SESSION_BUS_ADDRESS)"
+
+  if [[ -z "$display_value" && -z "$wayland_value" ]]; then
+    warn "No hay sesion grafica disponible; abre la URL manualmente"
+    return 1
+  fi
+
+  if ! command -v xdg-open >/dev/null 2>&1; then
+    warn "No existe xdg-open; abre la URL manualmente"
+    return 1
+  fi
+
+  env \
+    DISPLAY="${display_value:-}" \
+    WAYLAND_DISPLAY="${wayland_value:-}" \
+    DBUS_SESSION_BUS_ADDRESS="${dbus_value:-}" \
+    xdg-open "$url" >/tmp/openclaw-comfyui-open.log 2>&1 &
+}
 
 case "$cmd" in
   status)
     print_header "ComfyUI"
     kv "comfyui_dir" "$COMFYUI_DIR"
     if [[ -d "$COMFYUI_DIR" ]]; then
+      service_state=""
       if [[ -d "$COMFYUI_DIR/.git" ]]; then
         kv "git_branch" "$(git -C "$COMFYUI_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
         kv "git_head" "$(git -C "$COMFYUI_DIR" rev-parse --short HEAD 2>/dev/null || true)"
@@ -35,8 +62,10 @@ case "$cmd" in
       if systemctl --user cat comfyui.service >/dev/null 2>&1; then
         kv "service_file" "$(systemd_user_dir)/comfyui.service"
         kv "service_enabled" "$(systemctl --user is-enabled comfyui.service 2>/dev/null || true)"
-        kv "service_active" "$(systemctl --user is-active comfyui.service 2>/dev/null || true)"
+        service_state="$(systemctl --user is-active comfyui.service 2>/dev/null || true)"
+        kv "service_active" "$service_state"
       fi
+      kv "ui_url" "$comfyui_url"
       if [[ -d "$COMFYUI_MANAGER_DIR/.git" ]]; then
         kv "manager_dir" "$COMFYUI_MANAGER_DIR"
         kv "manager_git_branch" "$(git -C "$COMFYUI_MANAGER_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
@@ -51,12 +80,18 @@ case "$cmd" in
       else
         kv "manager_dir" "missing"
       fi
-      if command -v ss >/dev/null 2>&1; then
-        if ss -ltn | awk '{print $4}' | rg -x "127.0.0.1:$COMFYUI_PORT|0.0.0.0:$COMFYUI_PORT|\\*:$COMFYUI_PORT|\\[::\\]:$COMFYUI_PORT" >/dev/null 2>&1; then
-          kv "port_${COMFYUI_PORT}" "listening"
-        else
-          kv "port_${COMFYUI_PORT}" "inactive"
-        fi
+      if [[ -d "$COMFYUI_DIR/models" ]]; then
+        kv "models_dir" "$COMFYUI_DIR/models"
+      fi
+      if [[ -d "$COMFYUI_DIR/output" ]]; then
+        kv "output_dir" "$COMFYUI_DIR/output"
+      fi
+      if tcp_port_is_listening "$COMFYUI_HOST" "$COMFYUI_PORT"; then
+        kv "port_${COMFYUI_PORT}" "listening"
+      elif [[ "$service_state" == "active" ]]; then
+        kv "port_${COMFYUI_PORT}" "starting"
+      else
+        kv "port_${COMFYUI_PORT}" "inactive"
       fi
     else
       warn "ComfyUI no esta instalado en $COMFYUI_DIR"
@@ -65,11 +100,77 @@ case "$cmd" in
     ;;
   check-port)
     print_header "ComfyUI port"
-    if command -v ss >/dev/null 2>&1 && ss -ltn | awk '{print $4}' | rg -x "127.0.0.1:$COMFYUI_PORT|0.0.0.0:$COMFYUI_PORT|\\*:$COMFYUI_PORT|\\[::\\]:$COMFYUI_PORT" >/dev/null 2>&1; then
+    if tcp_port_is_listening "$COMFYUI_HOST" "$COMFYUI_PORT"; then
       kv "port_${COMFYUI_PORT}" "listening"
     else
       kv "port_${COMFYUI_PORT}" "inactive"
       exit 8
+    fi
+    ;;
+  url)
+    print_header "ComfyUI URL"
+    kv "ui_url" "$comfyui_url"
+    ;;
+  start-service)
+    print_header "ComfyUI start"
+    systemctl --user cat comfyui.service >/dev/null 2>&1 || die "No existe comfyui.service en systemd --user"
+    if [[ "${COMFYUI_ENABLE_SERVICE:-false}" == "true" ]]; then
+      systemctl --user enable --now comfyui.service
+    else
+      systemctl --user start comfyui.service
+    fi
+    if wait_for_tcp_port "$COMFYUI_HOST" "$COMFYUI_PORT" 90; then
+      kv "service_active" "$(systemctl --user is-active comfyui.service 2>/dev/null || true)"
+      kv "port_${COMFYUI_PORT}" "listening"
+      kv "ui_url" "$comfyui_url"
+    else
+      systemctl --user status comfyui.service --no-pager | sed -n '1,80p'
+      die "ComfyUI no quedo escuchando en ${COMFYUI_HOST}:${COMFYUI_PORT}"
+    fi
+    ;;
+  stop-service)
+    print_header "ComfyUI stop"
+    systemctl --user cat comfyui.service >/dev/null 2>&1 || die "No existe comfyui.service en systemd --user"
+    systemctl --user stop comfyui.service >/dev/null 2>&1 || true
+    for _ in $(seq 1 30); do
+      current_state="$(systemctl --user is-active comfyui.service 2>/dev/null || true)"
+      if [[ "$current_state" != "active" && "$current_state" != "activating" && "$current_state" != "deactivating" ]]; then
+        break
+      fi
+      sleep 1
+    done
+    kv "service_active" "$(systemctl --user is-active comfyui.service 2>/dev/null || true)"
+    ;;
+  restart-service)
+    print_header "ComfyUI restart"
+    systemctl --user cat comfyui.service >/dev/null 2>&1 || die "No existe comfyui.service en systemd --user"
+    systemctl --user restart comfyui.service
+    if wait_for_tcp_port "$COMFYUI_HOST" "$COMFYUI_PORT" 90; then
+      kv "service_active" "$(systemctl --user is-active comfyui.service 2>/dev/null || true)"
+      kv "port_${COMFYUI_PORT}" "listening"
+      kv "ui_url" "$comfyui_url"
+    else
+      systemctl --user status comfyui.service --no-pager | sed -n '1,80p'
+      die "ComfyUI no quedo escuchando en ${COMFYUI_HOST}:${COMFYUI_PORT}"
+    fi
+    ;;
+  wait-ready)
+    print_header "ComfyUI wait"
+    if wait_for_tcp_port "$COMFYUI_HOST" "$COMFYUI_PORT" 90; then
+      kv "port_${COMFYUI_PORT}" "listening"
+      kv "ui_url" "$comfyui_url"
+    else
+      kv "port_${COMFYUI_PORT}" "inactive"
+      exit 10
+    fi
+    ;;
+  open-ui)
+    print_header "ComfyUI open"
+    "$0" start-service >/dev/null
+    if open_browser "$comfyui_url"; then
+      printf 'ComfyUI abierto en el navegador: %s\n' "$comfyui_url"
+    else
+      printf 'ComfyUI listo. Abre esta URL: %s\n' "$comfyui_url"
     fi
     ;;
   service-status)
@@ -98,6 +199,6 @@ case "$cmd" in
     fi
     ;;
   *)
-    die "Uso: $0 [status|check-port|service-status|manager-status]"
+    die "Uso: $0 [status|check-port|url|start-service|stop-service|restart-service|wait-ready|open-ui|service-status|manager-status]"
     ;;
 esac
