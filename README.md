@@ -58,6 +58,7 @@ Hoy el repo ya implementa y documenta:
 - provision de `systemd --user` para OpenClaw
 - provision operativa de ComfyUI y `ComfyUI-Manager`
 - wrappers locales para Blender y ComfyUI
+- instalacion automatizable de `comfyui.service` desde el propio repo
 - plugin local `studio-actions` para `before_dispatch`
 - primeras acciones seguras para Blender y ComfyUI
 
@@ -118,6 +119,9 @@ Variables importantes en [`.env.example`](/home/eric/Documents/OpenClaw/.env.exa
 - `COMFYUI_INSTALL_REQUIREMENTS`
 - `COMFYUI_ENABLE_SERVICE`
 - `COMFYUI_MANAGER_INSTALL`
+- `COMFYUI_MANAGER_INSTALL_METHOD`
+- `COMFYUI_MANAGER_ENABLE`
+- `COMFYUI_MANAGER_USE_LEGACY_UI`
 - `COMFYUI_MANAGER_DIR`
 - `COMFYUI_MANAGER_REPO_URL`
 - `COMFYUI_MANAGER_REPO_REF`
@@ -147,7 +151,7 @@ scripts/bootstrap/apply-workstation.sh apply
 - preparacion del workspace creativo
 - registro del plugin `studio-actions`
 - provision de servicios de usuario
-- setup base de ComfyUI y `ComfyUI-Manager`
+- setup base de ComfyUI y del manager integrado de ComfyUI
 - diagnostico final
 
 ## Uso desde WhatsApp
@@ -165,6 +169,7 @@ Despues de la wake word ya se admite lenguaje natural sencillo:
 - `studio haz una prueba de blender`
 - `studio abre comfyui`
 - `studio inicia comfyui`
+- `studio reinicia comfyui`
 - `studio como esta comfyui`
 
 Tambien existe modo tecnico:
@@ -176,6 +181,7 @@ Tambien existe modo tecnico:
 - `studio blender smoke-test prueba-ws`
 - `studio comfyui status`
 - `studio comfyui start`
+- `studio comfyui restart`
 - `studio comfyui open`
 - `studio comfyui stop`
 
@@ -184,6 +190,29 @@ Comportamiento importante:
 - si el mensaje no empieza con `studio`, el plugin lo consume en silencio en WhatsApp
 - ese mensaje no debe llegar al agente general
 - el canal actual se usa desde el chat contigo mismo, no desde un contacto aparte llamado `OpenClaw`
+
+## Operacion diaria de ComfyUI
+
+El runtime operativo de ComfyUI queda como un servicio de usuario llamado
+`comfyui.service`.
+
+Para instalar o regenerar la unidad desde el propio repo:
+
+```bash
+scripts/apps/comfyui.sh install-service
+```
+
+Para operacion diaria:
+
+```bash
+scripts/apps/comfyui.sh service-status
+scripts/apps/comfyui.sh start-service
+scripts/apps/comfyui.sh restart-service
+scripts/apps/comfyui.sh stop-service
+scripts/apps/comfyui.sh open-ui
+```
+
+En la practica, reiniciar ComfyUI equivale a reiniciar `comfyui.service`.
 
 ## Primeras pruebas utiles
 
@@ -194,11 +223,15 @@ scripts/doctor/openclaw-status.sh
 scripts/apps/blender.sh status
 scripts/apps/blender.sh smoke-test blender-smoke
 scripts/apps/comfyui.sh status
+scripts/apps/comfyui.sh install-service
+scripts/apps/comfyui.sh service-status
+scripts/apps/comfyui.sh restart-service
 scripts/apps/comfyui.sh open-ui
 scripts/openclaw/install-studio-actions-plugin.sh apply
 scripts/openclaw/test-studio-actions-plugin.sh "studio como esta blender"
 scripts/openclaw/test-studio-actions-plugin.sh "studio crea proyecto whatsapp-demo"
 scripts/openclaw/test-studio-actions-plugin.sh "studio como esta comfyui"
+scripts/openclaw/test-studio-actions-plugin.sh "studio reinicia comfyui"
 scripts/openclaw/test-studio-actions-plugin.sh "studio abre comfyui"
 ```
 

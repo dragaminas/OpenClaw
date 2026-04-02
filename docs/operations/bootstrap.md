@@ -33,7 +33,8 @@ mantener una lista larga de pasos manuales.
 - preparacion del workspace creativo
 - registro del plugin `studio-actions`
 - provision de servicios `systemd --user`
-- setup de ComfyUI y `ComfyUI-Manager`
+- setup de ComfyUI y del manager integrado de ComfyUI
+- provision o regeneracion de `comfyui.service`
 - diagnostico final
 
 ## Modos
@@ -51,7 +52,9 @@ mantener una lista larga de pasos manuales.
 - `OPENCLAW_STUDIO_ACTIONS_COMMAND_PREFIX`
 - `ENABLE_OPENCLAW_SERVICES`
 - `COMFYUI_INSTALL`
+- `COMFYUI_REPO_REF`
 - `COMFYUI_ENABLE_SERVICE`
+- `COMFYUI_MANAGER_INSTALL_METHOD`
 - `DISABLE_GNOME_AUTOMOUNT`
 - `HARDEN_OPENCLAW`
 
@@ -61,6 +64,8 @@ mantener una lista larga de pasos manuales.
 scripts/doctor/openclaw-status.sh
 scripts/apps/blender.sh status
 scripts/apps/comfyui.sh status
+scripts/apps/comfyui.sh service-status
+scripts/apps/comfyui.sh restart-service
 openclaw plugins inspect studio-actions --json
 ```
 

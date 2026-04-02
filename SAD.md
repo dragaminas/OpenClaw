@@ -240,7 +240,7 @@ Implementado:
 - cierre del onboarding inicial de OpenClaw con `bootstrapPending=false`
 - prueba local del puente seguro con Blender
 - ComfyUI funcionando como servicio local en `127.0.0.1:8188`
-- acciones seguras minimas de ComfyUI para `status`, `start`, `open` y `stop`
+- acciones seguras minimas de ComfyUI para `status`, `start`, `restart`, `open` y `stop`
 
 Pendiente para cierre final:
 

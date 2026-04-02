@@ -26,6 +26,7 @@ Lenguaje natural:
 - `studio haz una prueba de blender`
 - `studio abre comfyui`
 - `studio inicia comfyui`
+- `studio reinicia comfyui`
 - `studio como esta comfyui`
 - `studio para comfyui`
 
@@ -38,6 +39,7 @@ Modo tecnico:
 - `studio blender smoke-test <nombre>`
 - `studio comfyui status`
 - `studio comfyui start`
+- `studio comfyui restart`
 - `studio comfyui open`
 - `studio comfyui stop`
 - `studio comfyui url`
@@ -85,6 +87,7 @@ Implementado hoy:
 - smoke test de Blender
 - estado de ComfyUI
 - arranque de ComfyUI
+- reinicio de ComfyUI
 - apertura de la UI web de ComfyUI
 - parada controlada de ComfyUI
 

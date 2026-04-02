@@ -29,6 +29,7 @@ Despues de `studio`, el lenguaje puede ser natural y simple.
 - `studio haz una prueba de blender`
 - `studio abre comfyui`
 - `studio inicia comfyui`
+- `studio reinicia comfyui`
 - `studio como esta comfyui`
 - `studio para comfyui`
 
