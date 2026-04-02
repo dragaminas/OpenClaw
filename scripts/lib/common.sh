@@ -29,10 +29,13 @@ OPENCLAW_STUDIO_ACTIONS_ALLOW_GROUP_MESSAGES="${OPENCLAW_STUDIO_ACTIONS_ALLOW_GR
 BLENDER_BIN="${BLENDER_BIN:-$(command -v blender || true)}"
 COMFYUI_DIR="${COMFYUI_DIR:-$HOME/ComfyUI}"
 COMFYUI_REPO_URL="${COMFYUI_REPO_URL:-https://github.com/comfyanonymous/ComfyUI.git}"
-COMFYUI_REPO_REF="${COMFYUI_REPO_REF:-master}"
+COMFYUI_REPO_REF="${COMFYUI_REPO_REF:-latest-stable}"
 COMFYUI_VENV_DIR="${COMFYUI_VENV_DIR:-$COMFYUI_DIR/.venv}"
 COMFYUI_HOST="${COMFYUI_HOST:-127.0.0.1}"
 COMFYUI_PORT="${COMFYUI_PORT:-8188}"
+COMFYUI_MANAGER_INSTALL_METHOD="${COMFYUI_MANAGER_INSTALL_METHOD:-core}"
+COMFYUI_MANAGER_ENABLE="${COMFYUI_MANAGER_ENABLE:-${COMFYUI_MANAGER_INSTALL:-true}}"
+COMFYUI_MANAGER_USE_LEGACY_UI="${COMFYUI_MANAGER_USE_LEGACY_UI:-false}"
 COMFYUI_MANAGER_DIR="${COMFYUI_MANAGER_DIR:-$COMFYUI_DIR/custom_nodes/comfyui-manager}"
 COMFYUI_MANAGER_REPO_URL="${COMFYUI_MANAGER_REPO_URL:-https://github.com/ltdrdata/ComfyUI-Manager.git}"
 COMFYUI_MANAGER_REPO_REF="${COMFYUI_MANAGER_REPO_REF:-main}"
@@ -144,4 +147,43 @@ wait_for_tcp_port() {
   done
 
   return 1
+}
+
+latest_semver_tag_from_remote() {
+  local repo_url="$1"
+
+  git ls-remote --tags "$repo_url" \
+    | awk '{print $2}' \
+    | sed 's#refs/tags/##' \
+    | sed 's/\^{}//' \
+    | sort -Vu \
+    | tail -n 1
+}
+
+latest_github_release_tag_from_repo() {
+  local repo_url="$1"
+  local repo_path api_url
+
+  repo_path="$(printf '%s' "$repo_url" | sed -E 's#^https://github.com/##; s#^git@github.com:##; s#\.git$##')"
+  api_url="https://api.github.com/repos/${repo_path}/releases/latest"
+
+  curl -Ls "$api_url" \
+    | python3 -c 'import json, sys; payload = json.load(sys.stdin); print(payload.get("tag_name", ""))'
+}
+
+remote_git_ref_type() {
+  local repo_url="$1"
+  local ref="$2"
+
+  if git ls-remote --exit-code --tags "$repo_url" "refs/tags/$ref" >/dev/null 2>&1; then
+    printf 'tag\n'
+    return 0
+  fi
+
+  if git ls-remote --exit-code --heads "$repo_url" "refs/heads/$ref" >/dev/null 2>&1; then
+    printf 'branch\n'
+    return 0
+  fi
+
+  printf 'missing\n'
 }

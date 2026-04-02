@@ -10,17 +10,33 @@ mode="$(run_mode "${1:-${DEFAULT_MODE:-audit}}")"
 require_cmd git
 require_cmd python3
 
+requested_repo_ref="$COMFYUI_REPO_REF"
+resolved_repo_ref="$COMFYUI_REPO_REF"
+
+if [[ "$requested_repo_ref" == "latest-stable" ]]; then
+  resolved_repo_ref="$(latest_github_release_tag_from_repo "$COMFYUI_REPO_URL")"
+  if [[ -z "$resolved_repo_ref" ]]; then
+    resolved_repo_ref="$(latest_semver_tag_from_remote "$COMFYUI_REPO_URL")"
+  fi
+  [[ -n "$resolved_repo_ref" ]] || die "No se pudo resolver el ultimo tag estable de ComfyUI"
+fi
+
+resolved_repo_ref_type="$(remote_git_ref_type "$COMFYUI_REPO_URL" "$resolved_repo_ref")"
+[[ "$resolved_repo_ref_type" != "missing" ]] || die "No existe el ref de ComfyUI: $resolved_repo_ref"
+
 print_header "Instalacion de ComfyUI"
 kv "mode" "$mode"
 kv "repo_url" "$COMFYUI_REPO_URL"
-kv "repo_ref" "$COMFYUI_REPO_REF"
+kv "repo_ref" "$requested_repo_ref"
+kv "resolved_repo_ref" "$resolved_repo_ref"
+kv "resolved_repo_ref_type" "$resolved_repo_ref_type"
 kv "comfyui_dir" "$COMFYUI_DIR"
 kv "venv_dir" "$COMFYUI_VENV_DIR"
 
 if [[ ! -d "$COMFYUI_DIR/.git" ]]; then
   if [[ "$mode" == "apply" ]]; then
     rm -rf "$COMFYUI_DIR"
-    git clone --depth 1 --branch "$COMFYUI_REPO_REF" "$COMFYUI_REPO_URL" "$COMFYUI_DIR"
+    git clone --depth 1 --branch "$resolved_repo_ref" "$COMFYUI_REPO_URL" "$COMFYUI_DIR"
     log "Repositorio ComfyUI clonado"
   else
     warn "ComfyUI aun no esta clonado"
@@ -28,9 +44,13 @@ if [[ ! -d "$COMFYUI_DIR/.git" ]]; then
 else
   kv "git_head" "$(git -C "$COMFYUI_DIR" rev-parse --short HEAD)"
   if [[ "$mode" == "apply" ]]; then
-    git -C "$COMFYUI_DIR" fetch --depth 1 origin "$COMFYUI_REPO_REF"
-    git -C "$COMFYUI_DIR" checkout "$COMFYUI_REPO_REF"
-    git -C "$COMFYUI_DIR" pull --ff-only origin "$COMFYUI_REPO_REF" || true
+    if [[ "$resolved_repo_ref_type" == "tag" ]]; then
+      git -C "$COMFYUI_DIR" fetch --depth 1 origin "refs/tags/$resolved_repo_ref:refs/tags/$resolved_repo_ref"
+      git -C "$COMFYUI_DIR" checkout --detach "$resolved_repo_ref"
+    else
+      git -C "$COMFYUI_DIR" fetch --depth 1 origin "$resolved_repo_ref"
+      git -C "$COMFYUI_DIR" checkout -B "$resolved_repo_ref" "origin/$resolved_repo_ref"
+    fi
     log "Repositorio ComfyUI actualizado"
   fi
 fi
