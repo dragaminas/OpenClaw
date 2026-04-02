@@ -6,7 +6,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 WorkingDirectory=__COMFYUI_DIR__
-ExecStart=__COMFYUI_VENV_DIR__/bin/python __COMFYUI_DIR__/main.py --listen __COMFYUI_HOST__ --port __COMFYUI_PORT__
+ExecStart=__COMFYUI_VENV_DIR__/bin/python __COMFYUI_DIR__/main.py --listen __COMFYUI_HOST__ --port __COMFYUI_PORT__ __COMFYUI_MANAGER_FLAGS__
 Restart=on-failure
 RestartSec=5
 Environment=HOME=__WORK_HOME__

@@ -67,11 +67,13 @@ function buildHelpText(prefix) {
     `${prefix} haz una prueba de blender`,
     `${prefix} abre comfyui`,
     `${prefix} inicia comfyui`,
+    `${prefix} reinicia comfyui`,
     `${prefix} como esta comfyui`,
     "",
     "Tambien funciona el modo tecnico:",
     `${prefix} blender status`,
-    `${prefix} comfyui status`
+    `${prefix} comfyui status`,
+    `${prefix} comfyui restart`
   ].join("\n");
 }
 
@@ -99,6 +101,9 @@ function parseLegacyCommand(stripped, prefix) {
       case "start":
       case "launch":
         return { kind: "comfyui-start" };
+      case "restart":
+      case "reload":
+        return { kind: "comfyui-restart" };
       case "open":
         return { kind: "comfyui-open" };
       case "stop":
@@ -187,6 +192,16 @@ function parseNaturalSpanish(normalized) {
     "arrancar comfyui"
   ].includes(low)) {
     return { kind: "comfyui-start" };
+  }
+
+  if ([
+    "reinicia comfyui",
+    "reiniciar comfyui",
+    "reinicia la ui de comfyui",
+    "reinicia el servicio de comfyui",
+    "restart comfyui"
+  ].includes(low)) {
+    return { kind: "comfyui-restart" };
   }
 
   if ([
@@ -362,6 +377,8 @@ async function handleBeforeDispatch(event, ctx, pluginConfig = {}, logger = cons
       return runComfyUIAction(["status"]);
     case "comfyui-start":
       return runComfyUIAction(["start"]);
+    case "comfyui-restart":
+      return runComfyUIAction(["restart"]);
     case "comfyui-open":
       return runComfyUIAction(["open"]);
     case "comfyui-stop":
@@ -377,7 +394,7 @@ async function handleBeforeDispatch(event, ctx, pluginConfig = {}, logger = cons
 const studioActionsPlugin = {
   id: "studio-actions",
   name: "Studio Actions",
-  description: "Puente seguro entre WhatsApp y wrappers locales para Blender.",
+  description: "Puente seguro entre WhatsApp y wrappers locales para Blender y ComfyUI.",
   configSchema: {
     type: "object",
     additionalProperties: false,

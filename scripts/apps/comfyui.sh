@@ -7,6 +7,7 @@ source "$SCRIPT_DIR/../lib/common.sh"
 
 cmd="${1:-status}"
 comfyui_url="http://${COMFYUI_HOST}:${COMFYUI_PORT}/"
+manager_requirements_file="$COMFYUI_DIR/manager_requirements.txt"
 
 open_browser() {
   local url="$1"
@@ -31,6 +32,30 @@ open_browser() {
     WAYLAND_DISPLAY="${wayland_value:-}" \
     DBUS_SESSION_BUS_ADDRESS="${dbus_value:-}" \
     xdg-open "$url" >/tmp/openclaw-comfyui-open.log 2>&1 &
+}
+
+ensure_service_unit() {
+  if systemctl --user cat comfyui.service >/dev/null 2>&1; then
+    return 0
+  fi
+
+  "$REPO_ROOT/scripts/services/install-comfyui-service.sh" apply >/dev/null
+  systemctl --user cat comfyui.service >/dev/null 2>&1 || die "No existe comfyui.service en systemd --user"
+}
+
+manager_python_status() {
+  [[ -x "$COMFYUI_VENV_DIR/bin/python" ]] || return 1
+
+  "$COMFYUI_VENV_DIR/bin/python" - <<'PY'
+import importlib.metadata
+import importlib.util
+
+spec = importlib.util.find_spec("comfyui_manager")
+if spec is None:
+    raise SystemExit(1)
+
+print(importlib.metadata.version("comfyui-manager"))
+PY
 }
 
 case "$cmd" in
@@ -66,19 +91,22 @@ case "$cmd" in
         kv "service_active" "$service_state"
       fi
       kv "ui_url" "$comfyui_url"
-      if [[ -d "$COMFYUI_MANAGER_DIR/.git" ]]; then
-        kv "manager_dir" "$COMFYUI_MANAGER_DIR"
-        kv "manager_git_branch" "$(git -C "$COMFYUI_MANAGER_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
-        kv "manager_git_head" "$(git -C "$COMFYUI_MANAGER_DIR" rev-parse --short HEAD 2>/dev/null || true)"
-        if [[ -f "$COMFYUI_MANAGER_DIR/requirements.txt" && -x "$COMFYUI_VENV_DIR/bin/python" ]]; then
-          if "$COMFYUI_VENV_DIR/bin/python" -m pip show gitpython >/dev/null 2>&1; then
-            kv "manager_requirements" "installed_or_partially_installed"
-          else
-            kv "manager_requirements" "unknown"
-          fi
-        fi
+      kv "manager_install_method" "${COMFYUI_MANAGER_INSTALL_METHOD:-core}"
+      kv "manager_enabled" "${COMFYUI_MANAGER_ENABLE:-${COMFYUI_MANAGER_INSTALL:-true}}"
+      kv "manager_legacy_ui" "${COMFYUI_MANAGER_USE_LEGACY_UI:-false}"
+      if [[ -f "$manager_requirements_file" ]]; then
+        kv "manager_requirements_file" "$manager_requirements_file"
+      fi
+      if manager_version="$(manager_python_status 2>/dev/null)"; then
+        kv "manager_python_package" "installed"
+        kv "manager_python_version" "$manager_version"
       else
-        kv "manager_dir" "missing"
+        kv "manager_python_package" "missing"
+      fi
+      if [[ -d "$COMFYUI_MANAGER_DIR/.git" ]]; then
+        kv "legacy_manager_dir" "$COMFYUI_MANAGER_DIR"
+        kv "legacy_manager_git_branch" "$(git -C "$COMFYUI_MANAGER_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+        kv "legacy_manager_git_head" "$(git -C "$COMFYUI_MANAGER_DIR" rev-parse --short HEAD 2>/dev/null || true)"
       fi
       if [[ -d "$COMFYUI_DIR/models" ]]; then
         kv "models_dir" "$COMFYUI_DIR/models"
@@ -111,9 +139,13 @@ case "$cmd" in
     print_header "ComfyUI URL"
     kv "ui_url" "$comfyui_url"
     ;;
+  install-service)
+    print_header "ComfyUI install service"
+    "$REPO_ROOT/scripts/services/install-comfyui-service.sh" apply
+    ;;
   start-service)
     print_header "ComfyUI start"
-    systemctl --user cat comfyui.service >/dev/null 2>&1 || die "No existe comfyui.service en systemd --user"
+    ensure_service_unit
     if [[ "${COMFYUI_ENABLE_SERVICE:-false}" == "true" ]]; then
       systemctl --user enable --now comfyui.service
     else
@@ -143,7 +175,7 @@ case "$cmd" in
     ;;
   restart-service)
     print_header "ComfyUI restart"
-    systemctl --user cat comfyui.service >/dev/null 2>&1 || die "No existe comfyui.service en systemd --user"
+    ensure_service_unit
     systemctl --user restart comfyui.service
     if wait_for_tcp_port "$COMFYUI_HOST" "$COMFYUI_PORT" 90; then
       kv "service_active" "$(systemctl --user is-active comfyui.service 2>/dev/null || true)"
@@ -186,19 +218,30 @@ case "$cmd" in
     ;;
   manager-status)
     print_header "ComfyUI Manager"
+    kv "manager_install_method" "${COMFYUI_MANAGER_INSTALL_METHOD:-core}"
+    kv "manager_enabled" "${COMFYUI_MANAGER_ENABLE:-${COMFYUI_MANAGER_INSTALL:-true}}"
+    kv "manager_legacy_ui" "${COMFYUI_MANAGER_USE_LEGACY_UI:-false}"
+    if [[ -f "$manager_requirements_file" ]]; then
+      kv "manager_requirements_file" "$manager_requirements_file"
+    fi
+    if manager_version="$(manager_python_status 2>/dev/null)"; then
+      kv "manager_python_package" "installed"
+      kv "manager_python_version" "$manager_version"
+    else
+      kv "manager_python_package" "missing"
+    fi
     if [[ -d "$COMFYUI_MANAGER_DIR/.git" ]]; then
-      kv "manager_dir" "$COMFYUI_MANAGER_DIR"
-      kv "manager_git_branch" "$(git -C "$COMFYUI_MANAGER_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
-      kv "manager_git_head" "$(git -C "$COMFYUI_MANAGER_DIR" rev-parse --short HEAD 2>/dev/null || true)"
+      kv "legacy_manager_dir" "$COMFYUI_MANAGER_DIR"
+      kv "legacy_manager_git_branch" "$(git -C "$COMFYUI_MANAGER_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+      kv "legacy_manager_git_head" "$(git -C "$COMFYUI_MANAGER_DIR" rev-parse --short HEAD 2>/dev/null || true)"
       if [[ -f "$COMFYUI_MANAGER_DIR/requirements.txt" ]]; then
-        kv "manager_requirements_file" "$COMFYUI_MANAGER_DIR/requirements.txt"
+        kv "legacy_manager_requirements_file" "$COMFYUI_MANAGER_DIR/requirements.txt"
       fi
     else
-      warn "ComfyUI-Manager no esta instalado"
-      exit 9
+      kv "legacy_manager_dir" "missing"
     fi
     ;;
   *)
-    die "Uso: $0 [status|check-port|url|start-service|stop-service|restart-service|wait-ready|open-ui|service-status|manager-status]"
+    die "Uso: $0 [status|check-port|url|install-service|start-service|stop-service|restart-service|wait-ready|open-ui|service-status|manager-status]"
     ;;
 esac

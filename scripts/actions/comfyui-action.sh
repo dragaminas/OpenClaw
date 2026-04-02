@@ -13,6 +13,7 @@ Comandos disponibles:
 - help
 - status
 - start
+- restart
 - open
 - stop
 - url
@@ -29,6 +30,9 @@ case "$command_name" in
   start)
     "$REPO_ROOT/scripts/apps/comfyui.sh" start-service
     ;;
+  restart)
+    "$REPO_ROOT/scripts/apps/comfyui.sh" restart-service
+    ;;
   open)
     "$REPO_ROOT/scripts/apps/comfyui.sh" open-ui
     ;;
@@ -39,6 +43,6 @@ case "$command_name" in
     "$REPO_ROOT/scripts/apps/comfyui.sh" url
     ;;
   *)
-    die "Uso: $0 [help|status|start|open|stop|url]"
+    die "Uso: $0 [help|status|start|restart|open|stop|url]"
     ;;
 esac
