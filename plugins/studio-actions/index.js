@@ -27,6 +27,14 @@ function normalizeMessage(text) {
   return String(text ?? "").replace(/\s+/g, " ").trim();
 }
 
+function normalizeIntentText(text) {
+  return normalizeMessage(text)
+    .toLowerCase()
+    .replace(/^[¿?¡!.,:;()[\]{}"']+/u, "")
+    .replace(/[¿?¡!.,:;()[\]{}"']+$/u, "")
+    .trim();
+}
+
 function escapeRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -152,7 +160,7 @@ function extractProjectName(normalized, prefixes) {
 }
 
 function parseNaturalSpanish(normalized) {
-  const low = normalized.toLowerCase();
+  const low = normalizeIntentText(normalized);
 
   if ([
     "blender",
@@ -288,7 +296,7 @@ function parseSafeActionMessage(text, prefix) {
   if (stripped === null) return null;
   if (!stripped) return { kind: "help" };
 
-  const low = stripped.toLowerCase();
+  const low = normalizeIntentText(stripped);
   if (low === "help" || low === "ayuda") {
     return { kind: "help" };
   }

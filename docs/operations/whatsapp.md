@@ -50,6 +50,21 @@ scripts/openclaw/test-studio-actions-plugin.sh "studio crea proyecto whatsapp-de
 openclaw plugins inspect studio-actions --json
 ```
 
+## Validacion real
+
+Validado con mensajes reales de WhatsApp el 2 de abril de 2026:
+
+- `studio abre blender` abre Blender
+- `studio, como esta blender?` responde con el estado de Blender
+
+Con ello queda confirmada la cadena real:
+
+- WhatsApp
+- wake word `studio`
+- parser del plugin
+- accion segura local
+- respuesta al mismo chat
+
 ## Troubleshooting
 
 Si responde sin wake word:
@@ -70,4 +85,5 @@ openclaw plugins inspect studio-actions --json
 
 En mensajes reales de WhatsApp, OpenClaw puede entregar el texto al plugin
 envuelto en metadatos multilinea. El parser actual ya contempla ese caso y
-busca la wake word dentro del contenido real del usuario.
+busca la wake word dentro del contenido real del usuario. Tambien normaliza
+mejor la puntuacion en frases como `studio, como esta blender?`.
