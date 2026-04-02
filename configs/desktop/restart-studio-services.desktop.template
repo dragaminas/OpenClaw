@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Restart Studio Services
+Comment=Reinicia los servicios de OpenClaw y ComfyUI
+Exec=__REPO_ROOT__/scripts/services/user-services.sh restart
+Terminal=true
+Categories=Utility;

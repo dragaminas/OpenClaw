@@ -25,6 +25,7 @@ mantener una lista larga de pasos manuales.
 `scripts/bootstrap/apply-workstation.sh` orquesta:
 
 - precondiciones
+- dependencias base del host
 - checks de usuario
 - discos y montajes
 - ajustes de GNOME
@@ -33,6 +34,7 @@ mantener una lista larga de pasos manuales.
 - preparacion del workspace creativo
 - registro del plugin `studio-actions`
 - provision de servicios `systemd --user`
+- instalacion opcional de accesos directos `.desktop`
 - setup de ComfyUI y del manager integrado de ComfyUI
 - provision o regeneracion de `comfyui.service`
 - diagnostico final
@@ -48,6 +50,10 @@ mantener una lista larga de pasos manuales.
 - `WORK_HOME`
 - `STUDIO_DIR`
 - `OPENCLAW_STATE_DIR`
+- `OPENCLAW_INSTALL_METHOD`
+- `OPENCLAW_PACKAGE_SPEC`
+- `OPENCLAW_ENABLE_NODE_SERVICE`
+- `OPENCLAW_DESKTOP_SHORTCUTS_ENABLE`
 - `OPENCLAW_STUDIO_ACTIONS_ENABLE`
 - `OPENCLAW_STUDIO_ACTIONS_COMMAND_PREFIX`
 - `ENABLE_OPENCLAW_SERVICES`
@@ -62,6 +68,8 @@ mantener una lista larga de pasos manuales.
 
 ```bash
 scripts/doctor/openclaw-status.sh
+scripts/doctor/workstation-health.sh
+scripts/services/user-services.sh status
 scripts/apps/blender.sh status
 scripts/apps/comfyui.sh status
 scripts/apps/comfyui.sh service-status

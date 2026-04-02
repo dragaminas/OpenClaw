@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 
 command_name="${1:-help}"
-project_root="$STUDIO_DIR/BlenderProjects"
+project_root="$OPENCLAW_ALLOWED_BLENDER_PROJECTS_DIR"
 safe_name_regex='^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$'
 
 validate_safe_name() {

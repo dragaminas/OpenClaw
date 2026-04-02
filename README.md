@@ -55,12 +55,16 @@ Hoy el repo ya implementa y documenta:
 - checks de precondiciones
 - hardening de discos, montajes y GNOME
 - hardening base de `~/.openclaw`
+- instalacion o actualizacion reproducible de OpenClaw
 - provision de `systemd --user` para OpenClaw
+- servicio `openclaw-node` opcional y deshabilitado por defecto en este perfil
 - provision operativa de ComfyUI y `ComfyUI-Manager`
 - wrappers locales para Blender y ComfyUI
 - instalacion automatizable de `comfyui.service` desde el propio repo
 - plugin local `studio-actions` para `before_dispatch`
 - primeras acciones seguras para Blender y ComfyUI
+- backup, restore, update y healthcheck de la workstation
+- accesos directos `.desktop` para tareas administrativas comunes
 
 Validado en este sistema:
 
@@ -73,11 +77,17 @@ Validado en este sistema:
 - `comfyui.service` queda `enabled` y escucha en `127.0.0.1:8188`
 - `scripts/openclaw/test-studio-actions-plugin.sh` ejecuta acciones seguras de ComfyUI
 - GNOME con `automount=false` y `automount-open=false`
+- `openclaw status --all --json` reporta WhatsApp enlazado
+- validacion real desde WhatsApp el 2 de abril de 2026: `studio abre blender` funciona y `studio, como esta blender?` responde correctamente
+- `openclaw-node.service` queda deshabilitado para evitar ciclos de pairing no usados
+- existen `backup`, `restore`, `update` y `workstation-health`
 
-Pendiente de cierre final:
+Pendiente de cierre final del plan:
 
 - crear y migrar al usuario runtime dedicado en lugar de `eric`
-- validacion real extremo a extremo por WhatsApp despues del ultimo fix del parser
+
+Mejora futura no bloqueante:
+
 - exponer el primer workflow real de video en ComfyUI
 
 ## Estructura del repo
@@ -102,12 +112,18 @@ Variables importantes en [`.env.example`](/home/eric/Documents/OpenClaw/.env.exa
 - `WORK_HOME`
 - `STUDIO_DIR`
 - `OPENCLAW_STATE_DIR`
+- `OPENCLAW_INSTALL_METHOD`
+- `OPENCLAW_PACKAGE_SPEC`
+- `OPENCLAW_ENABLE_NODE_SERVICE`
+- `OPENCLAW_DESKTOP_SHORTCUTS_ENABLE`
+- `OPENCLAW_USAGE_PROFILE`
 - `PRIMARY_CHAT_CHANNEL`
 - `OPENCLAW_STUDIO_ACTIONS_ENABLE`
 - `OPENCLAW_STUDIO_ACTIONS_PLUGIN_DIR`
 - `OPENCLAW_STUDIO_ACTIONS_COMMAND_PREFIX`
 - `OPENCLAW_STUDIO_ACTIONS_CHANNELS`
 - `OPENCLAW_STUDIO_ACTIONS_ALLOW_GROUP_MESSAGES`
+- `OPENCLAW_ALLOWED_BLENDER_PROJECTS_DIR`
 - `BLENDER_BIN`
 - `COMFYUI_DIR`
 - `COMFYUI_REPO_URL`
@@ -126,6 +142,10 @@ Variables importantes en [`.env.example`](/home/eric/Documents/OpenClaw/.env.exa
 - `COMFYUI_MANAGER_REPO_URL`
 - `COMFYUI_MANAGER_REPO_REF`
 - `COMFYUI_MANAGER_INSTALL_REQUIREMENTS`
+- `OPENCLAW_ALLOWED_COMFYUI_OUTPUT_DIR`
+- `OPENCLAW_BACKUP_DIR`
+- `OPENCLAW_BACKUP_INCLUDE_CREDENTIALS`
+- `OPENCLAW_BACKUP_INCLUDE_COMFY_OUTPUTS`
 - `DISABLE_GNOME_AUTOMOUNT`
 - `HARDEN_OPENCLAW`
 - `ENABLE_OPENCLAW_SERVICES`
@@ -146,11 +166,13 @@ scripts/bootstrap/apply-workstation.sh apply
 - checks de usuario y grupos peligrosos
 - verificacion de discos y montajes
 - desactivacion de automontaje de GNOME
+- instalacion de dependencias base del host
 - instalacion o validacion de OpenClaw
 - hardening base de OpenClaw
 - preparacion del workspace creativo
 - registro del plugin `studio-actions`
 - provision de servicios de usuario
+- instalacion opcional de accesos directos de escritorio
 - setup base de ComfyUI y del manager integrado de ComfyUI
 - diagnostico final
 
@@ -220,6 +242,8 @@ En la practica, reiniciar ComfyUI equivale a reiniciar `comfyui.service`.
 scripts/bootstrap/show-config.sh
 scripts/bootstrap/apply-workstation.sh audit
 scripts/doctor/openclaw-status.sh
+scripts/doctor/workstation-health.sh
+scripts/services/user-services.sh status
 scripts/apps/blender.sh status
 scripts/apps/blender.sh smoke-test blender-smoke
 scripts/apps/comfyui.sh status
@@ -233,6 +257,8 @@ scripts/openclaw/test-studio-actions-plugin.sh "studio crea proyecto whatsapp-de
 scripts/openclaw/test-studio-actions-plugin.sh "studio como esta comfyui"
 scripts/openclaw/test-studio-actions-plugin.sh "studio reinicia comfyui"
 scripts/openclaw/test-studio-actions-plugin.sh "studio abre comfyui"
+scripts/openclaw/backup.sh audit
+scripts/openclaw/update.sh audit
 ```
 
 ## Documentacion
@@ -242,6 +268,10 @@ scripts/openclaw/test-studio-actions-plugin.sh "studio abre comfyui"
 - Acciones seguras: [`docs/architecture/actions.md`](/home/eric/Documents/OpenClaw/docs/architecture/actions.md)
 - Bootstrap: [`docs/operations/bootstrap.md`](/home/eric/Documents/OpenClaw/docs/operations/bootstrap.md)
 - Uso por WhatsApp: [`docs/operations/whatsapp.md`](/home/eric/Documents/OpenClaw/docs/operations/whatsapp.md)
+- Uso diario: [`docs/operations/daily-use.md`](/home/eric/Documents/OpenClaw/docs/operations/daily-use.md)
+- Mantenimiento admin: [`docs/operations/admin-maintenance.md`](/home/eric/Documents/OpenClaw/docs/operations/admin-maintenance.md)
+- Backup y updates: [`docs/operations/backup-and-updates.md`](/home/eric/Documents/OpenClaw/docs/operations/backup-and-updates.md)
+- Checklist de aceptacion: [`docs/operations/acceptance.md`](/home/eric/Documents/OpenClaw/docs/operations/acceptance.md)
 - Blender: [`docs/operations/blender.md`](/home/eric/Documents/OpenClaw/docs/operations/blender.md)
 - ComfyUI: [`docs/operations/comfyui.md`](/home/eric/Documents/OpenClaw/docs/operations/comfyui.md)
 - Discos y automontaje: [`docs/security/disks-and-automount.md`](/home/eric/Documents/OpenClaw/docs/security/disks-and-automount.md)

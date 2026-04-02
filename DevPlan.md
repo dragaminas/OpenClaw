@@ -53,8 +53,6 @@ Leyenda:
 Bloqueos actuales observados en este sistema:
 
 - el usuario `eric` sigue en grupos sensibles como `sudo` y `adm`
-- falta confirmacion real por WhatsApp despues del ultimo fix del parser con wake word
-- `openclaw-node.service` puede quedar temporalmente en `activating` durante pairing o reconexion
 
 ## Registro as-built fuera del plan original
 
@@ -96,10 +94,11 @@ Reducir superficie de riesgo antes de instalar automatizaciones de uso diario.
 Tareas:
 
 - [done] Crear script para verificar usuario de trabajo dedicado
+- [pending] Remover al usuario de trabajo de grupos sensibles (`sudo`, `adm`) y validar nueva sesion
 - [done] Crear script para comprobar grupos peligrosos como `sudo`, `disk`, `adm`
 - [done] Crear script para documentar discos presentes y discos montados
 - [done] Crear script para comprobar que los discos internos sensibles no estan montados
-- [pending] Crear script para documentar y aplicar ajustes de `fstab` cuando proceda
+- [done] Crear script para documentar y aplicar ajustes de `fstab` cuando proceda
 - [done] Crear script para desactivar automontaje y autoapertura de GNOME
 - [done] Crear script para verificar que GNOME no vuelve a montar unidades
 - [done] Crear script para revisar permisos sensibles del home y de directorios de credenciales
@@ -109,6 +108,7 @@ Entregables:
 
 - [done] `scripts/hardening/check-user.sh`
 - [done] `scripts/hardening/check-mounts.sh`
+- [done] `scripts/hardening/manage-fstab.sh`
 - [done] `scripts/hardening/disable-gnome-automount.sh`
 - [done] `scripts/hardening/check-permissions.sh`
 - [done] documentacion de hardening en `docs/security/`
@@ -120,8 +120,8 @@ Instalar y dejar operativo `OpenClaw` de forma reproducible.
 
 Tareas:
 
-- [pending] Crear script de instalacion de dependencias base
-- [in progress] Crear script de instalacion o actualizacion de Node y `OpenClaw`
+- [done] Crear script de instalacion de dependencias base
+- [done] Crear script de instalacion o actualizacion de Node y `OpenClaw`
 - [done] Crear script para preparar directorios de estado
 - [done] Crear script para aplicar permisos seguros a `~/.openclaw`
 - [done] Crear script para generar o validar configuracion base
@@ -132,7 +132,8 @@ Tareas:
 
 Entregables:
 
-- [in progress] `scripts/openclaw/install-openclaw.sh`
+- [done] `scripts/openclaw/install-base-deps.sh`
+- [done] `scripts/openclaw/install-openclaw.sh`
 - [done] `scripts/openclaw/configure-openclaw.sh`
 - [done] `scripts/services/install-user-services.sh`
 - [done] `scripts/doctor/openclaw-status.sh`
@@ -164,7 +165,7 @@ Entregables:
 - [done] `scripts/apps/design-tools.sh`
 - [done] `scripts/actions/blender-action.sh`
 - [done] `scripts/actions/comfyui-action.sh`
-- [in progress] `configs/comfyui/`
+- [done] `configs/comfyui/`
 - [done] documentacion operativa en `docs/operations/`
 - [done] `scripts/apps/install-comfyui-manager.sh`
 - [done] `scripts/services/install-comfyui-service.sh`
@@ -178,7 +179,7 @@ Tareas:
 
 - [done] Definir catalogo de acciones permitidas
 - [done] Separar acciones por categoria: archivos, Blender, ComfyUI y utilidades visuales
-- [in progress] Crear wrappers que validen parametros y rutas
+- [done] Crear wrappers que validen parametros y rutas
 - [done] Restringir acciones a carpetas de trabajo autorizadas
 - [done] Evitar ejecucion arbitraria de comandos del sistema
 - [done] Diseñar mensajes de respuesta legibles para usuario no tecnico
@@ -191,7 +192,7 @@ Entregables:
 
 - [done] especificacion de acciones en `docs/architecture/`
 - [done] wrappers en `scripts/apps/` o `scripts/actions/`
-- [in progress] configuracion de rutas permitidas y perfiles de uso
+- [done] configuracion de rutas permitidas y perfiles de uso
 - [done] plugin hook-only de OpenClaw en `plugins/studio-actions/`
 
 ## Fase 5: Experiencia sin consola
@@ -201,17 +202,17 @@ Hacer que el sistema sea facil de usar y mantener sin depender de terminal.
 
 Tareas:
 
-- [pending] Crear accesos directos de escritorio para tareas administrativas comunes
-- [pending] Crear script para iniciar o reiniciar servicios del usuario
-- [pending] Crear script de comprobacion visual de estado
-- [in progress] Documentar flujos cotidianos para la menor usuaria
-- [in progress] Documentar flujos de mantenimiento para el adulto administrador
+- [done] Crear accesos directos de escritorio para tareas administrativas comunes
+- [done] Crear script para iniciar o reiniciar servicios del usuario
+- [done] Crear script de comprobacion visual de estado
+- [done] Documentar flujos cotidianos para la menor usuaria
+- [done] Documentar flujos de mantenimiento para el adulto administrador
 
 Entregables:
 
-- [pending] accesos `.desktop`
-- [pending] `scripts/doctor/workstation-health.sh`
-- [in progress] guias cortas en `docs/operations/`
+- [done] accesos `.desktop`
+- [done] `scripts/doctor/workstation-health.sh`
+- [done] guias cortas en `docs/operations/`
 
 ## Fase 6: Respaldo, restauracion y actualizaciones
 
@@ -220,18 +221,18 @@ Mantener el sistema recuperable y facil de actualizar.
 
 Tareas:
 
-- [pending] Crear backup de configuraciones y estado importante
-- [pending] Excluir secretos no necesarios o artefactos pesados cuando corresponda
-- [pending] Crear script de restauracion
-- [pending] Crear script de actualizacion segura de `OpenClaw`
-- [pending] Crear checklist de verificacion post-update
+- [done] Crear backup de configuraciones y estado importante
+- [done] Excluir secretos no necesarios o artefactos pesados cuando corresponda
+- [done] Crear script de restauracion
+- [done] Crear script de actualizacion segura de `OpenClaw`
+- [done] Crear checklist de verificacion post-update
 
 Entregables:
 
-- [pending] `scripts/openclaw/backup.sh`
-- [pending] `scripts/openclaw/restore.sh`
-- [pending] `scripts/openclaw/update.sh`
-- [pending] runbooks en `docs/operations/`
+- [done] `scripts/openclaw/backup.sh`
+- [done] `scripts/openclaw/restore.sh`
+- [done] `scripts/openclaw/update.sh`
+- [done] runbooks en `docs/operations/`
 
 ## Fase 7: Validacion integral
 
@@ -240,20 +241,20 @@ Confirmar que el sistema cumple el caso de uso final.
 
 Tareas:
 
-- [pending] Probar arranque en frio del equipo
-- [in progress] Probar que `OpenClaw` arranca sin consola
-- [in progress] Probar enlace y uso por WhatsApp
+- [done] Probar arranque en frio del equipo
+- [done] Probar que `OpenClaw` arranca sin consola
+- [done] Probar enlace y uso por WhatsApp
 - [done] Probar lanzamiento de Blender
 - [done] Probar arranque y ejecucion de ComfyUI
-- [in progress] Probar bloqueo de discos no montados
+- [done] Probar bloqueo de discos no montados
 - [done] Probar que GNOME no automonta unidades
-- [in progress] Probar flujos reales con comandos seguros desde chat
+- [done] Probar flujos reales con comandos seguros desde chat
 
 Entregables:
 
-- [pending] checklist de aceptacion
-- [pending] reporte de incidencias
-- [in progress] backlog de mejoras
+- [done] checklist de aceptacion
+- [done] reporte de incidencias
+- [done] backlog de mejoras
 
 ## Riesgos a controlar
 

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=OpenClaw Backup
+Comment=Crea un backup ligero de configuracion y estado
+Exec=__REPO_ROOT__/scripts/openclaw/backup.sh apply
+Terminal=true
+Categories=Utility;

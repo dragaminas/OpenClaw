@@ -42,13 +42,33 @@ Ambos valores deben devolver `false`.
 
 - `scripts/hardening/check-mounts.sh`
 - `scripts/hardening/disable-gnome-automount.sh`
+- `scripts/hardening/manage-fstab.sh`
 - `scripts/bootstrap/apply-workstation.sh`
+
+## Politica de `fstab`
+
+El repo no reescribe `fstab` a ciegas. Para cambios automáticos, solo gestiona
+entradas marcadas con `x-openclaw-managed`.
+
+Ejemplo:
+
+```fstab
+UUID=xxxx-xxxx /mnt/disco ext4 defaults,x-openclaw-managed 0 2
+```
+
+En modo `apply`, el script añade `noauto,nofail` a esas entradas gestionadas:
+
+```bash
+scripts/hardening/manage-fstab.sh audit
+sudo FSTAB_PATH=/etc/fstab scripts/hardening/manage-fstab.sh apply
+```
 
 ## Variables relacionadas
 
 - `DISABLE_GNOME_AUTOMOUNT`
 - `VERIFY_INTERNAL_NVME_UNMOUNTED`
 - `CHECK_DANGEROUS_GROUPS`
+- `OPENCLAW_FSTAB_MANAGED_TAG`
 
 ## Validacion manual
 

@@ -27,7 +27,8 @@ if [[ "${DISABLE_GNOME_AUTOMOUNT:-true}" == "true" ]]; then
   "$SCRIPT_DIR/../hardening/disable-gnome-automount.sh" "$mode"
 fi
 
-"$SCRIPT_DIR/../openclaw/install-openclaw.sh"
+"$SCRIPT_DIR/../openclaw/install-base-deps.sh" "$mode"
+"$SCRIPT_DIR/../openclaw/install-openclaw.sh" "$mode"
 
 if [[ "${HARDEN_OPENCLAW:-true}" == "true" ]]; then
   "$SCRIPT_DIR/../openclaw/configure-openclaw.sh" "$mode"
@@ -43,6 +44,10 @@ fi
 
 if [[ "${ENABLE_OPENCLAW_SERVICES:-true}" == "true" ]]; then
   "$SCRIPT_DIR/../services/install-user-services.sh" "$mode"
+fi
+
+if [[ "${INSTALL_DESKTOP_SHORTCUTS:-true}" == "true" && "${OPENCLAW_DESKTOP_SHORTCUTS_ENABLE:-true}" == "true" ]]; then
+  "$SCRIPT_DIR/../desktop/install-shortcuts.sh" "$mode"
 fi
 
 print_header "Integracion creativa"

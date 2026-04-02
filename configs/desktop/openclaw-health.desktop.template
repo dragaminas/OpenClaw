@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=OpenClaw Health
+Comment=Comprueba el estado general de OpenClaw, ComfyUI y Blender
+Exec=__REPO_ROOT__/scripts/doctor/workstation-health.sh
+Terminal=true
+Categories=Utility;
