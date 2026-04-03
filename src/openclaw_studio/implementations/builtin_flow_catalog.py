@@ -211,6 +211,14 @@ BUILTIN_FLOW_CATALOG = (
                 display_label="Variante local futura de texto a imagen",
                 maturity=ImplementationMaturity.FUTURE,
                 supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
+                workflow_file_references=(
+                    "ComfyUIWorkflows/local/adaptable/"
+                    "uc-img-01-text-to-image-z-image-template-v1.json",
+                ),
+                notes=(
+                    "Semilla derivada del template local de ComfyUI para "
+                    "construir la futura variante baseline.",
+                ),
             ),
             ExecutionVariant(
                 variant_id="txt2img-high-vram-adaptable",
@@ -261,7 +269,14 @@ BUILTIN_FLOW_CATALOG = (
                 maturity=ImplementationMaturity.AVAILABLE,
                 supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
                 workflow_file_references=(
-                    "ComfyUIWorkflows/260303_MICKMUMPITZ_Z-IMAGE_TURBO_CN_1-1.json",
+                    "ComfyUIWorkflows/local/minimum/"
+                    "uc-img-02-z-image-turbo-cn-rtx3060-v1.json",
+                    "ComfyUIWorkflows/"
+                    "260303_MICKMUMPITZ_Z-IMAGE_TURBO_CN_1-1.json",
+                ),
+                notes=(
+                    "La variante de producto usa la derivacion local "
+                    "versionada y conserva el JSON base como referencia.",
                 ),
             ),
             ExecutionVariant(
@@ -302,8 +317,14 @@ BUILTIN_FLOW_CATALOG = (
                 maturity=ImplementationMaturity.AVAILABLE,
                 supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
                 workflow_file_references=(
+                    "ComfyUIWorkflows/local/minimum/"
+                    "uc-vid-01-ai-renderer-preprocess-rtx3060-v1.json",
                     "ComfyUIWorkflows/"
                     "260225_MICKMUMPITZ_AI-RENDERER-PREPROCESS_1-0.json",
+                ),
+                notes=(
+                    "La derivacion local adapta el bloque de profundidad a "
+                    "DepthAnything_V2 mientras V3 no este disponible.",
                 ),
             ),
         ),
@@ -347,7 +368,14 @@ BUILTIN_FLOW_CATALOG = (
                 maturity=ImplementationMaturity.AVAILABLE,
                 supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
                 workflow_file_references=(
-                    "ComfyUIWorkflows/260225_MICKMUMPITZ_AI-RENDERER_SMPL_2-0.json",
+                    "ComfyUIWorkflows/local/minimum/"
+                    "uc-vid-02-ai-renderer-video-rtx3060-v1.json",
+                    "ComfyUIWorkflows/"
+                    "260225_MICKMUMPITZ_AI-RENDERER_SMPL_2-0.json",
+                ),
+                notes=(
+                    "La variante disponible apunta primero al workflow "
+                    "derivado para baseline minimum.",
                 ),
             ),
             ExecutionVariant(
@@ -356,6 +384,8 @@ BUILTIN_FLOW_CATALOG = (
                 maturity=ImplementationMaturity.ADAPTABLE,
                 supported_hardware_profiles=HIGH_VRAM_REFERENCE_PROFILES,
                 workflow_file_references=(
+                    "ComfyUIWorkflows/local/maximum/"
+                    "uc-vid-02-ai-renderer-video-high-vram-reference-v1.json",
                     "ComfyUIWorkflows/"
                     "260225_MICKMUMPITZ_AI-RENDERER_SMPL_2-0_Runpod.json",
                 ),
@@ -406,6 +436,14 @@ BUILTIN_FLOW_CATALOG = (
                 display_label="Variante adaptable start-to-end",
                 maturity=ImplementationMaturity.ADAPTABLE,
                 supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
+                workflow_file_references=(
+                    "ComfyUIWorkflows/local/adaptable/"
+                    "uc-vid-03-image-to-video-wan22-template-v1.json",
+                ),
+                notes=(
+                    "Semilla template para construir una derivacion futura de "
+                    "start-to-end.",
+                ),
             ),
         ),
     ),
@@ -439,6 +477,10 @@ BUILTIN_FLOW_CATALOG = (
                 display_label="Variante local futura de mejora de video",
                 maturity=ImplementationMaturity.FUTURE,
                 supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
+                workflow_file_references=(
+                    "ComfyUIWorkflows/local/adaptable/"
+                    "uc-vid-04-video-upscale-ganx4-template-v1.json",
+                ),
             ),
             ExecutionVariant(
                 variant_id="video-upscale-high-vram-future",
@@ -479,6 +521,14 @@ BUILTIN_FLOW_CATALOG = (
                 display_label="Exploracion local derivada de imagen a imagen",
                 maturity=ImplementationMaturity.ADAPTABLE,
                 supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
+                workflow_file_references=(
+                    "ComfyUIWorkflows/local/minimum/"
+                    "uc-img-03-z-image-style-exploration-rtx3060-v1.json",
+                ),
+                notes=(
+                    "Derivacion local orientada a exploracion de estilo sobre "
+                    "la base Z-Image.",
+                ),
             ),
             ExecutionVariant(
                 variant_id="style-variants-high-vram-reference",
