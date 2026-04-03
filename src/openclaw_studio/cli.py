@@ -4,7 +4,7 @@ import argparse
 from typing import Iterable
 
 from .application.session_engine import GuidedSessionEngine
-from .contracts.flows import ExecutionProfile
+from .contracts.flows import HardwareProfile
 from .contracts.interaction import GuidedFlowSession, InputPrompt
 from .implementations.builtin_flow_catalog import BUILTIN_FLOW_CATALOG
 
@@ -19,8 +19,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--profile",
-        choices=[profile.value for profile in ExecutionProfile],
-        help="Perfil de ejecucion preferido.",
+        choices=[profile.value for profile in HardwareProfile],
+        help="Perfil de hardware preferido.",
     )
     parser.add_argument(
         "--set",
@@ -116,7 +116,7 @@ def render_summary(
         "",
         f"Flujo: {summary.flow_display_label} ({summary.use_case_id})",
         f"Variante sugerida: {summary.selected_variant_label}",
-        f"Perfil: {summary.execution_profile_label}",
+        f"Perfil de hardware: {summary.hardware_profile_label}",
         "Resumen:",
     ]
     for display_label, value in summary.provided_inputs:
@@ -137,15 +137,15 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("Hace falta una intencion inicial.")
 
     session_engine = GuidedSessionEngine(BUILTIN_FLOW_CATALOG)
-    requested_execution_profile = (
-        ExecutionProfile(args.profile)
+    requested_hardware_profile = (
+        HardwareProfile(args.profile)
         if args.profile
-        else ExecutionProfile.LOCAL_RTX3060_12GB
+        else HardwareProfile.MINIMUM
     )
 
     session = session_engine.start_session(
         initial_request,
-        requested_execution_profile=requested_execution_profile,
+        requested_hardware_profile=requested_hardware_profile,
     )
     print(
         "Interfaz detectada: "

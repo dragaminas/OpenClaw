@@ -8,10 +8,10 @@ import uuid
 from collections.abc import Iterable
 
 from openclaw_studio.contracts.flows import (
-    ExecutionProfile,
     ExecutionVariant,
     FlowDefinition,
     FlowInputDefinition,
+    HardwareProfile,
     ImplementationMaturity,
     InputValueType,
 )
@@ -50,7 +50,7 @@ class GuidedSessionEngine:
     def start_session(
         self,
         user_request: str,
-        requested_execution_profile: ExecutionProfile | None = None,
+        requested_hardware_profile: HardwareProfile | None = None,
     ) -> GuidedFlowSession:
         """Create a new guided session for the best matching flow."""
 
@@ -59,7 +59,9 @@ class GuidedSessionEngine:
             session_id=str(uuid.uuid4()),
             user_request=user_request,
             selected_flow=selected_flow,
-            requested_execution_profile=requested_execution_profile,
+            requested_hardware_profile=(
+                requested_hardware_profile or HardwareProfile.MINIMUM
+            ),
         )
 
     def select_flow_for_request(self, user_request: str) -> FlowDefinition:
@@ -141,11 +143,7 @@ class GuidedSessionEngine:
         """Summarize the collected inputs and the chosen execution variant."""
 
         selected_variant = self.select_execution_variant(session)
-        execution_profile_label = (
-            session.requested_execution_profile.value
-            if session.requested_execution_profile
-            else "sin perfil"
-        )
+        hardware_profile = session.requested_hardware_profile or HardwareProfile.MINIMUM
 
         provided_inputs: list[tuple[str, str]] = []
         for input_definition in session.selected_flow.input_definitions:
@@ -167,7 +165,7 @@ class GuidedSessionEngine:
             use_case_id=session.selected_flow.use_case_id,
             flow_display_label=session.selected_flow.display_label,
             selected_variant_label=selected_variant.display_label,
-            execution_profile_label=execution_profile_label,
+            hardware_profile_label=hardware_profile.value,
             provided_inputs=tuple(provided_inputs),
             remaining_optional_inputs=remaining_optional_inputs,
         )
@@ -176,17 +174,17 @@ class GuidedSessionEngine:
         self,
         session: GuidedFlowSession,
     ) -> ExecutionVariant:
-        """Choose the best available variant for the requested profile."""
+        """Choose the best available variant for the requested hardware profile."""
 
-        requested_profile = (
-            session.requested_execution_profile
-            or ExecutionProfile.LOCAL_RTX3060_12GB
+        requested_hardware_profile = (
+            session.requested_hardware_profile
+            or HardwareProfile.MINIMUM
         )
 
         for execution_variant in session.selected_flow.execution_variants:
             if (
-                requested_profile
-                in execution_variant.supported_execution_profiles
+                requested_hardware_profile
+                in execution_variant.supported_hardware_profiles
                 and execution_variant.maturity != ImplementationMaturity.FUTURE
             ):
                 return execution_variant

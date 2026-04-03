@@ -3,10 +3,10 @@ from __future__ import annotations
 """Built-in catalog of guided creative flows for the studio CLI demo."""
 
 from openclaw_studio.contracts.flows import (
-    ExecutionProfile,
     ExecutionVariant,
     FlowDefinition,
     FlowInputDefinition,
+    HardwareProfile,
     ImplementationMaturity,
     InputValueType,
     OutputArtifactType,
@@ -169,6 +169,14 @@ STYLE_EXPLORATION_FOCUS_INPUT = FlowInputDefinition(
     ),
 )
 
+BASELINE_COMPATIBLE_PROFILES = (
+    HardwareProfile.MINIMUM,
+    HardwareProfile.MEDIUM,
+    HardwareProfile.MAXIMUM,
+)
+
+HIGH_VRAM_REFERENCE_PROFILES = (HardwareProfile.MAXIMUM,)
+
 
 BUILTIN_FLOW_CATALOG = (
     FlowDefinition(
@@ -202,16 +210,16 @@ BUILTIN_FLOW_CATALOG = (
                 variant_id="txt2img-local-future",
                 display_label="Variante local futura de texto a imagen",
                 maturity=ImplementationMaturity.FUTURE,
-                supported_execution_profiles=(
-                    ExecutionProfile.LOCAL_RTX3060_12GB,
-                ),
+                supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
             ),
             ExecutionVariant(
-                variant_id="txt2img-cloud-adaptable",
-                display_label="Variante cloud adaptable",
+                variant_id="txt2img-high-vram-adaptable",
+                display_label="Variante adaptable basada en workflow de alto VRAM",
                 maturity=ImplementationMaturity.ADAPTABLE,
-                supported_execution_profiles=(
-                    ExecutionProfile.RUNPOD_HIGH_VRAM,
+                supported_hardware_profiles=HIGH_VRAM_REFERENCE_PROFILES,
+                notes=(
+                    "Workflow base conservado como referencia para futuras "
+                    "adaptaciones a hardware superior.",
                 ),
             ),
         ),
@@ -251,19 +259,19 @@ BUILTIN_FLOW_CATALOG = (
                 variant_id="z-image-turbo-local",
                 display_label="Z-Image Turbo CN local",
                 maturity=ImplementationMaturity.AVAILABLE,
-                supported_execution_profiles=(
-                    ExecutionProfile.LOCAL_RTX3060_12GB,
-                ),
+                supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
                 workflow_file_references=(
                     "ComfyUIWorkflows/260303_MICKMUMPITZ_Z-IMAGE_TURBO_CN_1-1.json",
                 ),
             ),
             ExecutionVariant(
-                variant_id="img2img-cloud",
-                display_label="Batch cloud de mayor calidad",
+                variant_id="img2img-high-vram-reference",
+                display_label="Batch adaptable basado en workflow de alto VRAM",
                 maturity=ImplementationMaturity.ADAPTABLE,
-                supported_execution_profiles=(
-                    ExecutionProfile.RUNPOD_HIGH_VRAM,
+                supported_hardware_profiles=HIGH_VRAM_REFERENCE_PROFILES,
+                notes=(
+                    "Reservado como workflow base para futuras variantes de "
+                    "hardware medio o maximo.",
                 ),
             ),
         ),
@@ -292,9 +300,7 @@ BUILTIN_FLOW_CATALOG = (
                 variant_id="ai-renderer-preprocess-local",
                 display_label="AI Renderer Preprocess local",
                 maturity=ImplementationMaturity.AVAILABLE,
-                supported_execution_profiles=(
-                    ExecutionProfile.LOCAL_RTX3060_12GB,
-                ),
+                supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
                 workflow_file_references=(
                     "ComfyUIWorkflows/"
                     "260225_MICKMUMPITZ_AI-RENDERER-PREPROCESS_1-0.json",
@@ -339,32 +345,30 @@ BUILTIN_FLOW_CATALOG = (
                 variant_id="ai-renderer-local",
                 display_label="AI Renderer 2.0 local",
                 maturity=ImplementationMaturity.AVAILABLE,
-                supported_execution_profiles=(
-                    ExecutionProfile.LOCAL_RTX3060_12GB,
-                ),
+                supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
                 workflow_file_references=(
                     "ComfyUIWorkflows/260225_MICKMUMPITZ_AI-RENDERER_SMPL_2-0.json",
                 ),
             ),
             ExecutionVariant(
-                variant_id="ai-renderer-runpod",
-                display_label="AI Renderer 2.0 Runpod",
-                maturity=ImplementationMaturity.AVAILABLE,
-                supported_execution_profiles=(
-                    ExecutionProfile.RUNPOD_HIGH_VRAM,
-                ),
+                variant_id="ai-renderer-high-vram-reference",
+                display_label="AI Renderer 2.0 base de alto VRAM",
+                maturity=ImplementationMaturity.ADAPTABLE,
+                supported_hardware_profiles=HIGH_VRAM_REFERENCE_PROFILES,
                 workflow_file_references=(
                     "ComfyUIWorkflows/"
                     "260225_MICKMUMPITZ_AI-RENDERER_SMPL_2-0_Runpod.json",
+                ),
+                notes=(
+                    "Se conserva como biblioteca base para futuras adaptaciones "
+                    "a hardware superior.",
                 ),
             ),
             ExecutionVariant(
                 variant_id="ai-renderer-local-gguf",
                 display_label="Fallback local con GGUF",
                 maturity=ImplementationMaturity.ADAPTABLE,
-                supported_execution_profiles=(
-                    ExecutionProfile.LOCAL_RTX3060_12GB,
-                ),
+                supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
             ),
         ),
     ),
@@ -401,10 +405,7 @@ BUILTIN_FLOW_CATALOG = (
                 variant_id="start-to-end-adaptable",
                 display_label="Variante adaptable start-to-end",
                 maturity=ImplementationMaturity.ADAPTABLE,
-                supported_execution_profiles=(
-                    ExecutionProfile.LOCAL_RTX3060_12GB,
-                    ExecutionProfile.RUNPOD_HIGH_VRAM,
-                ),
+                supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
             ),
         ),
     ),
@@ -437,17 +438,13 @@ BUILTIN_FLOW_CATALOG = (
                 variant_id="video-upscale-local-future",
                 display_label="Variante local futura de mejora de video",
                 maturity=ImplementationMaturity.FUTURE,
-                supported_execution_profiles=(
-                    ExecutionProfile.LOCAL_RTX3060_12GB,
-                ),
+                supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
             ),
             ExecutionVariant(
-                variant_id="video-upscale-cloud-future",
-                display_label="Variante cloud futura de mejora de video",
+                variant_id="video-upscale-high-vram-future",
+                display_label="Variante futura de alto VRAM para mejora de video",
                 maturity=ImplementationMaturity.FUTURE,
-                supported_execution_profiles=(
-                    ExecutionProfile.RUNPOD_HIGH_VRAM,
-                ),
+                supported_hardware_profiles=HIGH_VRAM_REFERENCE_PROFILES,
             ),
         ),
     ),
@@ -481,16 +478,16 @@ BUILTIN_FLOW_CATALOG = (
                 variant_id="style-variants-local",
                 display_label="Exploracion local derivada de imagen a imagen",
                 maturity=ImplementationMaturity.ADAPTABLE,
-                supported_execution_profiles=(
-                    ExecutionProfile.LOCAL_RTX3060_12GB,
-                ),
+                supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
             ),
             ExecutionVariant(
-                variant_id="style-variants-cloud",
-                display_label="Exploracion cloud en lote",
+                variant_id="style-variants-high-vram-reference",
+                display_label="Exploracion en lote basada en workflow de alto VRAM",
                 maturity=ImplementationMaturity.ADAPTABLE,
-                supported_execution_profiles=(
-                    ExecutionProfile.RUNPOD_HIGH_VRAM,
+                supported_hardware_profiles=HIGH_VRAM_REFERENCE_PROFILES,
+                notes=(
+                    "Reservado como workflow base para futuras variantes mas "
+                    "ambiciosas en hardware superior.",
                 ),
             ),
         ),

@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 
-from .flows import ExecutionProfile, FlowDefinition
+from .flows import FlowDefinition, HardwareProfile
 
 
 class SessionStage(StrEnum):
@@ -36,9 +36,15 @@ class SessionSummary:
     use_case_id: str
     flow_display_label: str
     selected_variant_label: str
-    execution_profile_label: str
+    hardware_profile_label: str
     provided_inputs: tuple[tuple[str, str], ...]
     remaining_optional_inputs: tuple[str, ...]
+
+    @property
+    def execution_profile_label(self) -> str:
+        """Backward-compatible alias during the terminology migration."""
+
+        return self.hardware_profile_label
 
 
 @dataclass
@@ -48,10 +54,22 @@ class GuidedFlowSession:
     session_id: str
     user_request: str
     selected_flow: FlowDefinition
-    requested_execution_profile: ExecutionProfile | None = None
+    requested_hardware_profile: HardwareProfile | None = None
     stage: SessionStage = SessionStage.COLLECTING_REQUIRED
     provided_input_values: dict[str, str | tuple[str, ...]] = field(default_factory=dict)
     skipped_optional_input_keys: set[str] = field(default_factory=set)
+
+    @property
+    def requested_execution_profile(self) -> HardwareProfile | None:
+        """Backward-compatible alias during the terminology migration."""
+
+        return self.requested_hardware_profile
+
+    @requested_execution_profile.setter
+    def requested_execution_profile(self, value: HardwareProfile | None) -> None:
+        """Backward-compatible alias during the terminology migration."""
+
+        self.requested_hardware_profile = value
 
     @property
     def missing_required_input_keys(self) -> tuple[str, ...]:

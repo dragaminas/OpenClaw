@@ -18,11 +18,12 @@ class InputValueType(StrEnum):
     MULTI_CHOICE = "multi_choice"
 
 
-class ExecutionProfile(StrEnum):
-    """Execution environments that can run a flow variant."""
+class HardwareProfile(StrEnum):
+    """Hardware tiers used to classify flow compatibility and defaults."""
 
-    LOCAL_RTX3060_12GB = "local-rtx3060-12gb"
-    RUNPOD_HIGH_VRAM = "runpod-high-vram"
+    MINIMUM = "minimum"
+    MEDIUM = "medium"
+    MAXIMUM = "maximum"
 
 
 class ImplementationMaturity(StrEnum):
@@ -79,9 +80,15 @@ class ExecutionVariant:
     variant_id: str
     display_label: str
     maturity: ImplementationMaturity
-    supported_execution_profiles: tuple[ExecutionProfile, ...]
+    supported_hardware_profiles: tuple[HardwareProfile, ...]
     workflow_file_references: tuple[str, ...] = ()
     notes: tuple[str, ...] = ()
+
+    @property
+    def supported_execution_profiles(self) -> tuple[HardwareProfile, ...]:
+        """Backward-compatible alias during the terminology migration."""
+
+        return self.supported_hardware_profiles
 
 
 @dataclass(frozen=True)
@@ -123,6 +130,7 @@ class FlowDefinition:
 
 
 # Backwards-compatible aliases kept while the rest of the project migrates.
+ExecutionProfile = HardwareProfile
 FieldType = InputValueType
 ResultKind = OutputArtifactType
 ChoiceOption = SelectableOption
