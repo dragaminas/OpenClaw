@@ -69,15 +69,16 @@ Forma concreta de ejecutar una interfaz funcional. Ejemplos:
 
 - workflow local con `Z-Image Turbo CN`
 - pipeline local `Preprocess -> AI Renderer 2.0`
-- variante cloud en `Runpod`
+- workflow base pensado para hardware de mayor VRAM
 - variante local con fallback `GGUF`
 
 ## 3. Perfil de ejecucion
 
 Condiciones del entorno que restringen la ejecucion:
 
-- `local-rtx3060-12gb`
-- `runpod-high-vram`
+- `minimo`: `RTX 3060 8 GB-12 GB`
+- `medio`: `RTX 5060-5080 12 GB-16 GB`
+- `maximo`: `RTX 3090-5090 24 GB-32 GB`
 
 ## 4. Escenario operativo
 
@@ -95,6 +96,8 @@ Combinacion de interfaces funcionales para resolver un trabajo real. Ejemplos:
   - `ComfyUIWorkflows/260225_MICKMUMPITZ_AI-RENDERER-PREPROCESS_1-0.json`
   - `ComfyUIWorkflows/260225_MICKMUMPITZ_AI-RENDERER_SMPL_2-0.json`
   - `ComfyUIWorkflows/260225_MICKMUMPITZ_AI-RENDERER_SMPL_2-0_Runpod.json`
+- Esos workflows deberian tratarse tambien como biblioteca base para
+  adaptaciones futuras a perfiles `medio` y `maximo`.
 - Direccion general del pipeline:
   `Blender -> materiales de entrada -> ComfyUI -> imagen o video final`.
 
@@ -132,7 +135,7 @@ interfaz deberia exponer, aunque cada variante use solo un subconjunto.
 - `entrada_base`: imagen, secuencia o video sobre el que se apoya el render
 - `controles_visuales`: contorno, profundidad, pose u otros controles que se
   puedan activar
-- `perfil_ejecucion`: local o cloud
+- `perfil_hardware`: `minimum`, `medium` o `maximum`
 - `tamanio_objetivo`: resolucion o clase de calidad deseada
 - `duracion_objetivo`: longitud del clip o numero de frames
 - `modo_segmentacion`: ejecucion completa o fragmentada en bloques
@@ -150,7 +153,7 @@ van completando progresivamente.
 - `objetivo_visual`: que resultado quiere conseguir
 - `referencias`: personajes, estilo u otras imagenes de apoyo
 - `controles`: que tipos de control visual quiere activar
-- `perfil`: local o cloud segun coste, tiempo y hardware
+- `perfil`: perfil de hardware segun VRAM, tiempo y calidad objetivo
 - `alcance`: imagen unica, lote corto, plano breve o secuencia
 
 ## Reglas de captura
@@ -181,7 +184,8 @@ estas:
 - si no hay imagen base y solo hay descripcion textual, usar `UC-IMG-01`
 - si el trabajo es de video y faltan controles, ejecutar antes `UC-VID-01`
 - si el plano es corto y el hardware local alcanza, priorizar variante local
-- si el plano es largo o pesado, evaluar variante cloud o ejecucion segmentada
+- si el plano es largo o pesado, evaluar variante de alto VRAM o ejecucion
+  segmentada
 - si la VRAM local no alcanza, evaluar fallback `GGUF` o bajar perfil de salida
 
 ## Interfaces funcionales en detalle
@@ -203,7 +207,7 @@ estas:
   - metadatos suficientes para reproducir o iterar
 - Variantes de implementacion:
   - `V1` futura variante local de `texto -> imagen`
-  - `V2` variante cloud para mas calidad o batch
+  - `V2` variante de alto VRAM para mas calidad o batch
   - `V3` variante derivada que use una imagen vacia o base sintetica si hace
     falta acoplarla a un workflow existente
 - Captura guiada recomendada:
@@ -233,7 +237,7 @@ estas:
   - `V1` local actual: `Z-Image Turbo CN 1.1`
   - `V2` local futura: otra variante `img2img` con diferente balance entre
     control y estilo
-  - `V3` cloud: batch de calidad superior o mayor resolucion
+  - `V3` alto VRAM: batch de calidad superior o mayor resolucion
 - Captura guiada recomendada:
   - pedir imagen base
   - pedir una descripcion simple del resultado
@@ -291,7 +295,7 @@ estas:
   - si hace falta, varios fragmentos compatibles para recomposicion
 - Variantes de implementacion:
   - `V1` local actual: `AI RENDERER 2.0`
-  - `V2` cloud actual/adaptable: `AI RENDERER 2.0 Runpod`
+  - `V2` workflow base de alto VRAM: `AI RENDERER 2.0 Runpod`
   - `V3` local futura: fallback `GGUF` o perfil de memoria reducida
 - Captura guiada recomendada:
   - pedir video base o paquete de controles
@@ -338,13 +342,13 @@ estas:
   - `video_renderizado`
 - Entradas opcionales:
   - `tamanio_objetivo`
-  - `perfil_ejecucion`
+  - `perfil_hardware`
   - `modo_segmentacion`
 - Salidas esperadas:
   - video mejorado o reescalado
 - Variantes de implementacion:
   - `V1` futura variante local de upscale
-  - `V2` futura variante cloud para remaster pesado
+  - `V2` futura variante de alto VRAM para remaster pesado
 - Captura guiada recomendada:
   - pedir video de entrada
   - preguntar si la prioridad es resolucion, limpieza o acabado
@@ -369,7 +373,7 @@ estas:
   - base para elegir estilo reutilizable por proyecto
 - Variantes de implementacion:
   - `V1` local actual: derivado de `UC-IMG-02`
-  - `V2` local o cloud: exploracion en lote para biblia visual
+  - `V2` local o alto VRAM: exploracion en lote para biblia visual
 - Captura guiada recomendada:
   - pedir imagen base
   - pedir que quiere explorar: personaje, estilo o acabado
@@ -387,7 +391,7 @@ componiendo una o varias interfaces funcionales.
 | `SCN-03` | `P0` | Plano corto de prueba desde Blender | `UC-VID-01` + `UC-VID-02` |
 | `SCN-04` | `P1` | Biblia visual por secuencia | `UC-IMG-01` + `UC-IMG-02` + `UC-IMG-03` |
 | `SCN-05` | `P1` | Plano corto final con referencias multiples | `UC-VID-01` + `UC-VID-02` |
-| `SCN-06` | `P1` | Secuencia larga o pesada en cloud | `UC-VID-01` + `UC-VID-02` |
+| `SCN-06` | `P1` | Secuencia larga o pesada en hardware superior | `UC-VID-01` + `UC-VID-02` |
 | `SCN-07` | `P2` | Continuidad de estilo entre varios planos | `UC-VID-02` + `UC-IMG-03` |
 | `SCN-08` | `P2` | Remaster o upscale de salida final | `UC-VID-04` |
 
@@ -468,7 +472,7 @@ Motivos:
   una variante de una interfaz existente.
 - Si cambia la UI, documentarlo despues en `docs/comfyui/interface.md`.
 - Si cambia hardware, perfiles o limites, reflejarlo tambien en
-  `docs/comfyui/runtime-profiles.md`.
+  `docs/comfyui/hardware-profiles.md`.
 - Si se añade una nueva variante concreta, registrarla en los manifiestos de
   `configs/comfyui/` y en los documentos de auditoria.
 

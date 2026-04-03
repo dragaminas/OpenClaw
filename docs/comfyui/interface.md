@@ -170,12 +170,15 @@ La implementacion inicial ya define contratos para:
 
 ## Variantes de implementacion actuales
 
-La base inicial no ejecuta aun workflows, pero ya sugiere variantes por perfil:
+La base inicial ya se alinea con perfiles de hardware local y sugiere variantes
+segun compatibilidad de hardware. Toma
+`RTX 3060 8 GB-12 GB` como baseline minimo de producto.
 
 - `Z-Image Turbo CN local`
 - `AI Renderer Preprocess local`
 - `AI Renderer 2.0 local`
-- `AI Renderer 2.0 Runpod`
+- `AI Renderer 2.0 base de alto VRAM` para futuras
+  adaptaciones
 - `Fallback local con GGUF`
 - variantes futuras de `texto -> imagen`
 - variantes futuras de mejora de video
@@ -205,12 +208,12 @@ La seleccion de variante deberia estar en la capa de aplicacion y usar:
 
 - tipo de interfaz funcional
 - slots completados
-- perfil de ejecucion preferido
+- perfil de hardware preferido
 - madurez de la variante
 
 La base actual ya hace una primera sugerencia en `session_engine.py`:
 
-- prioriza variantes compatibles con el perfil pedido
+- prioriza variantes compatibles con el perfil de hardware pedido
 - evita elegir variantes marcadas solo como `future` si hay una utilizable
 
 ## Alcance de esta implementacion
@@ -246,7 +249,8 @@ PYTHONPATH=src python -m openclaw_studio --intent "quiero crear una imagen"
 
 ## Relacion con tareas posteriores
 
-- `8.3` fijara perfiles de ejecucion mas rigurosos
-- `8.5` y `8.6` aterrizaran workflow audit y mapping reales
+- `8.3` ya fija los perfiles de hardware y el baseline minimo de producto
+- `8.5` y `8.6` aterrizaran la biblioteca de workflows base, su audit y su
+  mapping real
 - `8.11` conectara estas interfaces con workflows derivados locales
 - `8.14` convertira estas sesiones en presets y UI operable para usuario final
