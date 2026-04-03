@@ -1,0 +1,13 @@
+preset_id: uc-vid-02-video-high-vram-reference
+display_label: Referencia high VRAM para video
+use_case_id: UC-VID-02
+hardware_profile: maximum
+workflow: ComfyUIWorkflows/local/maximum/uc-vid-02-ai-renderer-video-high-vram-reference-v1.json
+defaults:
+  role: reference
+  not_baseline: true
+paths:
+  output_prefix: comfyui/output/video/<shot>/<shot>__render_max__v001
+user_messages:
+  start: "Esta variante se conserva como referencia para hardware superior."
+  blocked: "No deberia usarse como ruta primaria del baseline minimo."

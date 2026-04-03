@@ -1,0 +1,14 @@
+preset_id: uc-vid-04-upscale-reference
+display_label: Mejora de video por upscale
+use_case_id: UC-VID-04
+hardware_profile: minimum
+workflow: ComfyUIWorkflows/local/adaptable/uc-vid-04-video-upscale-ganx4-template-v1.json
+defaults:
+  role: reference
+  upscale_model: RealESRGAN_x4plus.pth
+paths:
+  input_video: comfyui/output/video/<shot>/<shot>__render__v001.mp4
+  output_prefix: comfyui/output/enhanced/<shot>/<shot>__upscale__v001
+user_messages:
+  start: "Voy a usar la ruta simple de upscale para mejorar el video ya generado."
+  blocked: "Falta el modelo de upscale o la ruta de mejora nativa aun no esta cerrada."

@@ -1,0 +1,14 @@
+preset_id: uc-vid-02-video-gguf-fallback
+display_label: Fallback de video con GGUF
+use_case_id: UC-VID-02
+hardware_profile: minimum
+status: reference_only
+workflow: pending
+defaults:
+  enabled: false
+  reason: "La ruta GGUF fue evaluada, pero todavia no esta habilitada en esta maquina."
+  candidate_loader: GGUFLoaderKJ
+paths:
+  notes: docs/comfyui/fallback-paths.md
+user_messages:
+  blocked: "La ruta GGUF existe como plan de continuidad, pero aun no tiene plugin y modelos cuantizados validados."

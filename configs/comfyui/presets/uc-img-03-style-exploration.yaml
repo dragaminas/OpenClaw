@@ -1,0 +1,18 @@
+preset_id: uc-img-03-style-exploration
+display_label: Exploracion de estilo
+use_case_id: UC-IMG-03
+hardware_profile: minimum
+workflow: ComfyUIWorkflows/local/minimum/uc-img-03-z-image-style-exploration-rtx3060-v1.json
+defaults:
+  target_size: preview
+  width: 768
+  height: 768
+  batch: 1
+  control_strength: 0.65
+  max_style_refs: 2
+paths:
+  input_image: blender/frames/<shot>__start__v001.png
+  output_prefix: comfyui/output/stills/<shot>/<shot>__style__v001
+user_messages:
+  start: "Voy a sacar variantes de estilo sobre esta base visual."
+  blocked: "Si falta el patch de Z-Image ControlNet, esta exploracion queda limitada."

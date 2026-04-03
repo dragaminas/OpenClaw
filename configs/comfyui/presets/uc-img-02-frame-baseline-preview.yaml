@@ -1,0 +1,22 @@
+preset_id: uc-img-02-frame-baseline-preview
+display_label: Frame renderizado baseline
+use_case_id: UC-IMG-02
+hardware_profile: minimum
+workflow: ComfyUIWorkflows/local/minimum/uc-img-02-z-image-turbo-cn-rtx3060-v1.json
+defaults:
+  target_size: preview
+  width: 768
+  height: 768
+  batch: 1
+  control_strength: 0.72
+  controls:
+    - outline
+  max_references: 2
+paths:
+  input_image: blender/frames/<shot>__start__v001.png
+  control_video: blender/controls/<shot>__lineart__v001.mp4
+  output_prefix: comfyui/output/stills/<shot>/<shot>__render__v001
+user_messages:
+  start: "Voy a probar primero un frame baseline para validar look y control."
+  blocked: "Falta el patch de Z-Image ControlNet; puedo dejar una prueba de look sin control o esperar al asset."
+  success: "Frame generado y guardado en la carpeta de stills del shot."

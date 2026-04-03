@@ -1,0 +1,15 @@
+preset_id: uc-img-01-text-to-image-reference
+display_label: Texto a imagen de referencia
+use_case_id: UC-IMG-01
+hardware_profile: minimum
+workflow: ComfyUIWorkflows/local/adaptable/uc-img-01-text-to-image-z-image-template-v1.json
+defaults:
+  target_size: preview
+  width: 768
+  height: 768
+  batch: 1
+paths:
+  output_prefix: comfyui/output/stills/<shot>/<shot>__txt2img__v001
+user_messages:
+  start: "Voy a generar una imagen de referencia para validar prompt y look."
+  blocked: "Esta ruta sigue siendo template y no sustituye todavia un flujo de producto mas maduro."

@@ -1,0 +1,16 @@
+preset_id: uc-vid-03-image-to-video-reference
+display_label: Imagen a video de referencia
+use_case_id: UC-VID-03
+hardware_profile: minimum
+workflow: ComfyUIWorkflows/local/adaptable/uc-vid-03-image-to-video-wan22-template-v1.json
+defaults:
+  width: 640
+  height: 640
+  length_frames: 49
+  fps: 16
+paths:
+  start_frame: blender/frames/<shot>__start__v001.png
+  output_prefix: comfyui/output/video/<shot>/<shot>__img2vid__v001
+user_messages:
+  start: "Voy a usar la semilla template de imagen a video como referencia."
+  blocked: "Esta ruta todavia no es una derivacion start-to-end nativa del producto."

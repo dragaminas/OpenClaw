@@ -1,0 +1,22 @@
+preset_id: uc-vid-02-video-baseline-segmented
+display_label: Video renderizado baseline segmentado
+use_case_id: UC-VID-02
+hardware_profile: minimum
+workflow: ComfyUIWorkflows/local/minimum/uc-vid-02-ai-renderer-video-rtx3060-v1.json
+defaults:
+  resolution_profile: preview_segmented
+  width: 640
+  height: 640
+  segment_length_frames: 49
+  fps: 24
+  max_references: 2
+  max_loras: 1
+paths:
+  lineart_video: blender/controls/<shot>__lineart__v001.mp4
+  depth_video: blender/controls/<shot>__depth__v001.mp4
+  references_dir: blender/refs/
+  output_prefix: comfyui/output/video/<shot>/<shot>__render__v001
+user_messages:
+  start: "Voy a renderizar este plano en segmentos para cuidar VRAM y tiempo."
+  blocked: "Faltan assets Wan base; puedo dejar el preprocess listo y registrar el shot como pendiente de render AI."
+  success: "Render segmentado guardado en la carpeta de video del shot."

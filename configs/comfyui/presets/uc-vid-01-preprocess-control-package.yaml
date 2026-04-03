@@ -1,0 +1,20 @@
+preset_id: uc-vid-01-preprocess-control-package
+display_label: Paquete de controles baseline
+use_case_id: UC-VID-01
+hardware_profile: minimum
+workflow: ComfyUIWorkflows/local/minimum/uc-vid-01-ai-renderer-preprocess-rtx3060-v1.json
+defaults:
+  resolution_profile: control_512
+  fps: 24
+  frame_load_cap: 49
+  controls:
+    - outline
+    - pose
+    - depth
+paths:
+  input_video: blender/controls/<shot>__lineart__v001.mp4
+  output_dir: comfyui/output/preprocess/<shot>/
+user_messages:
+  start: "Voy a preparar un paquete de controles reutilizable para este plano."
+  degraded: "La profundidad puede degradarse a V2 o desactivarse si el runtime no tiene V3."
+  success: "Paquete de controles exportado en la carpeta preprocess del shot."
