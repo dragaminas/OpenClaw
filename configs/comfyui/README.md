@@ -27,3 +27,20 @@ Para migrar al manager integrado recomendado por upstream:
 ```bash
 scripts/apps/install-comfyui-manager.sh apply
 ```
+
+## Productizacion de workflows
+
+La Fase 8 añade aqui tres bloques de referencia:
+
+- `custom-nodes-manifest.md`: estado local de dependencias de nodos
+- `models-manifest.md`: estado local y ubicacion esperada de modelos
+- `model-set-baseline-minimo-rtx3060-8gb-12gb.md`: set objetivo para el
+  baseline `minimum`
+
+Los presets operativos viven en:
+
+- `configs/comfyui/presets/`
+
+Esos presets estan pensados para ser consumidos mas adelante por la UI guiada o
+por wrappers de ejecucion seguros, no para sustituir por si solos la logica de
+aplicacion.
