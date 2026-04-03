@@ -299,38 +299,42 @@ Tareas:
 - [done] 8.1 Inventariar y priorizar casos de uso reales para imagen y video
 - [done] 8.2 Definir la interfaz objetivo por caso de uso: sesion guiada principal, modo experto opcional y contratos de flujos configurables y ejecutables, con soporte futuro para canvas nativo de `ComfyUI`, preset operativo, atajo de escritorio o accion segura via `OpenClaw`
 - [done] 8.3 Definir perfiles de hardware objetivo `minimo`, `medio` y `maximo`, centrando el producto inicial en `RTX 3060 8 GB-12 GB` como baseline compatible y dejando los perfiles superiores para variantes futuras sin bloquear el primer stack operativo
-- [pending] 8.4 Perfilar limites del baseline minimo (`RTX 3060 8 GB-12 GB`; con `RTX 3060 12 GB`, `62 GiB RAM` y `Ryzen 5 5600X` como referencia actual) y fijar presets base de resolucion, duracion, batch e iteraciones
-- [pending] 8.5 Auditar, clasificar y documentar los workflows base en `ComfyUIWorkflows/` como biblioteca de referencia para futuras adaptaciones por hardware
-- [pending] 8.6 Mapear el papel de `260225_MICKMUMPITZ_AI-RENDERER-PREPROCESS_1-0.json`, `260225_MICKMUMPITZ_AI-RENDERER_SMPL_2-0.json`, `260225_MICKMUMPITZ_AI-RENDERER_SMPL_2-0_Runpod.json` y `260303_MICKMUMPITZ_Z-IMAGE_TURBO_CN_1-1.json`
-- [pending] 8.7 Inventariar e instalar los custom nodes requeridos por esos workflows (`VideoHelperSuite`, `DepthAnythingV3`, `ControlNet Aux`, `KJNodes`, `rgthree`, `Impact Pack`, `Essentials`, `easy-use`, `WanVideoWrapper`, `wanvaceadvanced`, `RES4LYF` y opcionalmente `ComfyUI-GGUF`)
-- [pending] 8.8 Descargar y ubicar los modelos, text encoders, VAE, model patches y LoRAs requeridos por los workflows base
-- [pending] 8.9 Documentar el set minimo local: `wan-14B_vace_skyreels_v3_R2V_e4m3fn_v1.safetensors`, `umt5_xxl_fp8_e4m3fn_scaled.safetensors`, `wan_2.1_vae.safetensors`, `qwen_3_4b.safetensors`, `z_image_turbo_bf16.safetensors`, `ae.safetensors`, el patch de `Z-Image Turbo ControlNet` y las LoRAs opcionales
-- [pending] 8.10 Evaluar y, si hace falta, habilitar la ruta GGUF para `VACE_Skyreels_V3_R2V_Merge` con `ComfyUI-GGUF` como fallback para VRAM limitada
-- [pending] 8.11 Crear variantes derivadas para uso local sin sobrescribir los JSON originales descargados
-- [pending] 8.12 Definir una convencion de entradas y salidas entre Blender y `ComfyUI` para `lineart`, `depth`, `openpose`, `start frame`, referencias y renders finales
-- [pending] 8.13 Evaluar la automatizacion minima desde Blender para exportar pases de control con nombres y carpetas consistentes
-- [pending] 8.14 Diseñar la primera interfaz operable para usuarios no tecnicos con presets por caso de uso, rutas estandar y mensajes claros
-- [pending] 8.15 Probar un caso de imagen fija y un caso de video corto de punta a punta saliendo de Blender y entrando en `ComfyUI`
-- [pending] 8.16 Documentar troubleshooting para VRAM insuficiente, nodos faltantes, modelos mal ubicados, tiempos de render y reanudacion de iteraciones
+- [done] 8.4 Perfilar limites del baseline minimo (`RTX 3060 8 GB-12 GB`; con `RTX 3060 12 GB`, `62 GiB RAM` y `Ryzen 5 5600X` como referencia actual), fijar presets base de resolucion, duracion, batch e iteraciones y documentar las degradaciones normales del sistema
+- [done] 8.5 Auditar, clasificar y documentar los workflows base en `ComfyUIWorkflows/` como biblioteca de referencia, distinguiendo baseline-compatible, referencia de alto VRAM, base adaptable, experimento y legado
+- [done] 8.6 Mapear el papel de `260225_MICKMUMPITZ_AI-RENDERER-PREPROCESS_1-0.json`, `260225_MICKMUMPITZ_AI-RENDERER_SMPL_2-0.json`, `260225_MICKMUMPITZ_AI-RENDERER_SMPL_2-0_Runpod.json` y `260303_MICKMUMPITZ_Z-IMAGE_TURBO_CN_1-1.json`, indicando para que casos de uso sirven hoy, de que perfil parten y que derivaciones futuras deberian inspirar
+- [done] 8.7 Inventariar e instalar los custom nodes requeridos por el baseline minimo y por la biblioteca de workflows base, separando dependencias bloqueantes, recomendadas y reservadas para variantes futuras (`VideoHelperSuite`, `DepthAnythingV3`, `ControlNet Aux`, `KJNodes`, `rgthree`, `Impact Pack`, `Essentials`, `easy-use`, `WanVideoWrapper`, `wanvaceadvanced`, `RES4LYF` y `ComfyUI-GGUF` si aplica)
+- [done] 8.8 Descargar y ubicar los modelos, text encoders, VAE, model patches y LoRAs requeridos por el baseline minimo y por la biblioteca de workflows base, distinguiendo que assets son operativos hoy y cuales se conservan para futuras adaptaciones
+- [done] 8.9 Documentar el set minimo local priorizando assets no cuantizados cuando sean viables en el hardware actual: `qwen_3_4b.safetensors`, `z_image_turbo_bf16.safetensors`, `ae.safetensors`, el patch `Z-Image Turbo ControlNet`, `da3_base.safetensors`, el fallback `depth_anything_v2_vitl_fp32.safetensors`, `wan2.2_ti2v_5B_fp16.safetensors`, `umt5_xxl_fp16.safetensors`, `wan2.2_vae.safetensors`, y documentar aparte la biblioteca heredada `VACE/Wan 2.1` y sus LoRAs
+- [done] 8.10 Evaluar y, si hace falta, habilitar rutas fallback para flujos sin implementacion operativa disponible en el baseline actual, incluyendo `VACE_Skyreels_V3_R2V_Merge` con `ComfyUI-GGUF` cuando sea la mejor via alternativa aunque no sea solo por VRAM limitada
+- [done] 8.11 Crear variantes derivadas para el baseline minimo y para futuras adaptaciones sin sobrescribir los JSON originales descargados, manteniendo trazabilidad con el workflow base del que nacen
+- [done] 8.12 Definir una convencion de entradas y salidas entre Blender y `ComfyUI` para `lineart`, `depth`, `openpose`, `start frame`, referencias y renders finales
+- [done] 8.13 Evaluar la automatizacion minima desde Blender para exportar pases de control con nombres y carpetas consistentes
+- [done] 8.14 Diseñar la primera interfaz operable para usuarios no tecnicos con presets por caso de uso, rutas estandar y mensajes claros
+- [pending] 8.15 Probar un caso de imagen fija y un caso de video corto de punta a punta entrando en `ComfyUI` desde material de prueba cualquiera o desde material ya disponible, validando primero el baseline minimo y registrando aparte los workflows base que aun no tengan derivacion operativa; la validacion Blender -> `ComfyUI` completa queda para una fase posterior cuando Blender este listo
+- [done] 8.16 Documentar troubleshooting para VRAM insuficiente, nodos faltantes, modelos mal ubicados, tiempos de render, reanudacion de iteraciones y ausencia temporal de una implementacion nativa para un flujo
+- [done] 8.17 Diseñar una validacion atomica y una validacion por composicion para los workflows derivados, definiendo tests E2E lo mas simples pero suficientes posibles, preferiblemente disparables desde WhatsApp, donde el output de una prueba pueda convertirse en input de la siguiente para comprobar no solo cada flujo aislado sino tambien la cadena operativa real
+- [pending] 8.18 Ejecutar la validacion diseñada para los workflows derivados y sus composiciones, registrar evidencia, conservar artefactos de entrada y salida y dejar claramente que partes quedaron aprobadas, cuales siguen pendientes y cuales requieren fallback o revision
 
 Entregables por tarea:
 
 - [done] 8.1 `docs/comfyui/usecases.md`
 - [done] 8.2 `docs/comfyui/interface.md`
 - [done] 8.3 `docs/comfyui/hardware-profiles.md`
-- [pending] 8.4 `docs/comfyui/baseline-minimo-rtx3060-8gb-12gb.md`
-- [pending] 8.5 `docs/comfyui/workflow-audit.md`
-- [pending] 8.6 `docs/comfyui/workflow-map.md`
-- [pending] 8.7 `configs/comfyui/custom-nodes-manifest.md`
-- [pending] 8.8 `configs/comfyui/models-manifest.md`
-- [pending] 8.9 `configs/comfyui/model-set-baseline-minimo-rtx3060-8gb-12gb.md`
-- [pending] 8.10 `configs/comfyui/model-set-gguf-fallback.md`
-- [pending] 8.11 workflows derivados versionados en `ComfyUIWorkflows/local/`
-- [pending] 8.12 `docs/comfyui/blender-bridge.md`
-- [pending] 8.13 `docs/comfyui/blender-export-automation.md`
-- [pending] 8.14 presets operativos en `configs/comfyui/presets/`
-- [pending] 8.15 `docs/comfyui/e2e-validation.md`
-- [pending] 8.16 `docs/comfyui/troubleshooting.md`
+- [done] 8.4 `docs/comfyui/baseline-minimo-rtx3060-8gb-12gb.md`
+- [done] 8.5 `docs/comfyui/workflow-audit.md`
+- [done] 8.6 `docs/comfyui/workflow-map.md`
+- [done] 8.7 `configs/comfyui/custom-nodes-manifest.md`
+- [done] 8.8 `configs/comfyui/models-manifest.md`
+- [done] 8.9 `configs/comfyui/model-set-baseline-minimo-rtx3060-8gb-12gb.md`
+- [done] 8.10 `docs/comfyui/fallback-paths.md`
+- [done] 8.11 workflows derivados versionados en `ComfyUIWorkflows/local/`
+- [done] 8.12 `docs/comfyui/blender-bridge.md`
+- [done] 8.13 `docs/comfyui/blender-export-automation.md`
+- [done] 8.14 presets operativos en `configs/comfyui/presets/`
+- [done] 8.15 `docs/comfyui/e2e-validation.md`
+- [done] 8.16 `docs/comfyui/troubleshooting.md`
+- [done] 8.17 `docs/comfyui/atomic-composed-whatsapp-validation.md`
+- [pending] 8.18 `docs/comfyui/atomic-composed-whatsapp-validation-results.md`
 
 ## Riesgos a controlar
 
