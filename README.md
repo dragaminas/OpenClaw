@@ -101,8 +101,21 @@ Mejora futura no bloqueante:
 ├── configs/
 ├── docs/
 ├── plugins/
+├── src/
 └── scripts/
 ```
+
+## Arquitectura emergente de flujos
+
+La provision del sistema sigue siendo principalmente declarativa y basada en
+scripts, pero la capa de producto para flujos guiados de ComfyUI empieza a
+migrar a una base Python en `src/openclaw_studio/`.
+
+Objetivo de esa base:
+
+- modelar interfaces funcionales estables
+- capturar parametros mediante sesiones guiadas
+- separar contratos, logica de negocio e implementaciones concretas
 
 ## Configuracion declarativa
 

@@ -297,7 +297,7 @@ conectada con Blender y con una interfaz de uso mas simple.
 Tareas:
 
 - [done] 8.1 Inventariar y priorizar casos de uso reales para imagen y video
-- [pending] 8.2 Definir la interfaz objetivo por caso de uso: canvas nativo de `ComfyUI`, preset operativo, atajo de escritorio o accion segura via `OpenClaw`
+- [done] 8.2 Definir la interfaz objetivo por caso de uso: sesion guiada principal, modo experto opcional y contratos de flujos configurables y ejecutables, con soporte futuro para canvas nativo de `ComfyUI`, preset operativo, atajo de escritorio o accion segura via `OpenClaw`
 - [pending] 8.3 Separar perfiles `local-rtx3060-12gb` y `runpod-high-vram` para no mezclar supuestos de memoria, tiempo y coste
 - [pending] 8.4 Perfilar limites del hardware local (`RTX 3060 12 GB`, `62 GiB RAM`, `Ryzen 5 5600X`) y fijar presets base de resolucion, duracion, batch e iteraciones
 - [pending] 8.5 Auditar y documentar los workflows base en `ComfyUIWorkflows/`
@@ -316,7 +316,7 @@ Tareas:
 Entregables por tarea:
 
 - [done] 8.1 `docs/comfyui/usecases.md`
-- [pending] 8.2 `docs/comfyui/interface.md`
+- [done] 8.2 `docs/comfyui/interface.md`
 - [pending] 8.3 `docs/comfyui/runtime-profiles.md`
 - [pending] 8.4 `docs/comfyui/local-rtx3060-12gb.md`
 - [pending] 8.5 `docs/comfyui/workflow-audit.md`

@@ -157,3 +157,6 @@ mantiene solo para compatibilidad o migracion.
 
 El inventario inicial de casos de uso para la Fase 8 vive en
 `docs/comfyui/usecases.md`.
+
+La definicion de interfaz guiada y la base Python para contratos y sesiones vive
+en `docs/comfyui/interface.md` y `src/openclaw_studio/`.
