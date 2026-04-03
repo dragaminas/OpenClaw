@@ -298,9 +298,9 @@ Tareas:
 
 - [done] 8.1 Inventariar y priorizar casos de uso reales para imagen y video
 - [done] 8.2 Definir la interfaz objetivo por caso de uso: sesion guiada principal, modo experto opcional y contratos de flujos configurables y ejecutables, con soporte futuro para canvas nativo de `ComfyUI`, preset operativo, atajo de escritorio o accion segura via `OpenClaw`
-- [pending] 8.3 Separar perfiles `local-rtx3060-12gb` y `runpod-high-vram` para no mezclar supuestos de memoria, tiempo y coste
-- [pending] 8.4 Perfilar limites del hardware local (`RTX 3060 12 GB`, `62 GiB RAM`, `Ryzen 5 5600X`) y fijar presets base de resolucion, duracion, batch e iteraciones
-- [pending] 8.5 Auditar y documentar los workflows base en `ComfyUIWorkflows/`
+- [done] 8.3 Definir perfiles de hardware objetivo `minimo`, `medio` y `maximo`, centrando el producto inicial en `RTX 3060 8 GB-12 GB` como baseline compatible y dejando los perfiles superiores para variantes futuras sin bloquear el primer stack operativo
+- [pending] 8.4 Perfilar limites del baseline minimo (`RTX 3060 8 GB-12 GB`; con `RTX 3060 12 GB`, `62 GiB RAM` y `Ryzen 5 5600X` como referencia actual) y fijar presets base de resolucion, duracion, batch e iteraciones
+- [pending] 8.5 Auditar, clasificar y documentar los workflows base en `ComfyUIWorkflows/` como biblioteca de referencia para futuras adaptaciones por hardware
 - [pending] 8.6 Mapear el papel de `260225_MICKMUMPITZ_AI-RENDERER-PREPROCESS_1-0.json`, `260225_MICKMUMPITZ_AI-RENDERER_SMPL_2-0.json`, `260225_MICKMUMPITZ_AI-RENDERER_SMPL_2-0_Runpod.json` y `260303_MICKMUMPITZ_Z-IMAGE_TURBO_CN_1-1.json`
 - [pending] 8.7 Inventariar e instalar los custom nodes requeridos por esos workflows (`VideoHelperSuite`, `DepthAnythingV3`, `ControlNet Aux`, `KJNodes`, `rgthree`, `Impact Pack`, `Essentials`, `easy-use`, `WanVideoWrapper`, `wanvaceadvanced`, `RES4LYF` y opcionalmente `ComfyUI-GGUF`)
 - [pending] 8.8 Descargar y ubicar los modelos, text encoders, VAE, model patches y LoRAs requeridos por los workflows base
@@ -317,13 +317,13 @@ Entregables por tarea:
 
 - [done] 8.1 `docs/comfyui/usecases.md`
 - [done] 8.2 `docs/comfyui/interface.md`
-- [pending] 8.3 `docs/comfyui/runtime-profiles.md`
-- [pending] 8.4 `docs/comfyui/local-rtx3060-12gb.md`
+- [done] 8.3 `docs/comfyui/hardware-profiles.md`
+- [pending] 8.4 `docs/comfyui/baseline-minimo-rtx3060-8gb-12gb.md`
 - [pending] 8.5 `docs/comfyui/workflow-audit.md`
 - [pending] 8.6 `docs/comfyui/workflow-map.md`
 - [pending] 8.7 `configs/comfyui/custom-nodes-manifest.md`
 - [pending] 8.8 `configs/comfyui/models-manifest.md`
-- [pending] 8.9 `configs/comfyui/model-set-local-rtx3060-12gb.md`
+- [pending] 8.9 `configs/comfyui/model-set-baseline-minimo-rtx3060-8gb-12gb.md`
 - [pending] 8.10 `configs/comfyui/model-set-gguf-fallback.md`
 - [pending] 8.11 workflows derivados versionados en `ComfyUIWorkflows/local/`
 - [pending] 8.12 `docs/comfyui/blender-bridge.md`
