@@ -152,3 +152,8 @@ mantiene solo para compatibilidad o migracion.
 ## Pendiente
 
 - exponer workflows reales de imagen o video sobre esta base
+
+## Productizacion de workflows
+
+El inventario inicial de casos de uso para la Fase 8 vive en
+`docs/comfyui/usecases.md`.
