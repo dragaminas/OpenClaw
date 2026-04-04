@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..", "..");
 const blenderActionScript = path.join(repoRoot, "scripts", "actions", "blender-action.sh");
 const comfyuiActionScript = path.join(repoRoot, "scripts", "actions", "comfyui-action.sh");
+const runnerActionScript = path.join(repoRoot, "scripts", "actions", "runner-action.sh");
 const defaultCommandPrefix = "studio";
 const defaultChannels = ["whatsapp"];
 
@@ -77,12 +78,69 @@ function buildHelpText(prefix) {
     `${prefix} inicia comfyui`,
     `${prefix} reinicia comfyui`,
     `${prefix} como esta comfyui`,
+    `${prefix} comfyui smoke`,
+    `${prefix} comfyui smoke SMK-VID-04-01`,
+    `${prefix} comfyui estado smoke-light-5`,
+    `${prefix} comfyui evidencia smoke-light-5`,
     "",
     "Tambien funciona el modo tecnico:",
     `${prefix} blender status`,
     `${prefix} comfyui status`,
-    `${prefix} comfyui restart`
+    `${prefix} comfyui restart`,
+    `${prefix} comfyui validate atomic AT-IMG-02-01`,
+    `${prefix} comfyui validate composed CP-VIDEO-01`
   ].join("\n");
+}
+
+function parseRunnerAction(tokens) {
+  const runnerId = tokens[0]?.toLowerCase() ?? "";
+  const action = tokens[1]?.toLowerCase() ?? "help";
+  const rawArg = tokens.slice(2).join(" ").trim();
+
+  if (runnerId !== "comfyui") return null;
+
+  switch (action) {
+    case "smoke":
+      return {
+        kind: "runner-start",
+        runnerId,
+        operationKind: "validate_smoke",
+        targetId: rawArg || null
+      };
+    case "estado":
+      return rawArg
+        ? { kind: "runner-status", runnerId, runId: rawArg }
+        : { kind: "error", text: "Dime el run_id. Ejemplo: studio comfyui estado smoke-20260404-120000" };
+    case "cancela":
+    case "cancel":
+    case "cancelar":
+      return rawArg
+        ? { kind: "runner-cancel", runnerId, runId: rawArg }
+        : { kind: "error", text: "Dime el run_id. Ejemplo: studio comfyui cancela smoke-20260404-120000" };
+    case "evidencia":
+    case "resultado":
+    case "result":
+      return rawArg
+        ? { kind: "runner-result", runnerId, runId: rawArg }
+        : { kind: "error", text: "Dime el run_id. Ejemplo: studio comfyui evidencia smoke-20260404-120000" };
+    case "validate": {
+      const validationKind = tokens[2]?.toLowerCase() ?? "";
+      const targetId = tokens.slice(3).join(" ").trim();
+      if (validationKind === "atomic") {
+        return targetId
+          ? { kind: "runner-start", runnerId, operationKind: "validate_atomic", targetId }
+          : { kind: "error", text: "Dime el test_id atomico. Ejemplo: studio comfyui validate atomic AT-IMG-02-01" };
+      }
+      if (validationKind === "composed") {
+        return targetId
+          ? { kind: "runner-start", runnerId, operationKind: "validate_composed", targetId }
+          : { kind: "error", text: "Dime el test_id compuesto. Ejemplo: studio comfyui validate composed CP-VIDEO-01" };
+      }
+      return { kind: "error", text: "Usa validate atomic <test_id> o validate composed <test_id>." };
+    }
+    default:
+      return null;
+  }
 }
 
 function parseLegacyCommand(stripped, prefix) {
@@ -96,6 +154,9 @@ function parseLegacyCommand(stripped, prefix) {
       text: `Por ahora solo estan habilitadas acciones de Blender y ComfyUI. Escribe "${prefix}" para ver ayuda.`
     };
   }
+
+  const runnerAction = parseRunnerAction(tokens);
+  if (runnerAction) return runnerAction;
 
   const action = tokens[1]?.toLowerCase() ?? "help";
   const rawArg = tokens.slice(2).join(" ").trim();
@@ -232,6 +293,20 @@ function parseNaturalSpanish(normalized) {
     return { kind: "comfyui-stop" };
   }
 
+  if ([
+    "corre smoke de comfyui",
+    "ejecuta smoke de comfyui",
+    "haz smoke de comfyui",
+    "comfyui smoke"
+  ].includes(low)) {
+    return {
+      kind: "runner-start",
+      runnerId: "comfyui",
+      operationKind: "validate_smoke",
+      targetId: null
+    };
+  }
+
   const newProject = extractProjectName(normalized, [
     "crea proyecto ",
     "crear proyecto ",
@@ -354,6 +429,82 @@ async function runComfyUIAction(args) {
   }
 }
 
+function formatHomePath(filePath) {
+  const normalized = String(filePath ?? "").trim();
+  const homeDir = process.env.HOME ? path.resolve(process.env.HOME) : "";
+  if (!normalized || !homeDir) return normalized;
+  const resolved = path.resolve(normalized);
+  return resolved.startsWith(`${homeDir}${path.sep}`) ? `~${resolved.slice(homeDir.length)}` : normalized;
+}
+
+function parseRunnerPayload(rawText) {
+  const normalized = String(rawText ?? "").trim();
+  if (!normalized) return null;
+  try {
+    return JSON.parse(normalized);
+  } catch {
+    return null;
+  }
+}
+
+function formatRunnerResponseText(payload) {
+  if (!payload || typeof payload !== "object") return "No se pudo interpretar la respuesta del runner.";
+
+  const lines = [];
+  if (payload.run_id) lines.push(`run_id=${payload.run_id}`);
+  if (payload.status) lines.push(`status=${payload.status}`);
+  if (payload.target_id) lines.push(`target=${payload.target_id}`);
+  if (payload.current_target_id) lines.push(`actual=${payload.current_target_id}`);
+  if (typeof payload.accepted === "boolean") lines.push(`accepted=${String(payload.accepted)}`);
+  if (payload.message) lines.push(`mensaje=${payload.message}`);
+
+  const evidencePath = payload.evidence_path || payload?.metadata?.evidence_path;
+  if (evidencePath) lines.push(`evidencia=${formatHomePath(evidencePath)}`);
+
+  const summaryPath = payload.summary_path || payload?.metadata?.summary_path;
+  if (summaryPath) lines.push(`summary=${formatHomePath(summaryPath)}`);
+
+  const manifestPath = payload.manifest_path || payload?.metadata?.manifest_path;
+  if (manifestPath) lines.push(`manifiesto=${formatHomePath(manifestPath)}`);
+
+  if (payload?.metadata?.current_prompt_id) {
+    lines.push(`prompt_id=${payload.metadata.current_prompt_id}`);
+  }
+  if (payload?.metadata?.cancel_requested === true && payload.status === "running") {
+    lines.push("cancelacion=solicitada");
+  }
+
+  return lines.join("\n") || "Accion completada.";
+}
+
+async function runRunnerAction(args) {
+  try {
+    const { stdout, stderr } = await execFileAsync(runnerActionScript, args, {
+      cwd: repoRoot,
+      env: process.env,
+      maxBuffer: 1024 * 1024
+    });
+    const payload = parseRunnerPayload(stdout);
+    if (payload) {
+      return {
+        handled: true,
+        text: formatRunnerResponseText(payload)
+      };
+    }
+
+    const text = [stdout, stderr].map((value) => String(value ?? "").trim()).filter(Boolean).join("\n");
+    return {
+      handled: true,
+      text: text || "Accion completada."
+    };
+  } catch (error) {
+    return {
+      handled: true,
+      text: buildFailureText(error)
+    };
+  }
+}
+
 async function handleBeforeDispatch(event, ctx, pluginConfig = {}, logger = console) {
   const allowedChannels = normalizeChannels(pluginConfig);
   if (!allowedChannels.includes(ctx?.channelId ?? "")) return undefined;
@@ -393,6 +544,27 @@ async function handleBeforeDispatch(event, ctx, pluginConfig = {}, logger = cons
       return runComfyUIAction(["stop"]);
     case "comfyui-url":
       return runComfyUIAction(["url"]);
+    case "runner-start": {
+      const args = ["start", parsed.runnerId, parsed.operationKind];
+      if (parsed.targetId) args.push(parsed.targetId);
+      args.push("--requested-by", String(ctx?.conversationId ?? "whatsapp"));
+      args.push("--channel", String(ctx?.channelId ?? "whatsapp"));
+      return runRunnerAction(args);
+    }
+    case "runner-status":
+      return runRunnerAction(["status", parsed.runnerId, parsed.runId]);
+    case "runner-cancel":
+      return runRunnerAction([
+        "cancel",
+        parsed.runnerId,
+        parsed.runId,
+        "--requested-by",
+        String(ctx?.conversationId ?? "whatsapp"),
+        "--channel",
+        String(ctx?.channelId ?? "whatsapp")
+      ]);
+    case "runner-result":
+      return runRunnerAction(["result", parsed.runnerId, parsed.runId]);
     default:
       logger?.warn?.(`studio-actions: accion desconocida ${parsed.kind}`);
       return { handled: true, text: `No reconozco esa accion segura. Usa "${prefix} help".` };

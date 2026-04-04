@@ -11,11 +11,7 @@ import urllib.request
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
-
-import av
-import numpy as np
-from PIL import Image, ImageDraw
+from typing import Any, Callable
 
 
 FRONTEND_ONLY_NODE_TYPES = {
@@ -34,6 +30,8 @@ PRIMITIVE_WIDGET_TYPES = {
     "INT",
     "STRING",
 }
+
+SMOKE_SUITE_TARGET_ID = "smoke"
 
 
 @dataclass(frozen=True)
@@ -123,7 +121,7 @@ class SmokeCase:
     display_label: str
     workflow_path: Path
     blocking: bool
-    mutate_workflow: callable
+    mutate_workflow: Callable[[dict[str, Any]], None]
     expected_outputs: list[Path]
     timeout_seconds: int
     use_case_id: str
@@ -145,8 +143,159 @@ class CaseResult:
     preset_id: str | None = None
 
 
+@dataclass(frozen=True)
+class SmokeCaseSpec:
+    case_id: str
+    display_label: str
+    workflow_relpath: str
+    blocking: bool
+    timeout_seconds: int
+    use_case_id: str
+    preset_id: str
+    allow_soft_timeout: bool = False
+
+
 class SmokeValidationError(RuntimeError):
     pass
+
+
+class SmokeValidationCancelled(SmokeValidationError):
+    pass
+
+
+class SmokeRunObserver:
+    def on_run_started(
+        self,
+        *,
+        run_id: str,
+        target_id: str,
+        validation_root: Path,
+        cases: list[SmokeCase],
+    ) -> None:
+        return
+
+    def on_case_started(self, case: SmokeCase) -> None:
+        return
+
+    def on_prompt_queued(self, case: SmokeCase, prompt_id: str) -> None:
+        return
+
+    def on_case_finished(self, result: CaseResult) -> None:
+        return
+
+    def on_run_finished(self, summary: dict[str, Any]) -> None:
+        return
+
+    def is_cancel_requested(self) -> bool:
+        return False
+
+
+SMOKE_CASE_SPECS = (
+    SmokeCaseSpec(
+        case_id="SMK-IMG-02-01",
+        display_label="UC-IMG-02 smoke",
+        workflow_relpath="ComfyUIWorkflows/local/minimum/uc-img-02-z-image-turbo-cn-rtx3060-v1.json",
+        blocking=True,
+        timeout_seconds=1800,
+        use_case_id="UC-IMG-02",
+        preset_id="uc-img-02-frame-baseline-preview",
+    ),
+    SmokeCaseSpec(
+        case_id="SMK-VID-01-01",
+        display_label="UC-VID-01 smoke",
+        workflow_relpath="ComfyUIWorkflows/local/minimum/uc-vid-01-ai-renderer-preprocess-rtx3060-v1.json",
+        blocking=True,
+        timeout_seconds=1800,
+        use_case_id="UC-VID-01",
+        preset_id="uc-vid-01-preprocess-control-package",
+    ),
+    SmokeCaseSpec(
+        case_id="SMK-VID-02-01",
+        display_label="UC-VID-02 smoke",
+        workflow_relpath="ComfyUIWorkflows/local/minimum/uc-vid-02-ai-renderer-video-rtx3060-v1.json",
+        blocking=True,
+        timeout_seconds=90,
+        use_case_id="UC-VID-02",
+        preset_id="uc-vid-02-video-baseline-segmented",
+        allow_soft_timeout=True,
+    ),
+    SmokeCaseSpec(
+        case_id="SMK-IMG-03-01",
+        display_label="UC-IMG-03 smoke",
+        workflow_relpath="ComfyUIWorkflows/local/minimum/uc-img-03-z-image-style-exploration-rtx3060-v1.json",
+        blocking=True,
+        timeout_seconds=1800,
+        use_case_id="UC-IMG-03",
+        preset_id="uc-img-03-style-exploration",
+    ),
+    SmokeCaseSpec(
+        case_id="SMK-VID-04-01",
+        display_label="UC-VID-04 smoke",
+        workflow_relpath="ComfyUIWorkflows/local/adaptable/uc-vid-04-video-upscale-ganx4-template-v1.json",
+        blocking=True,
+        timeout_seconds=1800,
+        use_case_id="UC-VID-04",
+        preset_id="uc-vid-04-upscale-reference",
+    ),
+)
+
+
+def list_smoke_case_specs() -> list[SmokeCaseSpec]:
+    return list(SMOKE_CASE_SPECS)
+
+
+def derive_smoke_run_status(
+    results: list[CaseResult],
+    *,
+    cancelled: bool = False,
+) -> str:
+    if cancelled:
+        return "cancelled"
+
+    blocking_results = [result.status for result in results if result.blocking]
+    if not blocking_results:
+        return results[-1].status if results else "pass"
+
+    for failing_status in (
+        "fail_compile",
+        "fail_runtime",
+        "fail_quality",
+        "blocked_missing_asset",
+    ):
+        if failing_status in blocking_results:
+            return failing_status
+
+    if "soft_pass_with_fallback" in blocking_results:
+        return "soft_pass_with_fallback"
+
+    return "pass"
+
+
+def build_smoke_run_message(
+    status: str,
+    *,
+    target_id: str,
+    results: list[CaseResult],
+) -> str:
+    if status == "cancelled":
+        return "La corrida se cancelo antes de completar el target solicitado."
+
+    if target_id != SMOKE_SUITE_TARGET_ID and results:
+        return results[-1].message
+
+    if status == "pass":
+        return "La smoke suite termino con pass."
+    if status == "soft_pass_with_fallback":
+        return "La smoke suite termino con fallback aceptado."
+    if status == "fail_compile":
+        return "La smoke suite termino con fallo de compilacion."
+    if status == "fail_runtime":
+        return "La smoke suite termino con fallo de ejecucion."
+    if status == "fail_quality":
+        return "La smoke suite termino con fallo de calidad."
+    if status == "blocked_missing_asset":
+        return "La smoke suite quedo bloqueada por assets faltantes."
+    return "La smoke suite termino."
 
 
 class ComfyApiClient:
@@ -223,9 +372,14 @@ class ComfyApiClient:
         prompt_id: str,
         timeout_seconds: int,
         poll_interval_seconds: float = 2.0,
+        cancel_checker: Callable[[], bool] | None = None,
     ) -> dict[str, Any]:
         started = time.monotonic()
         while time.monotonic() - started < timeout_seconds:
+            if cancel_checker is not None and cancel_checker():
+                raise SmokeValidationCancelled(
+                    f"Se solicito cancelacion para el prompt {prompt_id}."
+                )
             history_item = self.get_history(prompt_id)
             if history_item is not None:
                 return history_item
@@ -685,6 +839,8 @@ class FixtureBuilder:
         size: tuple[int, int],
         boxes: list[tuple[tuple[int, int, int, int], str, bool, int]],
     ) -> None:
+        from PIL import Image, ImageDraw
+
         image = Image.new("RGB", size, "white")
         draw = ImageDraw.Draw(image)
         for coords, color, filled, width in boxes:
@@ -699,6 +855,9 @@ class FixtureBuilder:
         frames: int,
         mode: str,
     ) -> None:
+        import av
+        import numpy as np
+
         width, height = size
         container = av.open(str(target), mode="w")
         stream = container.add_stream("libx264", rate=fps)
@@ -719,6 +878,8 @@ class FixtureBuilder:
     def _build_video_frame(
         self, width: int, height: int, frame_index: int, mode: str
     ) -> Image.Image:
+        from PIL import Image, ImageDraw
+
         image = Image.new("RGB", (width, height), "white")
         draw = ImageDraw.Draw(image)
 
@@ -742,7 +903,12 @@ class FixtureBuilder:
 
 
 class SmokeRunner:
-    def __init__(self, args: argparse.Namespace) -> None:
+    def __init__(
+        self,
+        args: argparse.Namespace,
+        *,
+        observer: SmokeRunObserver | None = None,
+    ) -> None:
         self.args = args
         self.repo_root = Path(args.repo_root).resolve()
         self.comfyui_dir = Path(args.comfyui_dir).resolve()
@@ -750,6 +916,8 @@ class SmokeRunner:
         self.comfy_output_dir = self.comfyui_dir / "output"
         self.studio_dir = Path(args.studio_dir).resolve()
         self.base_url = f"http://{args.comfyui_host}:{args.comfyui_port}"
+        self.case_id = getattr(args, "case_id", None)
+        self.target_id = self.case_id or SMOKE_SUITE_TARGET_ID
         self.run_id = args.run_id or datetime.now(timezone.utc).strftime(
             "smoke-%Y%m%d-%H%M%S"
         )
@@ -762,6 +930,7 @@ class SmokeRunner:
         self.evidence_dir = self.validation_root / "evidence"
         self.client = ComfyApiClient(self.base_url)
         self.object_info: dict[str, Any] | None = None
+        self.observer = observer or SmokeRunObserver()
 
     def run(self) -> dict[str, Any]:
         self.ensure_runtime_ready()
@@ -777,31 +946,68 @@ class SmokeRunner:
         fixture_paths = fixture_builder.build(self.run_id)
         self.object_info = self.client.get_object_info()
 
+        cases = self.build_cases(fixture_paths)
+        self.observer.on_run_started(
+            run_id=self.run_id,
+            target_id=self.target_id,
+            validation_root=self.validation_root,
+            cases=cases,
+        )
+
         results: list[CaseResult] = []
-        for case in self.build_cases(fixture_paths):
-            results.append(self.run_case(case))
+        cancelled = False
+        for case in cases:
+            if self.observer.is_cancel_requested():
+                cancelled = True
+                break
+            result = self.run_case(case)
+            results.append(result)
+            self.observer.on_case_finished(result)
+            if result.status == "cancelled":
+                cancelled = True
+                break
 
-        optional_vid03 = self.evaluate_optional_vid03()
-        results.append(optional_vid03)
+        if not self.case_id and not cancelled and not self.observer.is_cancel_requested():
+            optional_vid03 = self.evaluate_optional_vid03()
+            results.append(optional_vid03)
+            self.observer.on_case_finished(optional_vid03)
+        elif self.observer.is_cancel_requested() and not cancelled:
+            cancelled = True
 
-        gate_pass = all(
+        status = derive_smoke_run_status(results, cancelled=cancelled)
+        gate_pass = (not cancelled) and all(
             result.status in {"pass", "soft_pass_with_fallback"}
             for result in results
             if result.blocking
         )
+        artifact_refs = [
+            output_path for result in results for output_path in result.output_paths
+        ]
 
         summary = {
             "run_id": self.run_id,
+            "status": status,
+            "message": build_smoke_run_message(
+                status,
+                target_id=self.target_id,
+                results=results,
+            ),
+            "operation_kind": "validate_smoke",
+            "target_id": self.target_id,
             "gate_pass": gate_pass,
             "base_url": self.base_url,
             "comfyui_dir": str(self.comfyui_dir),
             "validation_root": str(self.validation_root),
+            "summary_path": str(self.manifests_dir / "summary.json"),
+            "evidence_path": str(self.evidence_dir / "summary.md"),
+            "artifact_refs": artifact_refs,
             "results": [result.__dict__ for result in results],
         }
 
         summary_path = self.manifests_dir / "summary.json"
         summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
         self.write_summary_markdown(summary, results)
+        self.observer.on_run_finished(summary)
         return summary
 
     def ensure_runtime_ready(self) -> None:
@@ -811,108 +1017,101 @@ class SmokeRunner:
 
     def build_cases(self, fixture_paths: dict[str, str]) -> list[SmokeCase]:
         run_prefix = Path("openclaw") / "smoke" / self.run_id
-        return [
-            SmokeCase(
-                case_id="SMK-IMG-02-01",
-                display_label="UC-IMG-02 smoke",
-                workflow_path=self.repo_root
-                / "ComfyUIWorkflows/local/minimum/uc-img-02-z-image-turbo-cn-rtx3060-v1.json",
-                blocking=True,
-                mutate_workflow=lambda data: patch_img02(
-                    data,
-                    fixture_paths["start_image"],
-                    fixture_paths["control_lineart"],
-                    str(run_prefix / "img02" / "render"),
-                ),
-                expected_outputs=[
-                    self.comfy_output_dir / str(run_prefix / "img02" / "render")
-                ],
-                timeout_seconds=1800,
-                use_case_id="UC-IMG-02",
-                preset_id="uc-img-02-frame-baseline-preview",
-            ),
-            SmokeCase(
-                case_id="SMK-VID-01-01",
-                display_label="UC-VID-01 smoke",
-                workflow_path=self.repo_root
-                / "ComfyUIWorkflows/local/minimum/uc-vid-01-ai-renderer-preprocess-rtx3060-v1.json",
-                blocking=True,
-                mutate_workflow=lambda data: patch_vid01(
-                    data,
-                    fixture_paths["control_lineart"],
-                    str(run_prefix / "vid01" / "depth"),
-                    str(run_prefix / "vid01" / "outline"),
-                    str(run_prefix / "vid01" / "pose"),
-                ),
-                expected_outputs=[
-                    self.comfy_output_dir / str(run_prefix / "vid01" / "depth"),
-                    self.comfy_output_dir / str(run_prefix / "vid01" / "outline"),
-                    self.comfy_output_dir / str(run_prefix / "vid01" / "pose"),
-                ],
-                timeout_seconds=1800,
-                use_case_id="UC-VID-01",
-                preset_id="uc-vid-01-preprocess-control-package",
-            ),
-            SmokeCase(
-                case_id="SMK-VID-02-01",
-                display_label="UC-VID-02 smoke",
-                workflow_path=self.repo_root
-                / "ComfyUIWorkflows/local/minimum/uc-vid-02-ai-renderer-video-rtx3060-v1.json",
-                blocking=True,
-                mutate_workflow=lambda data: patch_vid02(
-                    data,
-                    fixture_paths=fixture_paths,
-                    output_prefix=str(run_prefix / "vid02" / "render"),
-                ),
-                expected_outputs=[
-                    self.comfy_output_dir / str(run_prefix / "vid02" / "render")
-                ],
-                timeout_seconds=90,
-                use_case_id="UC-VID-02",
-                preset_id="uc-vid-02-video-baseline-segmented",
-                allow_soft_timeout=True,
-            ),
-            SmokeCase(
-                case_id="SMK-IMG-03-01",
-                display_label="UC-IMG-03 smoke",
-                workflow_path=self.repo_root
-                / "ComfyUIWorkflows/local/minimum/uc-img-03-z-image-style-exploration-rtx3060-v1.json",
-                blocking=True,
-                mutate_workflow=lambda data: patch_img03(
-                    data,
-                    fixture_paths["start_image"],
-                    fixture_paths["control_lineart"],
-                    str(run_prefix / "img03" / "style"),
-                ),
-                expected_outputs=[
-                    self.comfy_output_dir / str(run_prefix / "img03" / "style")
-                ],
-                timeout_seconds=1800,
-                use_case_id="UC-IMG-03",
-                preset_id="uc-img-03-style-exploration",
-            ),
-            SmokeCase(
-                case_id="SMK-VID-04-01",
-                display_label="UC-VID-04 smoke",
-                workflow_path=self.repo_root
-                / "ComfyUIWorkflows/local/adaptable/uc-vid-04-video-upscale-ganx4-template-v1.json",
-                blocking=True,
-                mutate_workflow=lambda data: patch_vid04(
-                    data,
-                    fixture_paths["render_source"],
-                    str(run_prefix / "vid04" / "upscale"),
-                ),
-                expected_outputs=[
-                    self.comfy_output_dir / str(run_prefix / "vid04" / "upscale")
-                ],
-                timeout_seconds=1800,
-                use_case_id="UC-VID-04",
-                preset_id="uc-vid-04-upscale-reference",
-            ),
+        cases = [
+            self.build_case_from_spec(spec, fixture_paths, run_prefix)
+            for spec in list_smoke_case_specs()
         ]
+        if self.case_id is None:
+            return cases
+
+        for case in cases:
+            if case.case_id == self.case_id:
+                return [case]
+
+        raise SmokeValidationError(
+            f"No existe smoke case con case_id={self.case_id!r}."
+        )
+
+    def build_case_from_spec(
+        self,
+        spec: SmokeCaseSpec,
+        fixture_paths: dict[str, str],
+        run_prefix: Path,
+    ) -> SmokeCase:
+        workflow_path = self.repo_root / spec.workflow_relpath
+
+        if spec.case_id == "SMK-IMG-02-01":
+            mutate_workflow = lambda data: patch_img02(
+                data,
+                fixture_paths["start_image"],
+                fixture_paths["control_lineart"],
+                str(run_prefix / "img02" / "render"),
+            )
+            expected_outputs = [
+                self.comfy_output_dir / str(run_prefix / "img02" / "render")
+            ]
+        elif spec.case_id == "SMK-VID-01-01":
+            mutate_workflow = lambda data: patch_vid01(
+                data,
+                fixture_paths["control_lineart"],
+                str(run_prefix / "vid01" / "depth"),
+                str(run_prefix / "vid01" / "outline"),
+                str(run_prefix / "vid01" / "pose"),
+            )
+            expected_outputs = [
+                self.comfy_output_dir / str(run_prefix / "vid01" / "depth"),
+                self.comfy_output_dir / str(run_prefix / "vid01" / "outline"),
+                self.comfy_output_dir / str(run_prefix / "vid01" / "pose"),
+            ]
+        elif spec.case_id == "SMK-VID-02-01":
+            mutate_workflow = lambda data: patch_vid02(
+                data,
+                fixture_paths=fixture_paths,
+                output_prefix=str(run_prefix / "vid02" / "render"),
+            )
+            expected_outputs = [
+                self.comfy_output_dir / str(run_prefix / "vid02" / "render")
+            ]
+        elif spec.case_id == "SMK-IMG-03-01":
+            mutate_workflow = lambda data: patch_img03(
+                data,
+                fixture_paths["start_image"],
+                fixture_paths["control_lineart"],
+                str(run_prefix / "img03" / "style"),
+            )
+            expected_outputs = [
+                self.comfy_output_dir / str(run_prefix / "img03" / "style")
+            ]
+        elif spec.case_id == "SMK-VID-04-01":
+            mutate_workflow = lambda data: patch_vid04(
+                data,
+                fixture_paths["render_source"],
+                str(run_prefix / "vid04" / "upscale"),
+            )
+            expected_outputs = [
+                self.comfy_output_dir / str(run_prefix / "vid04" / "upscale")
+            ]
+        else:
+            raise SmokeValidationError(
+                f"No existe builder de smoke para case_id={spec.case_id!r}."
+            )
+
+        return SmokeCase(
+            case_id=spec.case_id,
+            display_label=spec.display_label,
+            workflow_path=workflow_path,
+            blocking=spec.blocking,
+            mutate_workflow=mutate_workflow,
+            expected_outputs=expected_outputs,
+            timeout_seconds=spec.timeout_seconds,
+            use_case_id=spec.use_case_id,
+            preset_id=spec.preset_id,
+            allow_soft_timeout=spec.allow_soft_timeout,
+        )
 
     def run_case(self, case: SmokeCase) -> CaseResult:
         started = time.monotonic()
+        self.observer.on_case_started(case)
         try:
             workflow_data = json.loads(case.workflow_path.read_text(encoding="utf-8"))
             case.mutate_workflow(workflow_data)
@@ -954,8 +1153,33 @@ class SmokeRunner:
             )
 
         prompt_id = queue_response["prompt_id"]
+        self.observer.on_prompt_queued(case, prompt_id)
         try:
-            history = self.client.wait_for_prompt(prompt_id, case.timeout_seconds)
+            history = self.client.wait_for_prompt(
+                prompt_id,
+                case.timeout_seconds,
+                cancel_checker=self.observer.is_cancel_requested,
+            )
+        except SmokeValidationCancelled:
+            elapsed = time.monotonic() - started
+            try:
+                if self.client.is_prompt_running(prompt_id):
+                    self.client.interrupt_prompt(prompt_id)
+                    self.client.wait_until_prompt_not_running(prompt_id)
+            except urllib.error.URLError:
+                pass
+            return CaseResult(
+                case_id=case.case_id,
+                status="cancelled",
+                blocking=case.blocking,
+                message="La corrida fue cancelada antes de completar este caso.",
+                output_paths=[],
+                prompt_id=prompt_id,
+                elapsed_seconds=elapsed,
+                workflow_path=str(case.workflow_path),
+                use_case_id=case.use_case_id,
+                preset_id=case.preset_id,
+            )
         except SmokeValidationError as error:
             elapsed = time.monotonic() - started
             if case.allow_soft_timeout and self.client.is_prompt_running(prompt_id):
@@ -1094,11 +1318,12 @@ class SmokeRunner:
 
         return CaseResult(
             case_id="SMK-VID-03-01",
-            status="pending_optional",
+            status="fail_compile",
             blocking=False,
             message=(
-                "Los assets existen, pero esta runner smoke no lo ejecuta todavia "
-                "porque la referencia sigue siendo template y no gate bloqueante."
+                "Los assets existen, pero esta runner smoke todavia no ejecuta "
+                "UC-VID-03 porque la referencia sigue siendo template y no gate "
+                "bloqueante."
             ),
             output_paths=[],
             workflow_path=str(workflow_path),
@@ -1115,6 +1340,7 @@ class SmokeRunner:
             "# Resultados Smoke Validation 8.19",
             "",
             f"- run_id: `{summary['run_id']}`",
+            f"- status: `{summary['status']}`",
             f"- gate_pass: `{str(summary['gate_pass']).lower()}`",
             f"- base_url: `{summary['base_url']}`",
             f"- validation_root: `{summary['validation_root']}`",
@@ -1402,6 +1628,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--comfyui-host", default=os.environ.get("COMFYUI_HOST", "127.0.0.1"))
     parser.add_argument("--comfyui-port", type=int, default=int(os.environ.get("COMFYUI_PORT", "8188")))
     parser.add_argument("--run-id")
+    parser.add_argument("--case-id")
     return parser.parse_args(argv)
 
 
@@ -1411,6 +1638,8 @@ def main(argv: list[str] | None = None) -> int:
     summary = runner.run()
 
     print(f"run_id={summary['run_id']}")
+    print(f"status={summary['status']}")
+    print(f"target_id={summary['target_id']}")
     print(f"gate_pass={str(summary['gate_pass']).lower()}")
     print(f"validation_root={summary['validation_root']}")
     for result in summary["results"]:
@@ -1418,7 +1647,7 @@ def main(argv: list[str] | None = None) -> int:
             f"{result['case_id']}={result['status']} :: {result['message']}"
         )
 
-    return 0 if summary["gate_pass"] else 1
+    return 0 if summary["status"] in {"pass", "soft_pass_with_fallback"} else 1
 
 
 if __name__ == "__main__":
