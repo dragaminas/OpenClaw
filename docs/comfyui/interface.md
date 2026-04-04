@@ -41,6 +41,25 @@ src/openclaw_studio/
     └── builtin_flow_catalog.py
 ```
 
+La evolucion prevista para ejecucion real añade una capa transversal de
+`runner`, compartida por `ComfyUI` y futuras apps:
+
+```text
+UI guiada / WhatsApp / CLI
+        |
+        v
+application
+        |
+        v
+runner registry
+        |
+        v
+runner de aplicacion
+        |
+        v
+implementacion concreta y evidencia
+```
+
 ## Responsabilidad por capa
 
 ## `contracts/`
@@ -66,6 +85,9 @@ Contiene la logica de negocio:
 
 No deberia depender de un proveedor concreto de UI.
 
+Tambien deberia terminar delegando la ejecucion en un contrato de `runner`, no
+en scripts ad hoc por aplicacion o por canal.
+
 ## `implementations/`
 
 Contiene implementaciones concretas y catalogos adaptados al estado actual del
@@ -77,6 +99,21 @@ proyecto:
 
 Es la capa donde hoy se conecta el modelo funcional con los workflows reales de
 Mickmumpitz y futuras variantes.
+
+## Capa de `runner`
+
+La interfaz guiada no deberia ejecutar directamente wrappers de una aplicacion.
+
+Necesitamos una capa comun de `runner` para:
+
+- lanzar corridas
+- seguir estado
+- cancelar
+- leer resultados
+- reutilizar evidencia
+
+`ComfyUI` es la primera implementacion clara de este patron, pero la interfaz
+de `runner` debe ser reutilizable tambien por otras aplicaciones.
 
 ## `cli.py`
 

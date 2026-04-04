@@ -28,6 +28,31 @@ La evidencia queda en:
 - `~/Studio/Validation/comfyui/smoke/<run-id>/manifests/summary.json`
 - `~/Studio/Validation/comfyui/smoke/<run-id>/evidence/summary.md`
 
+El contrato general que deberia gobernar esta ejecucion vive en:
+
+- `docs/architecture/runner-interface.md`
+
+## Extension correcta hacia WhatsApp
+
+El siguiente paso no deberia crear una estructura paralela solo porque la UI
+actual sea WhatsApp.
+
+La idea correcta para `8.20` es extender la misma estructura que ya existe en
+`8.19`:
+
+- mismo runner local
+- mismos `case_id`
+- mismos manifiestos y rutas de evidencia
+- mismo criterio de estados (`pass`, `soft_pass_with_fallback`, `fail_runtime`)
+- mismo modelo de publicacion de artefactos
+
+WhatsApp deberia actuar como capa de entrada y seguimiento sobre esa base, no
+como una segunda implementacion distinta para lanzar tests o usar `ComfyUI`.
+
+La especificacion concreta de esa extension vive en:
+
+- `docs/comfyui/whatsapp-comfyui-extension.md`
+
 ## Lectura correcta
 
 `8.19` no sustituye a `8.18`.

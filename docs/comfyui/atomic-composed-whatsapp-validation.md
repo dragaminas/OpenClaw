@@ -87,6 +87,15 @@ La tarea `8.18` deberia anadir, como minimo:
 Hasta que eso exista, este documento debe leerse como contrato de validacion y
 no como manual final de ejecucion.
 
+## Dependencia operativa para WhatsApp
+
+Si queremos que `8.18` sea disparable por la persona usuaria desde la UI actual
+de WhatsApp, antes hace falta `8.20`.
+
+`8.20` no deberia crear otra implementacion distinta de la validacion, sino
+extender el mismo runner y la misma evidencia de `8.19` para exponerlos por
+chat.
+
 ## Objetivo
 
 Definir una bateria de pruebas E2E lo mas simple pero suficiente posible para:

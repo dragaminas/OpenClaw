@@ -52,6 +52,20 @@ Modo tecnico:
 - responder con mensajes simples
 - evitar comandos arbitrarios
 
+## Regla para operaciones con ciclo de vida
+
+Cuando una accion tiene:
+
+- estados de ejecucion
+- evidencia
+- cancelacion
+- artefactos publicados
+
+no deberia resolverse como un wrapper ad hoc por canal.
+
+Deberia pasar por la interfaz canonica de `runner` descrita en
+`docs/architecture/runner-interface.md`.
+
 ## Primer puente WhatsApp
 
 El primer puente implementado usa un plugin local de OpenClaw con hook
@@ -94,5 +108,7 @@ Implementado hoy:
 Pendiente:
 
 - primer workflow real de ComfyUI orientado a imagen o video
+- extension de `studio-actions` para invocar runners canonicos y no solo
+  wrappers directos
 - perfiles de acciones por usuario o por modo de uso
 - mas wrappers para archivos y herramientas creativas

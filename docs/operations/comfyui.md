@@ -120,6 +120,27 @@ scripts/actions/comfyui-action.sh open
 scripts/actions/comfyui-action.sh stop
 ```
 
+## Runner canonico
+
+La smoke validation implementada en `8.19` ya introduce la primera forma de
+runner reutilizable para `ComfyUI`:
+
+```bash
+scripts/apps/comfyui-smoke-validation.sh --run-id smoke-light-5
+```
+
+La evolucion prevista no es crear otro stack distinto para WhatsApp, sino
+convertir este runner en la implementacion `ComfyUI` de la interfaz canonica
+definida en `docs/architecture/runner-interface.md`.
+
+Eso significa reutilizar:
+
+- el mismo `run_id`
+- los mismos `case_id`
+- los mismos manifiestos
+- la misma evidencia
+- los mismos estados
+
 ## Prueba del puente local
 
 ```bash
@@ -137,6 +158,15 @@ scripts/openclaw/test-studio-actions-plugin.sh "studio abre comfyui"
 - `studio abre comfyui`
 - `studio para comfyui`
 
+Extension prevista en `8.20`:
+
+- `studio comfyui smoke`
+- `studio comfyui smoke <case_id>`
+- `studio comfyui validate atomic <test_id>`
+- `studio comfyui validate composed <test_id>`
+- `studio comfyui estado <run_id>`
+- `studio comfyui cancela <run_id>`
+
 ## Nota sobre Python
 
 Si el venv se crea sin `pip`, normalmente faltara `python3-venv` o
@@ -152,6 +182,8 @@ mantiene solo para compatibilidad o migracion.
 ## Pendiente
 
 - exponer workflows reales de imagen o video sobre esta base
+- extender el runner de `ComfyUI` al contrato generico de `runner`
+- exponer ese mismo runner desde WhatsApp sin estructuras paralelas
 
 ## Productizacion de workflows
 
