@@ -5,6 +5,88 @@ Define el diseno de la validacion para los workflows derivados de
 `ComfyUIWorkflows/local/` sin mezclar todavia el diseno con la ejecucion real,
 que queda reservada para `8.18`.
 
+## Como leer este documento
+
+Este archivo es una especificacion de pruebas, no un runner ya operativo.
+
+En otras palabras:
+
+- `8.17` define que pruebas hay que correr
+- `8.17` no implementa todavia los comandos finales para ejecutarlas
+- la ejecucion real, la evidencia y los resultados quedan para `8.18`
+
+Si lo que buscas es un comando unico tipo `make test` para `AT-IMG-02-01`,
+`AT-VID-01-01` o `CP-VIDEO-01`, hoy todavia no existe en el repo.
+
+Si hace falta un gate mas barato para comprobar primero que los workflows
+simplemente corren, esa funcion queda ahora reservada para `8.19` en
+`docs/comfyui/workflow-smoke-validation.md`.
+
+## Que puedes correr hoy y que no
+
+Hoy si puedes correr:
+
+- comprobaciones de servicio de `ComfyUI`
+- el puente local seguro ya existente para acciones basicas de `ComfyUI`
+- la CLI guiada de `openclaw_studio` para explorar sesiones e inputs
+
+Hoy no puedes correr todavia:
+
+- `AT-IMG-02-01`
+- `AT-VID-01-01`
+- `AT-VID-02-01`
+- `AT-IMG-03-01`
+- `AT-VID-03-01`
+- `AT-VID-04-01`
+- `CP-STILL-01`
+- `CP-VIDEO-01`
+- `CP-MOTION-01`
+
+como comandos automatizados ya cerrados dentro del repo.
+
+## Comandos reales disponibles hoy
+
+Para verificar que la base operativa esta viva, hoy los comandos utiles son:
+
+```bash
+scripts/apps/comfyui.sh status
+scripts/apps/comfyui.sh start-service
+scripts/apps/comfyui.sh restart-service
+scripts/apps/comfyui.sh open-ui
+```
+
+Para probar el puente local compatible con WhatsApp, hoy puedes usar:
+
+```bash
+scripts/openclaw/test-studio-actions-plugin.sh "studio como esta comfyui"
+scripts/openclaw/test-studio-actions-plugin.sh "studio inicia comfyui"
+scripts/openclaw/test-studio-actions-plugin.sh "studio reinicia comfyui"
+scripts/openclaw/test-studio-actions-plugin.sh "studio abre comfyui"
+```
+
+Para explorar la sesion guiada actual, hoy puedes usar:
+
+```bash
+PYTHONPATH=src python -m openclaw_studio
+```
+
+Esa CLI sirve para recorrer la sesion e introducir inputs, pero no ejecuta
+todavia la suite `AT-*` o `CP-*`.
+
+## Que faltara en `8.18`
+
+La tarea `8.18` deberia anadir, como minimo:
+
+- un comando o accion segura que reciba `test_id`, `preset_id` y `shot`
+- la ejecucion real del workflow correspondiente
+- la publicacion de artefactos en `published/`
+- manifiestos, logs y evidencia
+- el registro de resultados en
+  `docs/comfyui/atomic-composed-whatsapp-validation-results.md`
+
+Hasta que eso exista, este documento debe leerse como contrato de validacion y
+no como manual final de ejecucion.
+
 ## Objetivo
 
 Definir una bateria de pruebas E2E lo mas simple pero suficiente posible para:
