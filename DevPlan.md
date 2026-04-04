@@ -315,7 +315,7 @@ Tareas:
 - [done] 8.17 Diseñar una validacion atomica y una validacion por composicion para los workflows derivados, definiendo tests E2E lo mas simples pero suficientes posibles, preferiblemente disparables desde WhatsApp, donde el output de una prueba pueda convertirse en input de la siguiente para comprobar no solo cada flujo aislado sino tambien la cadena operativa real
 - [pending] 8.18 Ejecutar la validacion diseñada para los workflows derivados y sus composiciones, registrar evidencia, conservar artefactos de entrada y salida y dejar claramente que partes quedaron aprobadas, cuales siguen pendientes y cuales requieren fallback o revision
 - [done] 8.19 Preparar una smoke validation minima que permita ejecutar `8.18` con un gate barato de funcionamiento real, usando imagenes pequenas y clips de video pequenos para comprobar solo que cada workflow carga, corre y guarda salida sin exigir calidad alta ni comparativas finas
-- [pending] 8.20 Extender la misma estructura operativa creada en `8.19` para exponer `ComfyUI` y sus validaciones desde WhatsApp, sin crear runners, manifiestos, contratos ni rutas de evidencia paralelas; el runner de `ComfyUI` debe pasar a implementar una interfaz `runner` reutilizable tambien por otras aplicaciones, y el puente de `studio-actions` debe reutilizar y ampliar ese mismo contrato, los mismos identificadores de casos, la misma publicacion de artefactos y la misma forma de reportar estado para que sirva tanto para lanzar smoke tests y validaciones de `8.18` como para habilitar ya el uso real de `ComfyUI` desde la UI actual
+- [done] 8.20 Extender la misma estructura operativa creada en `8.19` para exponer `ComfyUI` y sus validaciones desde WhatsApp, sin crear runners, manifiestos, contratos ni rutas de evidencia paralelas; el runner de `ComfyUI` debe pasar a implementar una interfaz `runner` reutilizable tambien por otras aplicaciones, y el puente de `studio-actions` debe reutilizar y ampliar ese mismo contrato, los mismos identificadores de casos, la misma publicacion de artefactos y la misma forma de reportar estado para que sirva tanto para lanzar smoke tests y validaciones de `8.18` como para habilitar ya el uso real de `ComfyUI` desde la UI actual
 
 Entregables por tarea:
 
@@ -338,8 +338,8 @@ Entregables por tarea:
 - [done] 8.17 `docs/comfyui/atomic-composed-whatsapp-validation.md`
 - [pending] 8.18 `docs/comfyui/atomic-composed-whatsapp-validation-results.md`
 - [done] 8.19 `docs/comfyui/workflow-smoke-validation.md`
-- [pending] 8.20 `docs/architecture/runner-interface.md`
-- [pending] 8.20 `docs/comfyui/whatsapp-comfyui-extension.md`
+- [done] 8.20 `docs/architecture/runner-interface.md`
+- [done] 8.20 `docs/comfyui/whatsapp-comfyui-extension.md`
 
 ## Riesgos a controlar
 

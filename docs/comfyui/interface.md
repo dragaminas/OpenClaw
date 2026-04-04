@@ -51,6 +51,9 @@ UI guiada / WhatsApp / CLI
 application
         |
         v
+runner_cli
+        |
+        v
 runner registry
         |
         v
@@ -58,6 +61,18 @@ runner de aplicacion
         |
         v
 implementacion concreta y evidencia
+```
+
+Implementacion actual en el repo:
+
+```text
+src/openclaw_studio/
+├── runner_cli.py
+├── runners/
+│   ├── contracts.py
+│   ├── registry.py
+│   └── comfyui.py
+└── comfyui_smoke_validation.py
 ```
 
 ## Responsabilidad por capa

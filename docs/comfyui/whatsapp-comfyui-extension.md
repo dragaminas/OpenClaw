@@ -62,6 +62,8 @@ o presentacion, no el modelo de ejecucion.
 WhatsApp
   -> plugin studio-actions
   -> catalogo de acciones seguras
+  -> scripts/actions/runner-action.sh
+  -> openclaw_studio.runner_cli
   -> runner registry
   -> runner comfyui
   -> manifiestos y artefactos
@@ -94,6 +96,13 @@ No deberia:
 - reconstruir manifiestos
 - inventar estados propios
 - guardar evidencia por su cuenta
+
+Implementacion concreta actual:
+
+- parser y routing: `plugins/studio-actions/index.js`
+- wrapper seguro del contrato: `scripts/actions/runner-action.sh`
+- CLI del contrato: `src/openclaw_studio/runner_cli.py`
+- registro y runner de `ComfyUI`: `src/openclaw_studio/runners/`
 
 ## Runner de `ComfyUI`
 
@@ -166,6 +175,14 @@ target=SMK-VID-04-01
 evidencia=~/Studio/Validation/comfyui/smoke/smoke-light-5/evidence/summary.md
 ```
 
+Si la operacion todavia no esta implementada, debe responder por el mismo
+runner con algo equivalente a:
+
+```text
+status=unsupported
+accepted=false
+```
+
 ## Estados canonicos esperados
 
 WhatsApp debe reutilizar exactamente los estados del runner:
@@ -221,6 +238,23 @@ mismo contrato de runner.
 - la evidencia generada sea la misma que la corrida local
 - `studio-actions` no contenga logica especifica de workflows
 - el mismo contrato quede listo para ser usado por `8.18`
+
+## Estado implementado
+
+Hoy ya quedan expuestos por WhatsApp:
+
+- `studio comfyui smoke`
+- `studio comfyui smoke <case_id>`
+- `studio comfyui estado <run_id>`
+- `studio comfyui cancela <run_id>`
+- `studio comfyui evidencia <run_id>`
+
+Y quedan preparados por el mismo contrato:
+
+- `studio comfyui validate atomic <test_id>`
+- `studio comfyui validate composed <test_id>`
+
+con respuesta `unsupported` hasta que `8.18` aterrice la ejecucion real.
 
 ## No objetivos de 8.20
 

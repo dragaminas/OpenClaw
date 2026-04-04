@@ -23,8 +23,15 @@ La smoke suite ya se puede correr con:
 scripts/apps/comfyui-smoke-validation.sh --run-id smoke-light-5
 ```
 
+Tambien se puede correr un caso concreto reutilizando el mismo runner:
+
+```bash
+scripts/apps/comfyui-smoke-validation.sh --run-id smoke-demo-vid04 --case-id SMK-VID-04-01
+```
+
 La evidencia queda en:
 
+- `~/Studio/Validation/comfyui/smoke/<run-id>/manifests/run.json`
 - `~/Studio/Validation/comfyui/smoke/<run-id>/manifests/summary.json`
 - `~/Studio/Validation/comfyui/smoke/<run-id>/evidence/summary.md`
 

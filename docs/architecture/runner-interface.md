@@ -168,6 +168,14 @@ Campos minimos de respuesta:
 - `status`
 - `message`
 
+Si la operacion todavia no esta implementada, el runner puede responder:
+
+- `accepted=false`
+- `status=unsupported`
+- `message` claro
+
+sin crear un `run_id` ficticio ni una estructura paralela.
+
 ## `get_run_status`
 
 Devuelve el estado vivo de una corrida.
@@ -218,6 +226,14 @@ la misma estructura logica:
 - artefactos de salida
 - `run_id` consistente
 
+Cuando una corrida tenga ciclo de vida activo, el runner puede anadir un
+manifiesto operativo comun, por ejemplo:
+
+- `manifests/run.json`
+
+siempre que esa extension sea compartida por terminal, WhatsApp y futuras UIs,
+y no una variante especial del canal.
+
 La diferencia entre canales solo deberia estar en como se solicita la corrida y
 como se presenta el resultado al usuario.
 
@@ -242,6 +258,13 @@ La evolucion correcta es:
 2. reutilizarlo desde `studio-actions`
 3. ampliar el mismo runner para `8.18`
 4. reutilizar el mismo patron para otras apps
+
+Implementacion concreta actual en el repo:
+
+- contrato y registro: `src/openclaw_studio/runners/`
+- CLI segura: `src/openclaw_studio/runner_cli.py`
+- primer runner real: `src/openclaw_studio/runners/comfyui.py`
+- ejecucion smoke reutilizada: `src/openclaw_studio/comfyui_smoke_validation.py`
 
 ## Relacion con WhatsApp
 

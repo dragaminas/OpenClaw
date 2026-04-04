@@ -127,6 +127,7 @@ runner reutilizable para `ComfyUI`:
 
 ```bash
 scripts/apps/comfyui-smoke-validation.sh --run-id smoke-light-5
+scripts/apps/comfyui-smoke-validation.sh --run-id smoke-demo-vid04 --case-id SMK-VID-04-01
 ```
 
 La evolucion prevista no es crear otro stack distinto para WhatsApp, sino
@@ -141,6 +142,15 @@ Eso significa reutilizar:
 - la misma evidencia
 - los mismos estados
 
+La capa segura del contrato ya se puede invocar tambien con:
+
+```bash
+scripts/actions/runner-action.sh describe comfyui
+scripts/actions/runner-action.sh list-targets comfyui validate_smoke
+scripts/actions/runner-action.sh status comfyui smoke-light-5
+scripts/actions/runner-action.sh result comfyui smoke-light-5
+```
+
 ## Prueba del puente local
 
 ```bash
@@ -148,6 +158,10 @@ scripts/openclaw/test-studio-actions-plugin.sh "studio como esta comfyui"
 scripts/openclaw/test-studio-actions-plugin.sh "studio inicia comfyui"
 scripts/openclaw/test-studio-actions-plugin.sh "studio reinicia comfyui"
 scripts/openclaw/test-studio-actions-plugin.sh "studio abre comfyui"
+scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui smoke"
+scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui smoke SMK-VID-04-01"
+scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui estado <run_id>"
+scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui evidencia <run_id>"
 ```
 
 ## Uso esperado desde WhatsApp
@@ -157,15 +171,16 @@ scripts/openclaw/test-studio-actions-plugin.sh "studio abre comfyui"
 - `studio reinicia comfyui`
 - `studio abre comfyui`
 - `studio para comfyui`
-
-Extension prevista en `8.20`:
-
 - `studio comfyui smoke`
 - `studio comfyui smoke <case_id>`
 - `studio comfyui validate atomic <test_id>`
 - `studio comfyui validate composed <test_id>`
 - `studio comfyui estado <run_id>`
 - `studio comfyui cancela <run_id>`
+- `studio comfyui evidencia <run_id>`
+
+`validate_atomic` y `validate_composed` hoy ya entran por el mismo runner, pero
+responden `unsupported` hasta que `8.18` implemente la ejecucion real.
 
 ## Nota sobre Python
 
@@ -182,8 +197,8 @@ mantiene solo para compatibilidad o migracion.
 ## Pendiente
 
 - exponer workflows reales de imagen o video sobre esta base
-- extender el runner de `ComfyUI` al contrato generico de `runner`
-- exponer ese mismo runner desde WhatsApp sin estructuras paralelas
+- implementar `validate_atomic`
+- implementar `validate_composed`
 
 ## Productizacion de workflows
 

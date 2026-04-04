@@ -43,6 +43,13 @@ Modo tecnico:
 - `studio comfyui open`
 - `studio comfyui stop`
 - `studio comfyui url`
+- `studio comfyui smoke`
+- `studio comfyui smoke <case_id>`
+- `studio comfyui estado <run_id>`
+- `studio comfyui cancela <run_id>`
+- `studio comfyui evidencia <run_id>`
+- `studio comfyui validate atomic <test_id>`
+- `studio comfyui validate composed <test_id>`
 
 ## Principios
 
@@ -104,11 +111,14 @@ Implementado hoy:
 - reinicio de ComfyUI
 - apertura de la UI web de ComfyUI
 - parada controlada de ComfyUI
+- launch de `validate_smoke` por runner canonico
+- consulta de estado, cancelacion y evidencia por `run_id`
+- respuestas `unsupported` para `validate_atomic` y `validate_composed` a traves
+  del mismo runner
 
 Pendiente:
 
-- primer workflow real de ComfyUI orientado a imagen o video
-- extension de `studio-actions` para invocar runners canonicos y no solo
-  wrappers directos
+- implementacion real de `validate_atomic`
+- implementacion real de `validate_composed`
 - perfiles de acciones por usuario o por modo de uso
 - mas wrappers para archivos y herramientas creativas
