@@ -314,6 +314,7 @@ Tareas:
 - [done] 8.16 Documentar troubleshooting para VRAM insuficiente, nodos faltantes, modelos mal ubicados, tiempos de render, reanudacion de iteraciones y ausencia temporal de una implementacion nativa para un flujo
 - [done] 8.17 Diseñar una validacion atomica y una validacion por composicion para los workflows derivados, definiendo tests E2E lo mas simples pero suficientes posibles, preferiblemente disparables desde WhatsApp, donde el output de una prueba pueda convertirse en input de la siguiente para comprobar no solo cada flujo aislado sino tambien la cadena operativa real
 - [pending] 8.18 Ejecutar la validacion diseñada para los workflows derivados y sus composiciones, registrar evidencia, conservar artefactos de entrada y salida y dejar claramente que partes quedaron aprobadas, cuales siguen pendientes y cuales requieren fallback o revision
+- [done] 8.19 Preparar una smoke validation minima que permita ejecutar `8.18` con un gate barato de funcionamiento real, usando imagenes pequenas y clips de video pequenos para comprobar solo que cada workflow carga, corre y guarda salida sin exigir calidad alta ni comparativas finas
 
 Entregables por tarea:
 
@@ -335,6 +336,7 @@ Entregables por tarea:
 - [done] 8.16 `docs/comfyui/troubleshooting.md`
 - [done] 8.17 `docs/comfyui/atomic-composed-whatsapp-validation.md`
 - [pending] 8.18 `docs/comfyui/atomic-composed-whatsapp-validation-results.md`
+- [done] 8.19 `docs/comfyui/workflow-smoke-validation.md`
 
 ## Riesgos a controlar
 
