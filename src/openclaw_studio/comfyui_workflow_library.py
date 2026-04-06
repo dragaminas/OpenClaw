@@ -22,10 +22,13 @@ from openclaw_studio.implementations import BUILTIN_FLOW_CATALOG
 MODULE_NAME = "openclaw-workflows"
 EXAMPLE_WORKFLOWS_DIRNAME = "example_workflows"
 MANIFEST_FILENAME = "openclaw-workflows-manifest.json"
-MODULE_INIT_TEXT = '''"""OpenClaw workflow templates exposed to ComfyUI."""
+MODULE_HELPER_SOURCE_RELPATH = Path(
+    "src/openclaw_studio/comfyui_openclaw_workflow_nodes.py"
+)
+MODULE_HELPER_FILENAME = "openclaw_nodes.py"
+MODULE_INIT_TEXT = '''"""OpenClaw workflow templates and helper nodes exposed to ComfyUI."""
 
-NODE_CLASS_MAPPINGS = {}
-NODE_DISPLAY_NAME_MAPPINGS = {}
+from .openclaw_nodes import NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
 '''
@@ -189,6 +192,10 @@ def sync_workflow_templates(repo_root: Path, comfyui_dir: Path) -> SyncResult:
     module_dir.mkdir(parents=True, exist_ok=True)
     templates_dir.mkdir(parents=True, exist_ok=True)
     (module_dir / "__init__.py").write_text(MODULE_INIT_TEXT, encoding="utf-8")
+    _publish_support_file(
+        source_path=(repo_root / MODULE_HELPER_SOURCE_RELPATH).resolve(),
+        target_path=module_dir / MODULE_HELPER_FILENAME,
+    )
 
     previous_manifest = _load_manifest(manifest_path)
     previous_filenames = set(previous_manifest.get("managed_filenames", ()))
@@ -212,6 +219,7 @@ def sync_workflow_templates(repo_root: Path, comfyui_dir: Path) -> SyncResult:
         "module_name": MODULE_NAME,
         "module_path": str(module_dir),
         "templates_dir": str(templates_dir),
+        "helper_files": [MODULE_HELPER_FILENAME],
         "managed_filenames": sorted(current_filenames),
         "entries": [asdict(entry) for entry in published_entries],
     }
@@ -526,6 +534,15 @@ def _publish_template_file(source_path: Path, template_path: Path) -> None:
         template_path.unlink()
 
     shutil.copyfile(source_path, template_path)
+
+
+def _publish_support_file(source_path: Path, target_path: Path) -> None:
+    """Publish one Python helper file into the ComfyUI module directory."""
+
+    if target_path.is_symlink() or target_path.exists():
+        target_path.unlink()
+
+    shutil.copyfile(source_path, target_path)
 
 
 def _render_output_label(output_type: OutputArtifactType) -> str:

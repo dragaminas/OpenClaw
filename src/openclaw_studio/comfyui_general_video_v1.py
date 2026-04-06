@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from openclaw_studio.comfyui_openclaw_workflow_nodes import DEFAULT_FPS_TARGET
+
 
 GENERAL_VIDEO_V1_WORKFLOW_RELPATH = Path(
     "ComfyUIWorkflows/local/minimum/uc-vid-02-general-video-render-rtx3060-v1.json"
@@ -33,6 +35,7 @@ DEFAULT_FRAME_LOAD_CAP = 0
 DEFAULT_RENDER_FRAME_RATE = 12
 DEFAULT_OPERATIONAL_FALLBACK_FRAME_RATE = 24
 DEFAULT_OPERATIONAL_RENDER_STEPS = 8
+DEFAULT_ENABLE_FPS_INTERPOLATION = False
 DEFAULT_USE_BORDERS = True
 DEFAULT_USE_POSE = True
 DEFAULT_USE_DEPTH = True
@@ -135,6 +138,8 @@ def patch_general_video_v1_runtime(
     frame_load_cap: int = 2,
     custom_width: int = DEFAULT_CONTROL_WIDTH,
     render_frame_rate: int = DEFAULT_RENDER_FRAME_RATE,
+    enable_fps_interpolation: bool = DEFAULT_ENABLE_FPS_INTERPOLATION,
+    target_fps: float = DEFAULT_FPS_TARGET,
     use_borders: bool = DEFAULT_USE_BORDERS,
     use_pose: bool = DEFAULT_USE_POSE,
     use_depth: bool = DEFAULT_USE_DEPTH,
@@ -165,6 +170,8 @@ def patch_general_video_v1_runtime(
     _set_video_combine_frame_rate(workflow, 4005, render_frame_rate)
     _set_video_combine_frame_rate(workflow, 4006, render_frame_rate)
     _set_video_combine_frame_rate(workflow, 4007, render_frame_rate)
+    _find_node(workflow, 4021)["widgets_values"][0] = enable_fps_interpolation
+    _find_node(workflow, 4022)["widgets_values"][0] = target_fps
     _find_node(workflow, 4020)["widgets_values"]["filename_prefix"] = (
         f"{output_prefix_root}/render"
     )
@@ -431,6 +438,11 @@ def _build_added_nodes(
         "ver": "0.3.76",
         "Node name for S&R": "PrimitiveBoolean",
     }
+    float_properties = {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.76",
+        "Node name for S&R": "PrimitiveFloat",
+    }
     logic_properties = {
         "cnr_id": "ComfyUI-Impact-Pack",
         "ver": "8.21.2",
@@ -506,11 +518,79 @@ def _build_added_nodes(
         clone(
             preprocess_sources[3001],
             new_id=4020,
-            pos=(920, -210),
+            pos=(2680, -210),
             title="RENDER FINAL",
             widgets_overrides=_video_combine_widgets(f"{DEFAULT_OUTPUT_PREFIX_ROOT}/render"),
         )
     )
+
+    added_nodes.append(
+        {
+            "id": 4021,
+            "type": "PrimitiveBoolean",
+            "pos": [2140, -860],
+            "size": [240, 58],
+            "flags": {},
+            "order": next_order,
+            "mode": 0,
+            "inputs": [],
+            "outputs": [{"name": "BOOLEAN", "type": "BOOLEAN", "links": None}],
+            "title": "usar_interpolacion_fps",
+            "properties": bool_properties,
+            "widgets_values": [DEFAULT_ENABLE_FPS_INTERPOLATION],
+            "shape": 1,
+        }
+    )
+    next_order += 1
+    added_nodes.append(
+        {
+            "id": 4022,
+            "type": "PrimitiveFloat",
+            "pos": [2140, -780],
+            "size": [240, 58],
+            "flags": {},
+            "order": next_order,
+            "mode": 0,
+            "inputs": [],
+            "outputs": [{"name": "FLOAT", "type": "FLOAT", "links": None}],
+            "title": "fps_objetivo",
+            "properties": float_properties,
+            "widgets_values": [DEFAULT_FPS_TARGET],
+            "shape": 1,
+        }
+    )
+    next_order += 1
+    added_nodes.append(
+        {
+            "id": 4023,
+            "type": "OpenClawFPSInterpolation",
+            "pos": [2380, -860],
+            "size": [280, 182],
+            "flags": {},
+            "order": next_order,
+            "mode": 0,
+            "inputs": [
+                {"name": "images", "type": "IMAGE", "link": None},
+                {"name": "source_fps", "type": "FLOAT", "link": None},
+                {"name": "target_fps", "type": "FLOAT", "link": None},
+                {"name": "enabled", "type": "BOOLEAN", "link": None},
+            ],
+            "outputs": [
+                {"name": "images", "type": "IMAGE", "links": None},
+                {"name": "output_fps", "type": "FLOAT", "links": None},
+                {"name": "interpolated", "type": "BOOLEAN", "links": None},
+                {"name": "inserted_frames", "type": "INT", "links": None},
+                {"name": "summary", "type": "STRING", "links": None},
+            ],
+            "title": "INTERPOLACION FPS OPCIONAL",
+            "properties": {
+                "cnr_id": "openclaw-workflows",
+                "Node name for S&R": "OpenClawFPSInterpolation",
+            },
+            "widgets_values": [],
+        }
+    )
+    next_order += 1
     for node_id in (4005, 4006, 4007, 4020):
         _promote_video_combine_frame_rate_input(
             next(node for node in added_nodes if int(node["id"]) == node_id)
@@ -644,7 +724,10 @@ def _layout_general_video_v1(workflow: dict[str, Any]) -> None:
         3359: (1430, -540),
         3083: (1430, -480),
         3228: (1680, -800),
-        4020: (2140, -260),
+        4021: (2140, -860),
+        4022: (2140, -780),
+        4023: (2380, -860),
+        4020: (2680, -260),
     }
     for node_id, pos in positions.items():
         node = _find_node(workflow, node_id)
@@ -693,8 +776,14 @@ def _layout_general_video_v1(workflow: dict[str, Any]) -> None:
         ),
         _group(
             group_id=207,
+            title="INTERPOLACION FPS",
+            bounding=[2100, -930, 620, 360],
+            color="#507a73",
+        ),
+        _group(
+            group_id=208,
             title="SALIDA Y EVIDENCIA",
-            bounding=[2100, -930, 560, 760],
+            bounding=[2640, -930, 560, 760],
             color="#3f7284",
         ),
     ]
@@ -727,7 +816,7 @@ def _wire_general_video_v1(workflow: dict[str, Any]) -> None:
     _add_link(workflow, 4002, 0, 4005, 0, "IMAGE")
     _add_link(workflow, 4003, 0, 4006, 0, "IMAGE")
     _add_link(workflow, 4004, 0, 4007, 0, "IMAGE")
-    for target_id in (4005, 4006, 4007, 4020):
+    for target_id in (4005, 4006, 4007):
         _add_link(workflow, 3083, 0, target_id, 4, "FLOAT")
 
     # first frame preview and references
@@ -765,7 +854,14 @@ def _wire_general_video_v1(workflow: dict[str, Any]) -> None:
 
     # selected control goes straight into the render core
     _add_link(workflow, 4018, 0, 3228, 5, "IMAGE")
-    _add_link(workflow, 3228, 0, 4020, 0, "IMAGE")
+
+    # optional FPS interpolation lives after the main render and before output.
+    _add_link(workflow, 3228, 0, 4023, 0, "IMAGE")
+    _add_link(workflow, 3083, 0, 4023, 1, "FLOAT")
+    _add_link(workflow, 4022, 0, 4023, 2, "FLOAT")
+    _add_link(workflow, 4021, 0, 4023, 3, "BOOLEAN")
+    _add_link(workflow, 4023, 0, 4020, 0, "IMAGE")
+    _add_link(workflow, 4023, 1, 4020, 4, "FLOAT")
 
 
 def _add_link(

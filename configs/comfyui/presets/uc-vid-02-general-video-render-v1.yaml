@@ -7,6 +7,8 @@ defaults:
   control_width: 512
   frame_load_cap: 0
   fps: source
+  usar_interpolacion_fps: false
+  fps_objetivo: 24
   controles_activos: bordes,pose,profundidad
   segmentacion: single
 paths:

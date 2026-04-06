@@ -53,9 +53,11 @@ class ComfyUIWorkflowLibraryTests(unittest.TestCase):
         module_dir = self.comfyui_dir / "custom_nodes" / MODULE_NAME
         template_path = module_dir / "example_workflows" / "prepara-video.json"
         manifest_path = module_dir / "openclaw-workflows-manifest.json"
+        helper_path = module_dir / "openclaw_nodes.py"
 
         self.assertTrue(sync_result.created_module)
         self.assertTrue((module_dir / "__init__.py").is_file())
+        self.assertTrue(helper_path.is_file())
         self.assertTrue(template_path.exists())
         self.assertTrue(manifest_path.is_file())
 

@@ -29,9 +29,12 @@ class GeneralVideoV1WorkflowTests(unittest.TestCase):
         self.assertIn(4008, node_ids)
         self.assertIn(4009, node_ids)
         self.assertIn(4020, node_ids)
+        self.assertIn(4023, node_ids)
         self.assertNotIn(282, node_ids)
         self.assertEqual(get_node(workflow, 1066)["title"], "OPENCLAW GENERAL VIDEO RENDER V1")
         self.assertEqual(get_node(workflow, 265)["widgets_values"]["frame_load_cap"], 0)
+        self.assertFalse(get_node(workflow, 4021)["widgets_values"][0])
+        self.assertEqual(get_node(workflow, 4022)["widgets_values"][0], 24.0)
         self.assertEqual(
             get_node(workflow, 4020)["widgets_values"]["frame_rate"],
             24,
@@ -56,6 +59,8 @@ class GeneralVideoV1WorkflowTests(unittest.TestCase):
             frame_load_cap=3,
             custom_width=640,
             render_frame_rate=15,
+            enable_fps_interpolation=True,
+            target_fps=18.0,
             use_borders=True,
             use_pose=False,
             use_depth=True,
@@ -72,6 +77,8 @@ class GeneralVideoV1WorkflowTests(unittest.TestCase):
         )
         self.assertEqual(get_node(workflow, 4020)["widgets_values"]["frame_rate"], 15)
         self.assertIsNone(get_node(workflow, 4020)["inputs"][4]["link"])
+        self.assertTrue(get_node(workflow, 4021)["widgets_values"][0])
+        self.assertEqual(get_node(workflow, 4022)["widgets_values"][0], 18.0)
         self.assertEqual(
             _subgraph_node(workflow, "c475d739-ec74-430f-a7bd-aab0fdd85070", 3253)["widgets_values"][2],
             1,
@@ -93,6 +100,7 @@ class GeneralVideoV1WorkflowTests(unittest.TestCase):
                 "PREPROCESS CONTROLES",
                 "SELECCION DE CONTROL",
                 "RENDER GENERAL",
+                "INTERPOLACION FPS",
                 "SALIDA Y EVIDENCIA",
             ],
         )
@@ -139,6 +147,9 @@ class GeneralVideoV1WorkflowTests(unittest.TestCase):
             3359,
             3083,
             3228,
+            4021,
+            4022,
+            4023,
             4020,
             3326,
             3327,

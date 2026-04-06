@@ -80,6 +80,8 @@ class GeneralVideoV1ValidationRunner:
             frame_load_cap=self.args.frame_load_cap,
             custom_width=self.args.control_width,
             render_frame_rate=self.args.render_frame_rate,
+            enable_fps_interpolation=self.args.enable_fps_interpolation,
+            target_fps=self.args.target_fps,
             use_borders=use_borders,
             use_pose=use_pose,
             use_depth=use_depth,
@@ -174,6 +176,8 @@ class GeneralVideoV1ValidationRunner:
                 "frame_load_cap": self.args.frame_load_cap,
                 "control_width": self.args.control_width,
                 "render_frame_rate": self.args.render_frame_rate,
+                "enable_fps_interpolation": self.args.enable_fps_interpolation,
+                "target_fps": self.args.target_fps,
                 "full_quality": self.args.full_quality,
             },
             "expected_outputs": expected_output_labels(),
@@ -490,6 +494,17 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--frame-load-cap", type=int, default=2)
     parser.add_argument("--control-width", type=int, default=DEFAULT_CONTROL_WIDTH)
     parser.add_argument("--render-frame-rate", type=int, default=DEFAULT_RENDER_FRAME_RATE)
+    parser.add_argument(
+        "--enable-fps-interpolation",
+        action="store_true",
+        help="Activa la rama opcional de interpolacion FPS en la V1 funcional.",
+    )
+    parser.add_argument(
+        "--target-fps",
+        type=float,
+        default=24.0,
+        help="FPS objetivo para la rama opcional de interpolacion.",
+    )
     parser.add_argument("--timeout-seconds", type=int, default=900)
     parser.add_argument(
         "--controls",
