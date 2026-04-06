@@ -34,9 +34,28 @@ El workflow debe producir:
 
 - `video_base`
 - `prompt_escena_estilo`
+- `controles_activos`
+
+`controles_activos` no significa que los tres controles deban estar siempre
+encendidos.
+Significa que el usuario debe elegir una combinacion valida de `1` a `3`
+controles entre:
+
+- `bordes`
+- `pose`
+- `profundidad`
+
+Forma equivalente de modelarlo en UI o en el JSON del workflow:
+
 - `usar_bordes`
 - `usar_pose`
 - `usar_profundidad`
+
+Regla canonica:
+
+- al menos uno de esos tres flags debe estar en `true`
+- el workflow debe aceptar cualquier combinacion valida de `1`, `2` o `3`
+  controles activos
 
 ## Parametros opcionales
 
@@ -153,6 +172,13 @@ Debe partir de `UC-VID-01` y permitir:
 - `pose` on/off
 - `profundidad` on/off
 
+Lectura correcta:
+
+- no hace falta usar siempre los tres
+- el workflow debe poder correr con cualquier combinacion valida de `1` a `3`
+  controles activos
+- el caso invalido es `0` controles activos
+
 Salida esperada:
 
 - un paquete persistente de controles con nombres y rutas estables
@@ -219,7 +245,8 @@ La primera derivacion que deberia considerarse valida para esta tarea es:
 - prompt
 - preview del primer frame
 - aspect ratio preservado
-- controles `bordes`, `pose` y `profundidad` con on/off
+- controles `bordes`, `pose` y `profundidad` con on/off, aceptando cualquier
+  combinacion valida de `1` a `3` activos
 - render principal local
 - evidencia real con `blenderTest.mp4`
 
