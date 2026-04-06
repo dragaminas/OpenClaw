@@ -31,6 +31,20 @@ class GeneralVideoV1WorkflowTests(unittest.TestCase):
         self.assertIn(4020, node_ids)
         self.assertNotIn(282, node_ids)
         self.assertEqual(get_node(workflow, 1066)["title"], "OPENCLAW GENERAL VIDEO RENDER V1")
+        self.assertEqual(get_node(workflow, 265)["widgets_values"]["frame_load_cap"], 0)
+        self.assertEqual(
+            get_node(workflow, 4020)["widgets_values"]["frame_rate"],
+            24,
+        )
+        self.assertEqual(
+            _subgraph_node(workflow, "c475d739-ec74-430f-a7bd-aab0fdd85070", 3253)["widgets_values"][2],
+            8,
+        )
+
+        for node_id in (4005, 4006, 4007, 4020):
+            frame_rate_input = get_node(workflow, node_id)["inputs"][4]
+            self.assertEqual(frame_rate_input["name"], "frame_rate")
+            self.assertIsNotNone(frame_rate_input["link"])
 
     def test_runtime_patch_updates_paths_and_control_flags(self) -> None:
         workflow = derive_general_video_v1_workflow(self.repo_root)
@@ -55,6 +69,12 @@ class GeneralVideoV1WorkflowTests(unittest.TestCase):
         self.assertEqual(
             get_node(workflow, 4020)["widgets_values"]["filename_prefix"],
             "openclaw/test/general-video-v1/render",
+        )
+        self.assertEqual(get_node(workflow, 4020)["widgets_values"]["frame_rate"], 15)
+        self.assertIsNone(get_node(workflow, 4020)["inputs"][4]["link"])
+        self.assertEqual(
+            _subgraph_node(workflow, "c475d739-ec74-430f-a7bd-aab0fdd85070", 3253)["widgets_values"][2],
+            1,
         )
         self.assertTrue(get_node(workflow, 4010)["widgets_values"][0])
         self.assertFalse(get_node(workflow, 4011)["widgets_values"][0])
@@ -182,3 +202,13 @@ def _overlap(left: tuple[int, float, float, float, float], right: tuple[int, flo
         and left_y < right_y + right_h
         and left_y + left_h > right_y
     )
+
+
+def _subgraph_node(workflow: dict, subgraph_id: str, node_id: int) -> dict:
+    for subgraph in workflow.get("definitions", {}).get("subgraphs", []):
+        if subgraph.get("id") != subgraph_id:
+            continue
+        for node in subgraph.get("nodes", []):
+            if int(node["id"]) == node_id:
+                return node
+    raise KeyError((subgraph_id, node_id))

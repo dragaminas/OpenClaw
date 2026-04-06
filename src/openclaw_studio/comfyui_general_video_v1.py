@@ -29,8 +29,10 @@ DEFAULT_PROMPT = (
 DEFAULT_CLIP_NAME = "umt5_xxl_fp16.safetensors"
 DEFAULT_CONTROL_WIDTH = 512
 DEFAULT_PREPROCESS_RESOLUTION = 288
-DEFAULT_FRAME_LOAD_CAP = 8
+DEFAULT_FRAME_LOAD_CAP = 0
 DEFAULT_RENDER_FRAME_RATE = 12
+DEFAULT_OPERATIONAL_FALLBACK_FRAME_RATE = 24
+DEFAULT_OPERATIONAL_RENDER_STEPS = 8
 DEFAULT_USE_BORDERS = True
 DEFAULT_USE_POSE = True
 DEFAULT_USE_DEPTH = True
@@ -160,10 +162,13 @@ def patch_general_video_v1_runtime(
     _find_node(workflow, 4007)["widgets_values"]["filename_prefix"] = (
         f"{output_prefix_root}/preprocess_pose"
     )
+    _set_video_combine_frame_rate(workflow, 4005, render_frame_rate)
+    _set_video_combine_frame_rate(workflow, 4006, render_frame_rate)
+    _set_video_combine_frame_rate(workflow, 4007, render_frame_rate)
     _find_node(workflow, 4020)["widgets_values"]["filename_prefix"] = (
         f"{output_prefix_root}/render"
     )
-    _find_node(workflow, 4020)["widgets_values"]["frame_rate"] = render_frame_rate
+    _set_video_combine_frame_rate(workflow, 4020, render_frame_rate)
     _find_node(workflow, 4009)["widgets_values"][0] = (
         f"{output_prefix_root}/first_frame"
     )
@@ -182,6 +187,7 @@ def patch_general_video_v1_runtime(
         sampler_node = _find_subgraph_node(render_subgraph, 3253)
         sampler_node["widgets_values"][2] = 1
         sampler_node["widgets_values"][3] = 1
+    _sync_top_level_links(workflow)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -258,6 +264,9 @@ def _configure_render_core_defaults(workflow: dict[str, Any]) -> None:
         workflow, "c475d739-ec74-430f-a7bd-aab0fdd85070"
     )
     _find_subgraph_node(render_subgraph, 3268)["widgets_values"][0] = 0
+    _find_subgraph_node(render_subgraph, 3253)["widgets_values"][2] = (
+        DEFAULT_OPERATIONAL_RENDER_STEPS
+    )
 
 
 def _remove_nodes(workflow: dict[str, Any], node_ids: set[int]) -> None:
@@ -502,12 +511,16 @@ def _build_added_nodes(
             widgets_overrides=_video_combine_widgets(f"{DEFAULT_OUTPUT_PREFIX_ROOT}/render"),
         )
     )
+    for node_id in (4005, 4006, 4007, 4020):
+        _promote_video_combine_frame_rate_input(
+            next(node for node in added_nodes if int(node["id"]) == node_id)
+        )
     return added_nodes
 
 
 def _video_combine_widgets(filename_prefix: str) -> dict[str, Any]:
     return {
-        "frame_rate": DEFAULT_RENDER_FRAME_RATE,
+        "frame_rate": DEFAULT_OPERATIONAL_FALLBACK_FRAME_RATE,
         "loop_count": 0,
         "filename_prefix": filename_prefix,
         "format": "video/h264-mp4",
@@ -519,6 +532,29 @@ def _video_combine_widgets(filename_prefix: str) -> dict[str, Any]:
         "save_output": True,
         "videopreview": {"hidden": False, "paused": False, "params": {}},
     }
+
+
+def _promote_video_combine_frame_rate_input(node: dict[str, Any]) -> None:
+    if any(input_entry.get("name") == "frame_rate" for input_entry in node.get("inputs", [])):
+        return
+    node.setdefault("inputs", []).append(
+        {
+            "name": "frame_rate",
+            "type": "FLOAT",
+            "widget": {"name": "frame_rate"},
+            "link": None,
+        }
+    )
+
+
+def _set_video_combine_frame_rate(
+    workflow: dict[str, Any],
+    node_id: int,
+    frame_rate: int,
+) -> None:
+    node = _find_node(workflow, node_id)
+    _remove_link_to_target(workflow, node_id, 4)
+    node["widgets_values"]["frame_rate"] = frame_rate
 
 
 def set_general_video_v1_controls(
@@ -552,9 +588,9 @@ def _layout_general_video_v1(workflow: dict[str, Any]) -> None:
     note_frame_cap["size"] = [520, 110]
     note_frame_cap["widgets_values"] = [
         (
-            "En corridas largas de Wan/VACE conviene usar frame_load_cap con "
-            "formula 4n+1. La validacion rapida de V1 puede usar menos frames "
-            "solo para comprobar la base."
+            "Uso normal: frame_load_cap=0 para cargar el clip completo y "
+            "mantener el fps del video base. Usa un cap 4n+1 solo para "
+            "corridas largas o para la ruta de validacion rapida."
         )
     ]
 
@@ -691,6 +727,8 @@ def _wire_general_video_v1(workflow: dict[str, Any]) -> None:
     _add_link(workflow, 4002, 0, 4005, 0, "IMAGE")
     _add_link(workflow, 4003, 0, 4006, 0, "IMAGE")
     _add_link(workflow, 4004, 0, 4007, 0, "IMAGE")
+    for target_id in (4005, 4006, 4007, 4020):
+        _add_link(workflow, 3083, 0, target_id, 4, "FLOAT")
 
     # first frame preview and references
     _add_link(workflow, 4008, 0, 4009, 0, "IMAGE")

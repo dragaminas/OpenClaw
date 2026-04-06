@@ -26,6 +26,9 @@ Este documento registra el cierre comprobado de `8.21.2` y `8.21.3`.
 - los tres controles `bordes`, `pose` y `profundidad` pueden quedar activos a la vez en una corrida real local
 - la corrida publica artefactos revisables para preview, preprocess y render final
 - la biblioteca `openclaw-workflows` ya publica `render-video` usando esta V1 derivada
+- la ruta `validation` sigue separada y mantiene overrides rapidos para humo y
+  comprobacion tecnica, pero no debe contaminar el template funcional abierto
+  desde la UI
 
 ## Artefactos publicados
 
@@ -38,6 +41,11 @@ Este documento registra el cierre comprobado de `8.21.2` y `8.21.3`.
 ## Alcance real de este cierre
 
 Lo que queda validado en `8.21.3` es la base operativa de la `V1`, no la version final de producto.
+
+La corrida registrada aqui uso un perfil rapido de validacion (`frame_load_cap=2`,
+`render_frame_rate=12`, `full_quality=false`). Ese perfil sirve para comprobar
+que la cadena corre en esta maquina, pero no es el default que debe abrirse
+desde la UI para pruebas funcionales.
 
 Ya funciona de verdad:
 

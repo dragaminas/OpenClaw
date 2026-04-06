@@ -5,14 +5,14 @@ hardware_profile: minimum
 workflow: ComfyUIWorkflows/local/minimum/uc-vid-02-general-video-render-rtx3060-v1.json
 defaults:
   control_width: 512
-  frame_load_cap: 8
-  fps: 12
+  frame_load_cap: 0
+  fps: source
   controles_activos: bordes,pose,profundidad
   segmentacion: single
 paths:
   base_video: blender/<shot>__base__v001.mp4
   output_prefix: comfyui/output/video/<shot>/<shot>__general_render__v001
 user_messages:
-  start: "Voy a preparar y renderizar este video con la V1 general."
-  blocked: "No pude compilar o ejecutar la V1 general con este material."
-  success: "La V1 general dejo preview, controles y render final en la carpeta de salida."
+  start: "Voy a preparar y renderizar este video con la V1 general funcional."
+  blocked: "No pude compilar o ejecutar la V1 general funcional con este material."
+  success: "La V1 general funcional dejo preview, controles y render final en la carpeta de salida."

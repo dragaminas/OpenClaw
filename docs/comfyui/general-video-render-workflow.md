@@ -419,6 +419,19 @@ Script ya previsto para prepararlo:
 scripts/apps/comfyui-stage-e2e-fixture.sh
 ```
 
+## Regla de publicacion en UI
+
+La biblioteca `openclaw-workflows` debe publicar aqui el workflow funcional,
+no el de validacion rapida.
+
+- `render-video` debe abrir la variante operativa para uso real desde la UI
+- la variante operativa debe nacer con `frame_load_cap=0`
+- la variante operativa debe heredar el `fps` del video base
+- la variante operativa puede seguir usando una resolucion conservadora para
+  `RTX 3060`, pero no debe truncar el clip por defecto
+- cualquier ruta rapida de comprobacion debe quedarse fuera de la UI funcional
+  y llevar explicitamente el apellido `validation`
+
 ## Comandos de verificacion esperados
 
 La implementacion final de esta tarea deberia dejar documentados y ejecutados,
