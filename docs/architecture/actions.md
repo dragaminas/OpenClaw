@@ -65,6 +65,26 @@ Modo tecnico:
 - responder con mensajes simples
 - evitar comandos arbitrarios
 
+## Dos modos de `studio`
+
+No todo lo que entra con wake word deberia terminar en una respuesta fija del
+plugin.
+
+Hay dos modos validos:
+
+- modo operativo: el plugin ejecuta una accion segura y responde directamente
+- modo asesorado: el plugin reconoce la intencion, prepara contexto seguro y
+  deja pasar el mensaje al agente general
+
+El segundo modo sirve para preguntas como:
+
+- `studio que hace prepara-video`
+- `studio explica que hace prepare-video`
+
+En esos casos, `studio-actions` no deberia inventar una respuesta dura. Deberia
+inyectar al prompt del agente contexto derivado del workflow real y dejar que
+OpenClaw explique el flujo con mas libertad.
+
 ## Regla para operaciones con ciclo de vida
 
 Cuando una accion tiene:

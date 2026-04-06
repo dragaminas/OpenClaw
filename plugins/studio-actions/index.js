@@ -12,6 +12,8 @@ const comfyuiActionScript = path.join(repoRoot, "scripts", "actions", "comfyui-a
 const runnerActionScript = path.join(repoRoot, "scripts", "actions", "runner-action.sh");
 const defaultCommandPrefix = "studio";
 const defaultChannels = ["whatsapp"];
+const workflowAdvisorRequests = new Map();
+const workflowAdvisorTtlMs = 5 * 60 * 1000;
 
 function normalizeChannels(pluginConfig) {
   return Array.isArray(pluginConfig?.channels) && pluginConfig.channels.length > 0
@@ -41,7 +43,10 @@ function escapeRegExp(text) {
 }
 
 function normalizeWorkflowRef(rawValue) {
-  return normalizeMessage(rawValue).replace(/^(workflow|flujo)\s+/i, "").trim();
+  return normalizeMessage(rawValue)
+    .replace(/^(workflow|flujo)\s+/i, "")
+    .replace(/^que hace\s+/i, "")
+    .trim();
 }
 
 function stripWakeWord(rawText, prefix) {
@@ -487,13 +492,17 @@ function buildFailureText(error) {
   return stderr || stdout || message || "No se pudo completar la accion solicitada.";
 }
 
-async function runBlenderAction(args) {
+async function execActionScript(scriptPath, args) {
+  return execFileAsync(scriptPath, args, {
+    cwd: repoRoot,
+    env: process.env,
+    maxBuffer: 1024 * 1024
+  });
+}
+
+async function runScriptAction(scriptPath, args) {
   try {
-    const { stdout, stderr } = await execFileAsync(blenderActionScript, args, {
-      cwd: repoRoot,
-      env: process.env,
-      maxBuffer: 1024 * 1024
-    });
+    const { stdout, stderr } = await execActionScript(scriptPath, args);
     const text = [stdout, stderr].map((value) => String(value ?? "").trim()).filter(Boolean).join("\n");
     return {
       handled: true,
@@ -507,24 +516,12 @@ async function runBlenderAction(args) {
   }
 }
 
+async function runBlenderAction(args) {
+  return runScriptAction(blenderActionScript, args);
+}
+
 async function runComfyUIAction(args) {
-  try {
-    const { stdout, stderr } = await execFileAsync(comfyuiActionScript, args, {
-      cwd: repoRoot,
-      env: process.env,
-      maxBuffer: 1024 * 1024
-    });
-    const text = [stdout, stderr].map((value) => String(value ?? "").trim()).filter(Boolean).join("\n");
-    return {
-      handled: true,
-      text: text || "Accion completada."
-    };
-  } catch (error) {
-    return {
-      handled: true,
-      text: buildFailureText(error)
-    };
-  }
+  return runScriptAction(comfyuiActionScript, args);
 }
 
 function formatHomePath(filePath) {
@@ -603,6 +600,85 @@ async function runRunnerAction(args) {
   }
 }
 
+function buildWorkflowAdvisorKeyCandidates(text) {
+  const normalized = normalizeIntentText(text);
+  if (!normalized) return [];
+  const strippedPrefix = normalized.replace(/^studio\s+/i, "").trim();
+  return Array.from(new Set([normalized, strippedPrefix].filter(Boolean)));
+}
+
+function pruneWorkflowAdvisorRequests(now = Date.now()) {
+  for (const [key, value] of workflowAdvisorRequests.entries()) {
+    if (!value || typeof value !== "object" || now - value.createdAt > workflowAdvisorTtlMs) {
+      workflowAdvisorRequests.delete(key);
+    }
+  }
+}
+
+function registerWorkflowAdvisorRequest(messageText, advisoryContext) {
+  const now = Date.now();
+  pruneWorkflowAdvisorRequests(now);
+  for (const key of buildWorkflowAdvisorKeyCandidates(messageText)) {
+    workflowAdvisorRequests.set(key, {
+      advisoryContext,
+      createdAt: now
+    });
+  }
+}
+
+function consumeWorkflowAdvisorRequest(promptText) {
+  pruneWorkflowAdvisorRequests();
+  for (const key of buildWorkflowAdvisorKeyCandidates(promptText)) {
+    const match = workflowAdvisorRequests.get(key);
+    if (match) {
+      workflowAdvisorRequests.delete(key);
+      return match.advisoryContext;
+    }
+  }
+  return null;
+}
+
+function buildWorkflowAdvisorPromptContext(advisoryContext, promptText) {
+  return [
+    "Studio advisory mode is active for this turn.",
+    `The user asked: ${promptText}`,
+    "Use the following grounded workflow context to answer interactively and naturally.",
+    "Explain how the workflow works and how to use it in ComfyUI.",
+    "Prefer the real workflow entry nodes, prompt nodes, model nodes, and outputs from the context.",
+    "Do not claim to see nodes or settings that are not present below.",
+    "",
+    advisoryContext
+  ].join("\n");
+}
+
+async function prepareWorkflowAdvisorTurn(event, parsed) {
+  try {
+    const { stdout, stderr } = await execActionScript(comfyuiActionScript, [
+      "workflow-advisory",
+      parsed.workflowRef
+    ]);
+    const advisoryContext = [stdout, stderr]
+      .map((value) => String(value ?? "").trim())
+      .filter(Boolean)
+      .join("\n");
+
+    if (!advisoryContext) {
+      return {
+        handled: true,
+        text: "No pude preparar contexto suficiente para explicar ese workflow."
+      };
+    }
+
+    registerWorkflowAdvisorRequest(event?.content ?? event?.body ?? "", advisoryContext);
+    return { handled: false };
+  } catch (error) {
+    return {
+      handled: true,
+      text: buildFailureText(error)
+    };
+  }
+}
+
 async function handleBeforeDispatch(event, ctx, pluginConfig = {}, logger = console) {
   const allowedChannels = normalizeChannels(pluginConfig);
   if (!allowedChannels.includes(ctx?.channelId ?? "")) return undefined;
@@ -641,7 +717,7 @@ async function handleBeforeDispatch(event, ctx, pluginConfig = {}, logger = cons
     case "comfyui-workflows":
       return runComfyUIAction(["workflows"]);
     case "comfyui-workflow-info":
-      return runComfyUIAction(["workflow-info", parsed.workflowRef]);
+      return prepareWorkflowAdvisorTurn(event, parsed);
     case "comfyui-workflow-open":
       return runComfyUIAction(["open-workflow", parsed.workflowRef]);
     case "comfyui-workflow-path":
@@ -705,8 +781,31 @@ const studioActionsPlugin = {
         };
       }
     });
+    api.on("before_prompt_build", (event) => {
+      try {
+        const advisoryContext = consumeWorkflowAdvisorRequest(event?.prompt ?? "");
+        if (!advisoryContext) return undefined;
+        return {
+          prependContext: buildWorkflowAdvisorPromptContext(
+            advisoryContext,
+            String(event?.prompt ?? "").trim()
+          )
+        };
+      } catch (error) {
+        api.logger?.error?.(`studio-actions prompt injection: ${buildFailureText(error)}`);
+        return undefined;
+      }
+    });
   }
 };
 
-export { buildHelpText, handleBeforeDispatch, parseSafeActionMessage };
+export {
+  buildHelpText,
+  buildWorkflowAdvisorPromptContext,
+  consumeWorkflowAdvisorRequest,
+  handleBeforeDispatch,
+  parseSafeActionMessage,
+  prepareWorkflowAdvisorTurn,
+  registerWorkflowAdvisorRequest
+};
 export default studioActionsPlugin;

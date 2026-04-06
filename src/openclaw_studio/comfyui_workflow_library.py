@@ -8,6 +8,7 @@ import os
 import shutil
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any
 
 from openclaw_studio.application.session_engine import normalize_text
 from openclaw_studio.contracts.flows import (
@@ -28,6 +29,15 @@ NODE_DISPLAY_NAME_MAPPINGS = {}
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
 '''
+
+FRONTEND_ONLY_NODE_TYPES = {
+    "GetNode",
+    "Label (rgthree)",
+    "MarkdownNote",
+    "Note",
+    "Reroute",
+    "SetNode",
+}
 
 
 @dataclass(frozen=True)
@@ -310,6 +320,50 @@ def render_workflow_explanation(entry: WorkflowTemplateEntry) -> str:
     return "\n".join(lines)
 
 
+def render_workflow_advisory_context(entry: WorkflowTemplateEntry) -> str:
+    """Render richer workflow context intended for prompt injection."""
+
+    source_payload = json.loads(Path(entry.source_path).read_text(encoding="utf-8"))
+    graph_summary = summarize_workflow_graph(source_payload)
+
+    lines = [
+        "OpenClaw workflow advisory context:",
+        f"workflow_alias={entry.friendly_alias}",
+        f"use_case_id={entry.use_case_id}",
+        f"workflow_name={entry.display_label}",
+        f"workflow_description={entry.description}",
+        f"output={entry.output_label}",
+        f"required_inputs={_render_input_labels(entry.required_input_labels)}",
+        f"optional_inputs={_render_input_labels(entry.optional_input_labels)}",
+        f"variant={entry.variant_display_label}",
+        f"source_path={format_home_path(entry.source_path)}",
+        f"template_path={format_home_path(entry.template_path)}",
+        f"load_in_ui={entry.loader_hint}",
+    ]
+    if entry.sample_user_request:
+        lines.append(f"sample_request={entry.sample_user_request}")
+
+    lines.extend(
+        (
+            "workflow_graph_summary:",
+            f"- node_count={graph_summary['node_count']}",
+            f"- visible_titles={graph_summary['visible_titles']}",
+            f"- editable_entry_nodes={graph_summary['editable_entry_nodes']}",
+            f"- prompt_nodes={graph_summary['prompt_nodes']}",
+            f"- model_nodes={graph_summary['model_nodes']}",
+            f"- output_nodes={graph_summary['output_nodes']}",
+            f"- node_type_counts={graph_summary['node_type_counts']}",
+            (
+                "- usage_hints="
+                "Para explicar como usarlo, prioriza los entry_nodes editables, "
+                "luego los prompt_nodes, y trata los model_nodes como "
+                "infraestructura que normalmente no se toca."
+            ),
+        )
+    )
+    return "\n".join(lines)
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Create the CLI parser for the ComfyUI workflow library."""
 
@@ -342,6 +396,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Explica en lenguaje claro que hace un workflow.",
     )
     explain_parser.add_argument("workflow_ref", help="Alias o use_case_id del workflow.")
+
+    advisory_parser = subparsers.add_parser(
+        "advisory-context",
+        help="Devuelve contexto estructurado del workflow real para el agente.",
+    )
+    advisory_parser.add_argument("workflow_ref", help="Alias o use_case_id del workflow.")
 
     return parser
 
@@ -382,6 +442,16 @@ def main(argv: list[str] | None = None) -> int:
             comfyui_dir=comfyui_dir,
         )
         print(render_workflow_explanation(entry))
+        return 0
+
+    if args.command == "advisory-context":
+        sync_workflow_templates(repo_root, comfyui_dir)
+        entry = resolve_workflow_template_entry(
+            workflow_ref=args.workflow_ref,
+            repo_root=repo_root,
+            comfyui_dir=comfyui_dir,
+        )
+        print(render_workflow_advisory_context(entry))
         return 0
 
     parser.error(f"Comando no soportado: {args.command}")
@@ -442,6 +512,150 @@ def _render_input_labels(input_labels: tuple[str, ...]) -> str:
     """Join input labels in a compact human-friendly form."""
 
     return ", ".join(input_labels) if input_labels else "ninguna"
+
+
+def summarize_workflow_graph(payload: dict[str, Any]) -> dict[str, str]:
+    """Build a compact summary of the real workflow graph for advisory turns."""
+
+    nodes = payload.get("nodes", [])
+    visible_titles: list[str] = []
+    editable_entry_nodes: list[str] = []
+    prompt_nodes: list[str] = []
+    model_nodes: list[str] = []
+    output_nodes: list[str] = []
+    node_type_counts: dict[str, int] = {}
+
+    for node in nodes:
+        node_type = str(node.get("type", ""))
+        if node_type and node_type not in FRONTEND_ONLY_NODE_TYPES:
+            node_type_counts[node_type] = node_type_counts.get(node_type, 0) + 1
+
+        title = str(node.get("title") or node_type).strip()
+        if (
+            node_type in {"Label (rgthree)", "MarkdownNote", "Note"}
+            and title
+            and title not in visible_titles
+        ):
+            visible_titles.append(title)
+
+        summary_line = _summarize_node(node)
+        if _is_editable_entry_node(node):
+            editable_entry_nodes.append(summary_line)
+        elif _is_prompt_node(node):
+            prompt_nodes.append(summary_line)
+        elif _is_model_node(node):
+            model_nodes.append(summary_line)
+        elif _is_output_node(node):
+            output_nodes.append(summary_line)
+
+    top_node_types = sorted(
+        node_type_counts.items(),
+        key=lambda item: (-item[1], item[0]),
+    )[:8]
+
+    return {
+        "node_count": str(len(nodes)),
+        "visible_titles": _render_compact_list(visible_titles[:6]),
+        "editable_entry_nodes": _render_compact_list(editable_entry_nodes[:8]),
+        "prompt_nodes": _render_compact_list(prompt_nodes[:6]),
+        "model_nodes": _render_compact_list(model_nodes[:8]),
+        "output_nodes": _render_compact_list(output_nodes[:8]),
+        "node_type_counts": _render_compact_list(
+            [f"{node_type} x{count}" for node_type, count in top_node_types]
+        ),
+    }
+
+
+def _is_editable_entry_node(node: dict[str, Any]) -> bool:
+    node_type = str(node.get("type", ""))
+    node_title = str(node.get("title") or "").lower()
+    if node_type in FRONTEND_ONLY_NODE_TYPES or _is_model_node(node):
+        return False
+    return (
+        node_type in {"LoadImage", "VHS_LoadVideo", "LoadImageMask", "LoadAudio"}
+        or ("load" in node_type.lower() and node_type not in {"UNETLoader", "CLIPLoader", "VAELoader", "ModelPatchLoader"})
+        or ("input" in node_title and node_type not in FRONTEND_ONLY_NODE_TYPES)
+    )
+
+
+def _is_prompt_node(node: dict[str, Any]) -> bool:
+    return str(node.get("type", "")) in {"CLIPTextEncode", "Text Multiline (Code Compatible)"}
+
+
+def _is_model_node(node: dict[str, Any]) -> bool:
+    return str(node.get("type", "")) in {
+        "UNETLoader",
+        "CLIPLoader",
+        "VAELoader",
+        "ModelPatchLoader",
+        "LoraLoader",
+        "DownloadAndLoadDepthAnythingV2Model",
+    }
+
+
+def _is_output_node(node: dict[str, Any]) -> bool:
+    node_type = str(node.get("type", ""))
+    node_title = str(node.get("title") or "").lower()
+    if node_type in FRONTEND_ONLY_NODE_TYPES:
+        return False
+    return (
+        node_type in {"SaveImage", "CreateVideo", "VHS_VideoCombine", "SaveAnimatedWEBP"}
+        or node_type.lower().startswith("save")
+        or "save" in node_title
+        or "output" in node_title
+    )
+
+
+def _summarize_node(node: dict[str, Any]) -> str:
+    node_type = str(node.get("type", ""))
+    title = str(node.get("title") or node_type).strip()
+    primary_value = _extract_primary_widget_value(node.get("widgets_values"))
+    if primary_value:
+        return f"{title} [{node_type}] -> {primary_value}"
+    return f"{title} [{node_type}]"
+
+
+def _extract_primary_widget_value(raw_value: Any) -> str:
+    if isinstance(raw_value, dict):
+        for key in (
+            "video",
+            "image",
+            "filename_prefix",
+            "text",
+            "unet_name",
+            "clip_name",
+            "vae_name",
+            "lora_name",
+        ):
+            value = raw_value.get(key)
+            if value is not None and value != "" and value != []:
+                return str(value)
+        for value in raw_value.values():
+            extracted = _extract_primary_widget_value(value)
+            if extracted:
+                return extracted
+        return ""
+
+    if isinstance(raw_value, list):
+        for value in raw_value:
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+        for value in raw_value:
+            if isinstance(value, (int, float, bool)):
+                return str(value)
+        return ""
+
+    if isinstance(raw_value, str):
+        return raw_value.strip()
+
+    if isinstance(raw_value, (int, float, bool)):
+        return str(raw_value)
+
+    return ""
+
+
+def _render_compact_list(values: list[str]) -> str:
+    return " | ".join(value for value in values if value) if values else "none"
 
 
 if __name__ == "__main__":

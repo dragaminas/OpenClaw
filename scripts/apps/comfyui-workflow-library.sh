@@ -23,6 +23,7 @@ Comandos disponibles:
 - list
 - describe <alias|use_case_id>
 - explain <alias|use_case_id>
+- advisory-context <alias|use_case_id>
 - open <alias|use_case_id>
 EOF
 }
@@ -82,6 +83,10 @@ case "$command_name" in
     [[ -n "$workflow_ref" ]] || die "Debes indicar un alias o use_case_id."
     python_workflow_library explain "$workflow_ref"
     ;;
+  advisory-context)
+    [[ -n "$workflow_ref" ]] || die "Debes indicar un alias o use_case_id."
+    python_workflow_library advisory-context "$workflow_ref"
+    ;;
   open)
     [[ -n "$workflow_ref" ]] || die "Debes indicar un alias o use_case_id."
     python_workflow_library sync >/dev/null
@@ -111,6 +116,6 @@ case "$command_name" in
     printf '%s\n' "$open_output"
     ;;
   *)
-    die "Uso: $0 [help|sync|list|describe <alias|use_case_id>|explain <alias|use_case_id>|open <alias|use_case_id>]"
+    die "Uso: $0 [help|sync|list|describe <alias|use_case_id>|explain <alias|use_case_id>|advisory-context <alias|use_case_id>|open <alias|use_case_id>]"
     ;;
 esac

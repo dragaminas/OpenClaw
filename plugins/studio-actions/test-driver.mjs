@@ -19,4 +19,4 @@ const result = await handleBeforeDispatch(
 );
 
 console.log(JSON.stringify(result, null, 2));
-if (!result?.handled) process.exit(2);
+if (result == null) process.exit(2);

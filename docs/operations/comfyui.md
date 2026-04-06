@@ -221,6 +221,11 @@ workflow, incluyendo que hace, su entrada obligatoria y la salida principal.
 Ademas, `studio que hace <alias>` y `studio comfyui que hace <alias>` explican
 un workflow concreto usando el mismo catalogo canonico.
 
+Para estas preguntas asesoradas, `studio-actions` ya no responde con un bloque
+fijo. Ahora prepara contexto del workflow real y lo inyecta al agente general
+via `before_prompt_build`, para que la respuesta pueda ser mas libre e
+interactiva sin perder grounding.
+
 ## Nota sobre Python
 
 Si el venv se crea sin `pip`, normalmente faltara `python3-venv` o

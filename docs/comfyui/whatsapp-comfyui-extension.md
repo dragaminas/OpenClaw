@@ -163,6 +163,16 @@ es su entrada obligatoria y que salida produce.
 workflow desde el mismo catalogo canonico y explicar el flujo en lenguaje
 humano, sin duplicar logica dentro de WhatsApp.
 
+Implementacion actual recomendada:
+
+- `before_dispatch` reconoce la consulta asesorada y la deja pasar
+- el plugin prepara contexto derivado del workflow real
+- `before_prompt_build` inyecta ese contexto al agente general
+- OpenClaw responde de forma libre pero grounded
+
+Eso evita convertir preguntas de producto en respuestas fijas del plugin y
+permite explicar como usar el workflow mirando su estructura real.
+
 ## Smoke validation
 
 - `studio corre smoke de comfyui`

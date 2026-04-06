@@ -7,6 +7,7 @@ from pathlib import Path
 
 from openclaw_studio.comfyui_workflow_library import (
     MODULE_NAME,
+    render_workflow_advisory_context,
     build_workflow_template_entries,
     render_workflow_explanation,
     render_workflow_list,
@@ -97,6 +98,21 @@ class ComfyUIWorkflowLibraryTests(unittest.TestCase):
         self.assertIn("Entrada obligatoria:", rendered)
         self.assertIn("Salida principal:", rendered)
         self.assertIn("Comando: studio comfyui abre workflow prepara-video", rendered)
+
+    def test_render_workflow_advisory_context_mentions_real_graph_structure(self) -> None:
+        entry = resolve_workflow_template_entry(
+            workflow_ref="prepara-video",
+            repo_root=self.repo_root,
+            comfyui_dir=self.comfyui_dir,
+        )
+
+        rendered = render_workflow_advisory_context(entry)
+
+        self.assertIn("OpenClaw workflow advisory context:", rendered)
+        self.assertIn("workflow_alias=prepara-video", rendered)
+        self.assertIn("editable_entry_nodes=", rendered)
+        self.assertIn("INPUT VIDEO [VHS_LoadVideo]", rendered)
+        self.assertIn("output_nodes=", rendered)
 
 
 if __name__ == "__main__":
