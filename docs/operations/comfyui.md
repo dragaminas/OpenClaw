@@ -158,6 +158,9 @@ scripts/openclaw/test-studio-actions-plugin.sh "studio como esta comfyui"
 scripts/openclaw/test-studio-actions-plugin.sh "studio inicia comfyui"
 scripts/openclaw/test-studio-actions-plugin.sh "studio reinicia comfyui"
 scripts/openclaw/test-studio-actions-plugin.sh "studio abre comfyui"
+scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui workflows"
+scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui abre workflow prepara-video"
+scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui ruta workflow prepara-video"
 scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui smoke"
 scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui smoke SMK-VID-04-01"
 scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui estado <run_id>"
@@ -171,6 +174,9 @@ scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui evidencia <run_id
 - `studio reinicia comfyui`
 - `studio abre comfyui`
 - `studio para comfyui`
+- `studio comfyui workflows`
+- `studio comfyui abre workflow <alias>`
+- `studio comfyui ruta workflow <alias>`
 - `studio comfyui smoke`
 - `studio comfyui smoke <case_id>`
 - `studio comfyui validate atomic <test_id>`
@@ -181,6 +187,26 @@ scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui evidencia <run_id
 
 `validate_atomic` y `validate_composed` hoy ya entran por el mismo runner, pero
 responden `unsupported` hasta que `8.18` implemente la ejecucion real.
+
+## Biblioteca visible en ComfyUI
+
+Los workflows OpenClaw publicados para inspeccion manual viven como templates
+nativos bajo:
+
+- `~/ComfyUI/custom_nodes/openclaw-workflows/example_workflows/`
+
+La fuente de verdad sigue siendo `ComfyUIWorkflows/local/` en el repo. La
+biblioteca local publica symlinks o copias hacia esos JSON canonicos y deja los
+aliases humanos del catalogo Python como nombre visible:
+
+- `prepara-video`
+- `render-video`
+- `render-frame`
+- `explora-estilos`
+
+Si `ComfyUI` ya estaba abierto antes de crear por primera vez el modulo
+`openclaw-workflows`, conviene reiniciarlo para que registre la ruta
+`/api/workflow_templates/openclaw-workflows/...`.
 
 ## Nota sobre Python
 
@@ -196,7 +222,6 @@ mantiene solo para compatibilidad o migracion.
 
 ## Pendiente
 
-- exponer workflows reales de imagen o video sobre esta base
 - implementar `validate_atomic`
 - implementar `validate_composed`
 

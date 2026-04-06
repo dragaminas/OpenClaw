@@ -78,6 +78,9 @@ function buildHelpText(prefix) {
     `${prefix} inicia comfyui`,
     `${prefix} reinicia comfyui`,
     `${prefix} como esta comfyui`,
+    `${prefix} comfyui workflows`,
+    `${prefix} comfyui abre workflow prepara-video`,
+    `${prefix} comfyui ruta workflow prepara-video`,
     `${prefix} comfyui smoke`,
     `${prefix} comfyui smoke SMK-VID-04-01`,
     `${prefix} comfyui estado smoke-light-5`,
@@ -162,9 +165,21 @@ function parseLegacyCommand(stripped, prefix) {
   const rawArg = tokens.slice(2).join(" ").trim();
 
   if (tool === "comfyui") {
+    const workflowSubject = tokens[2]?.toLowerCase() ?? "";
+    const workflowRef = tokens.slice(3).join(" ").trim();
+
     switch (action) {
       case "help":
         return { kind: "help" };
+      case "workflows":
+        return { kind: "comfyui-workflows" };
+      case "abre":
+        if (workflowSubject === "workflow") {
+          return workflowRef
+            ? { kind: "comfyui-workflow-open", workflowRef }
+            : { kind: "error", text: "Dime el alias del workflow. Ejemplo: studio comfyui abre workflow prepara-video" };
+        }
+        return { kind: "comfyui-open" };
       case "status":
         return { kind: "comfyui-status" };
       case "start":
@@ -174,7 +189,20 @@ function parseLegacyCommand(stripped, prefix) {
       case "reload":
         return { kind: "comfyui-restart" };
       case "open":
+        if (workflowSubject === "workflow") {
+          return workflowRef
+            ? { kind: "comfyui-workflow-open", workflowRef }
+            : { kind: "error", text: "Dime el alias del workflow. Ejemplo: studio comfyui open workflow prepara-video" };
+        }
         return { kind: "comfyui-open" };
+      case "ruta":
+      case "path":
+        if (workflowSubject === "workflow") {
+          return workflowRef
+            ? { kind: "comfyui-workflow-path", workflowRef }
+            : { kind: "error", text: "Dime el alias del workflow. Ejemplo: studio comfyui ruta workflow prepara-video" };
+        }
+        return { kind: "error", text: `No reconozco esa accion de ComfyUI. Escribe "${prefix}" para ver ayuda.` };
       case "stop":
         return { kind: "comfyui-stop" };
       case "url":
@@ -291,6 +319,41 @@ function parseNaturalSpanish(normalized) {
     "stop comfyui"
   ].includes(low)) {
     return { kind: "comfyui-stop" };
+  }
+
+  if ([
+    "workflows comfyui",
+    "lista workflows comfyui",
+    "muestra workflows comfyui",
+    "lista los workflows de comfyui"
+  ].includes(low)) {
+    return { kind: "comfyui-workflows" };
+  }
+
+  const openWorkflow = extractProjectName(normalized, [
+    "abre workflow ",
+    "abrir workflow ",
+    "abre el workflow ",
+    "abrir el workflow ",
+    "abre workflow de comfyui ",
+    "abrir workflow de comfyui "
+  ]);
+  if (openWorkflow !== null) {
+    return openWorkflow
+      ? { kind: "comfyui-workflow-open", workflowRef: openWorkflow }
+      : { kind: "error", text: "Dime el alias del workflow. Ejemplo: studio abre workflow prepara-video" };
+  }
+
+  const workflowPath = extractProjectName(normalized, [
+    "ruta workflow ",
+    "muestra ruta workflow ",
+    "path workflow ",
+    "ruta del workflow "
+  ]);
+  if (workflowPath !== null) {
+    return workflowPath
+      ? { kind: "comfyui-workflow-path", workflowRef: workflowPath }
+      : { kind: "error", text: "Dime el alias del workflow. Ejemplo: studio ruta workflow prepara-video" };
   }
 
   if ([
@@ -540,6 +603,12 @@ async function handleBeforeDispatch(event, ctx, pluginConfig = {}, logger = cons
       return runComfyUIAction(["restart"]);
     case "comfyui-open":
       return runComfyUIAction(["open"]);
+    case "comfyui-workflows":
+      return runComfyUIAction(["workflows"]);
+    case "comfyui-workflow-open":
+      return runComfyUIAction(["open-workflow", parsed.workflowRef]);
+    case "comfyui-workflow-path":
+      return runComfyUIAction(["workflow-path", parsed.workflowRef]);
     case "comfyui-stop":
       return runComfyUIAction(["stop"]);
     case "comfyui-url":

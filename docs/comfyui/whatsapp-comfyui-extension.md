@@ -137,6 +137,17 @@ deberia quedar cerrado solo para smoke.
 - `studio abre comfyui`
 - `studio para comfyui`
 
+## Biblioteca visible de workflows
+
+- `studio comfyui workflows`
+- `studio comfyui abre workflow prepara-video`
+- `studio comfyui ruta workflow prepara-video`
+
+Estos comandos no lanzan el runner. Publican y exponen la biblioteca visible de
+workflows de `OpenClaw` como templates nativos de `ComfyUI` bajo
+`custom_nodes/openclaw-workflows/example_workflows/`, reutilizando el mismo
+catalogo Python de flujos y aliases amigables.
+
 ## Smoke validation
 
 - `studio corre smoke de comfyui`
@@ -243,6 +254,9 @@ mismo contrato de runner.
 
 Hoy ya quedan expuestos por WhatsApp:
 
+- `studio comfyui workflows`
+- `studio comfyui abre workflow <alias>`
+- `studio comfyui ruta workflow <alias>`
 - `studio comfyui smoke`
 - `studio comfyui smoke <case_id>`
 - `studio comfyui estado <run_id>`
@@ -255,6 +269,13 @@ Y quedan preparados por el mismo contrato:
 - `studio comfyui validate composed <test_id>`
 
 con respuesta `unsupported` hasta que `8.18` aterrice la ejecucion real.
+
+La apertura visual de workflows y la ejecucion por runner comparten la misma
+fuente de verdad de catalogo, pero no se mezclan:
+
+- la biblioteca visible sirve para inspeccionar y cargar grafos en la UI web
+- el runner sigue siendo la via canonica para operaciones con estado,
+  evidencia y cancelacion
 
 ## No objetivos de 8.20
 

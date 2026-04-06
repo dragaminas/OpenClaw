@@ -29,6 +29,9 @@ Lenguaje natural:
 - `studio reinicia comfyui`
 - `studio como esta comfyui`
 - `studio para comfyui`
+- `studio lista workflows comfyui`
+- `studio abre workflow prepara-video`
+- `studio ruta workflow prepara-video`
 
 Modo tecnico:
 
@@ -43,6 +46,9 @@ Modo tecnico:
 - `studio comfyui open`
 - `studio comfyui stop`
 - `studio comfyui url`
+- `studio comfyui workflows`
+- `studio comfyui abre workflow <alias>`
+- `studio comfyui ruta workflow <alias>`
 - `studio comfyui smoke`
 - `studio comfyui smoke <case_id>`
 - `studio comfyui estado <run_id>`
@@ -110,6 +116,8 @@ Implementado hoy:
 - arranque de ComfyUI
 - reinicio de ComfyUI
 - apertura de la UI web de ComfyUI
+- publicacion de workflows OpenClaw como templates nativos de ComfyUI
+- apertura de la UI web con un workflow visible en Templates
 - parada controlada de ComfyUI
 - launch de `validate_smoke` por runner canonico
 - consulta de estado, cancelacion y evidencia por `run_id`
