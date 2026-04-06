@@ -182,6 +182,7 @@ BUILTIN_FLOW_CATALOG = (
     FlowDefinition(
         use_case_id="UC-IMG-01",
         display_label="Texto a imagen",
+        friendly_alias="texto-a-imagen",
         description=(
             "Genera una imagen guiada por descripcion breve y referencias opcionales."
         ),
@@ -231,10 +232,12 @@ BUILTIN_FLOW_CATALOG = (
                 ),
             ),
         ),
+        friendly_aliases=("generar imagen", "imagen desde texto"),
     ),
     FlowDefinition(
         use_case_id="UC-IMG-02",
         display_label="Imagen base a frame renderizado",
+        friendly_alias="render-frame",
         description=(
             "Transforma una imagen base en un frame final con controles visuales "
             "opcionales."
@@ -290,10 +293,16 @@ BUILTIN_FLOW_CATALOG = (
                 ),
             ),
         ),
+        friendly_aliases=(
+            "render frame",
+            "frame renderizado",
+            "imagen renderizada",
+        ),
     ),
     FlowDefinition(
         use_case_id="UC-VID-01",
         display_label="Video base a paquete de controles",
+        friendly_alias="prepara-video",
         description=(
             "Extrae materiales de control reutilizables desde una animacion base."
         ),
@@ -328,10 +337,16 @@ BUILTIN_FLOW_CATALOG = (
                 ),
             ),
         ),
+        friendly_aliases=(
+            "prepara video",
+            "paquete de controles",
+            "controles video",
+        ),
     ),
     FlowDefinition(
         use_case_id="UC-VID-02",
         display_label="Video base y referencias a video renderizado",
+        friendly_alias="render-video",
         description=(
             "Renderiza un plano animado a partir de una base y referencias "
             "visuales."
@@ -401,10 +416,16 @@ BUILTIN_FLOW_CATALOG = (
                 supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
             ),
         ),
+        friendly_aliases=(
+            "render video",
+            "video renderizado",
+            "plano renderizado",
+        ),
     ),
     FlowDefinition(
         use_case_id="UC-VID-03",
         display_label="Imagen inicial y final a video",
+        friendly_alias="transicion-video",
         description=(
             "Genera una transicion o clip guiado por dos keyframes extremos."
         ),
@@ -446,10 +467,15 @@ BUILTIN_FLOW_CATALOG = (
                 ),
             ),
         ),
+        friendly_aliases=(
+            "transicion video",
+            "dos imagenes a video",
+        ),
     ),
     FlowDefinition(
         use_case_id="UC-VID-04",
         display_label="Video renderizado a video mejorado",
+        friendly_alias="mejora-video",
         description=(
             "Mejora una salida de video ya generada con foco en calidad final."
         ),
@@ -489,10 +515,16 @@ BUILTIN_FLOW_CATALOG = (
                 supported_hardware_profiles=HIGH_VRAM_REFERENCE_PROFILES,
             ),
         ),
+        friendly_aliases=(
+            "mejora video",
+            "upscale video",
+            "video mejorado",
+        ),
     ),
     FlowDefinition(
         use_case_id="UC-IMG-03",
         display_label="Imagen o frame a variantes de estilo",
+        friendly_alias="explora-estilos",
         description=(
             "Explora estilos y acabados reutilizables sobre una base visual."
         ),
@@ -540,6 +572,11 @@ BUILTIN_FLOW_CATALOG = (
                     "ambiciosas en hardware superior.",
                 ),
             ),
+        ),
+        friendly_aliases=(
+            "explora estilos",
+            "variantes de estilo",
+            "estilo imagen",
         ),
     ),
 )

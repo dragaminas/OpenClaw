@@ -97,6 +97,7 @@ class FlowDefinition:
 
     use_case_id: str
     display_label: str
+    friendly_alias: str
     description: str
     output_type: OutputArtifactType
     sample_user_requests: tuple[str, ...]
@@ -105,6 +106,7 @@ class FlowDefinition:
     optional_input_keys: tuple[str, ...]
     input_definitions: tuple[FlowInputDefinition, ...]
     execution_variants: tuple[ExecutionVariant, ...]
+    friendly_aliases: tuple[str, ...] = ()
     notes: tuple[str, ...] = ()
     _input_definition_by_key: dict[str, FlowInputDefinition] = field(
         init=False,
@@ -114,6 +116,26 @@ class FlowDefinition:
     def __post_init__(self) -> None:
         """Build a lookup table so the engine can resolve inputs quickly."""
 
+        cleaned_friendly_alias = self.friendly_alias.strip()
+        if not cleaned_friendly_alias:
+            raise ValueError("FlowDefinition.friendly_alias must not be empty.")
+
+        cleaned_additional_aliases: list[str] = []
+        for raw_alias in self.friendly_aliases:
+            candidate_alias = raw_alias.strip()
+            if (
+                candidate_alias
+                and candidate_alias != cleaned_friendly_alias
+                and candidate_alias not in cleaned_additional_aliases
+            ):
+                cleaned_additional_aliases.append(candidate_alias)
+
+        object.__setattr__(self, "friendly_alias", cleaned_friendly_alias)
+        object.__setattr__(
+            self,
+            "friendly_aliases",
+            tuple(cleaned_additional_aliases),
+        )
         object.__setattr__(
             self,
             "_input_definition_by_key",
@@ -127,6 +149,29 @@ class FlowDefinition:
         """Return the input definition associated with a specific key."""
 
         return self._input_definition_by_key[input_key]
+
+    @property
+    def user_aliases(self) -> tuple[str, ...]:
+        """Return the stable, user-facing aliases for this flow."""
+
+        return (self.friendly_alias, *self.friendly_aliases)
+
+    @property
+    def match_phrases(self) -> tuple[str, ...]:
+        """Return the identifiers and aliases that can route to this flow."""
+
+        candidates = (
+            self.use_case_id,
+            self.display_label,
+            self.friendly_alias,
+            self.friendly_alias.replace("-", " "),
+            *self.friendly_aliases,
+        )
+        deduped_candidates: list[str] = []
+        for candidate in candidates:
+            if candidate and candidate not in deduped_candidates:
+                deduped_candidates.append(candidate)
+        return tuple(deduped_candidates)
 
 
 # Backwards-compatible aliases kept while the rest of the project migrates.

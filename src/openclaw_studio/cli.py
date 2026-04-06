@@ -114,7 +114,11 @@ def render_summary(
     summary = session_engine.build_session_summary(session)
     lines = [
         "",
-        f"Flujo: {summary.flow_display_label} ({summary.use_case_id})",
+        (
+            "Flujo: "
+            f"{summary.flow_display_label} "
+            f"({summary.use_case_id}, alias: {summary.flow_friendly_alias})"
+        ),
         f"Variante sugerida: {summary.selected_variant_label}",
         f"Perfil de hardware: {summary.hardware_profile_label}",
         "Resumen:",
@@ -150,7 +154,8 @@ def main(argv: list[str] | None = None) -> int:
     print(
         "Interfaz detectada: "
         f"{session.selected_flow.display_label} "
-        f"({session.selected_flow.use_case_id})"
+        f"({session.selected_flow.use_case_id}, "
+        f"alias: {session.selected_flow.friendly_alias})"
     )
     print(session.selected_flow.description)
 

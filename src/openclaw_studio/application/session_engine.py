@@ -164,6 +164,7 @@ class GuidedSessionEngine:
         return SessionSummary(
             use_case_id=session.selected_flow.use_case_id,
             flow_display_label=session.selected_flow.display_label,
+            flow_friendly_alias=session.selected_flow.friendly_alias,
             selected_variant_label=selected_variant.display_label,
             hardware_profile_label=hardware_profile.value,
             provided_inputs=tuple(provided_inputs),
@@ -224,7 +225,8 @@ class GuidedSessionEngine:
         score = 0
 
         for candidate_phrase in (
-            flow_definition.routing_phrases
+            flow_definition.match_phrases
+            + flow_definition.routing_phrases
             + flow_definition.sample_user_requests
         ):
             normalized_candidate = normalize_text(candidate_phrase)

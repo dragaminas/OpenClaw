@@ -35,6 +35,7 @@ class SessionSummary:
 
     use_case_id: str
     flow_display_label: str
+    flow_friendly_alias: str
     selected_variant_label: str
     hardware_profile_label: str
     provided_inputs: tuple[tuple[str, str], ...]

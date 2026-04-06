@@ -145,6 +145,7 @@ Cada flujo configurable y ejecutable se representa como una interfaz funcional
 con:
 
 - `use_case_id`
+- `friendly_alias`
 - `label`
 - `summary`
 - `result_kind`
@@ -154,6 +155,10 @@ con:
 - `optional_slot_keys`
 - `slots`
 - `variants`
+
+El `use_case_id` sigue siendo el identificador canonico interno. El
+`friendly_alias` es el nombre corto y humano que deberiamos exponer en CLI,
+WhatsApp y catalogos visibles a usuario.
 
 Esto permite desacoplar:
 
@@ -210,15 +215,15 @@ Flujo esperado:
 
 La implementacion inicial ya define contratos para:
 
-| ID | Flujo | Tipo | Estado |
-| --- | --- | --- | --- |
-| `UC-IMG-01` | Texto a imagen | Imagen | adaptable |
-| `UC-IMG-02` | Imagen base a frame renderizado | Imagen | disponible |
-| `UC-VID-01` | Video base a paquete de controles | Video prep | disponible |
-| `UC-VID-02` | Video base y referencias a video renderizado | Video | disponible |
-| `UC-VID-03` | Imagen inicial y final a video | Video | adaptable |
-| `UC-VID-04` | Video renderizado a video mejorado | Video | futura variante |
-| `UC-IMG-03` | Imagen o frame a variantes de estilo | Imagen | adaptable |
+| ID | Alias | Flujo | Tipo | Estado |
+| --- | --- | --- | --- | --- |
+| `UC-IMG-01` | `texto-a-imagen` | Texto a imagen | Imagen | adaptable |
+| `UC-IMG-02` | `render-frame` | Imagen base a frame renderizado | Imagen | disponible |
+| `UC-VID-01` | `prepara-video` | Video base a paquete de controles | Video prep | disponible |
+| `UC-VID-02` | `render-video` | Video base y referencias a video renderizado | Video | disponible |
+| `UC-VID-03` | `transicion-video` | Imagen inicial y final a video | Video | adaptable |
+| `UC-VID-04` | `mejora-video` | Video renderizado a video mejorado | Video | futura variante |
+| `UC-IMG-03` | `explora-estilos` | Imagen o frame a variantes de estilo | Imagen | adaptable |
 
 ## Variantes de implementacion actuales
 
