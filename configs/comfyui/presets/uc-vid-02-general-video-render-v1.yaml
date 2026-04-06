@@ -10,11 +10,19 @@ defaults:
   usar_interpolacion_fps: false
   fps_objetivo: 24
   controles_activos: bordes,pose,profundidad
-  segmentacion: single
+  usar_identidad_color: false
+  colores_identidad_disponibles: rojo,verde,azul
+  segmentacion: auto_iterable
+  segmentar_clip_largo: false
+  frames_por_segmento: 49
+  solape_segmentos: 1
+  usar_mejora_final_full_hd: true
+  ancho_final: 1920
+  alto_final: 1080
 paths:
   base_video: blender/<shot>__base__v001.mp4
   output_prefix: comfyui/output/video/<shot>/<shot>__general_render__v001
 user_messages:
   start: "Voy a preparar y renderizar este video con la V1 general funcional."
   blocked: "No pude compilar o ejecutar la V1 general funcional con este material."
-  success: "La V1 general funcional dejo preview, controles y render final en la carpeta de salida."
+  success: "La V1 general funcional dejo preview, controles, segmentacion visible, render base y salida final Full HD en la carpeta de salida."
