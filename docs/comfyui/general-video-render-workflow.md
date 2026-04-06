@@ -66,6 +66,8 @@ Regla canonica:
 - `duracion_objetivo`
 - `resolucion_objetivo`
 - `segmentar_clip_largo`
+- `fps_objetivo`
+- `modo_fps`
 
 ## Comportamiento obligatorio
 
@@ -79,6 +81,8 @@ El workflow general debe:
 - escoger una resolucion adecuada al hardware local cuando el usuario no fije una
 - dividir clips largos en subsecciones iterables cuando la duracion o el coste lo exijan
 - aplicar una mejora posterior del video hasta `Full HD` cuando el clip base y el runtime lo permitan
+- dejar abierta una etapa opcional de aumento de FPS para clips tipo stopmotion,
+  colocada despues del render principal y antes del upscale final
 - publicar una secuencia renderizada final y una evidencia estable de la corrida
 
 ## Comportamiento opcional deseado
@@ -100,7 +104,9 @@ El orden correcto es:
 1. conseguir una version general que corra bien con video base, prompt y controles on/off
 2. añadir despues el etiquetado por color y las referencias por personaje
 3. estabilizar luego el troceado de clips largos
-4. cerrar por ultimo la mejora final hasta `Full HD`
+4. introducir, si aporta valor, una etapa opcional de aumento de FPS despues del
+   render principal
+5. cerrar por ultimo la mejora final hasta `Full HD`
 
 ## Base tecnica a reutilizar
 
@@ -235,6 +241,28 @@ Regla de producto:
   primera version que publique el render base y deje el upscale como paso
   posterior bien definido
 
+## Bloque 5.5: Interpolacion opcional de FPS
+
+Este bloque no forma parte de la `V1` obligatoria, pero conviene dejarlo
+ubicado desde ahora para clips tipo stopmotion.
+
+Regla:
+
+- si existe, debe ir despues del render principal y antes del upscale final
+
+Motivo:
+
+- evita multiplicar el coste del render principal
+- conserva el timing creativo del clip base durante la parte mas cara del
+  pipeline
+- permite comparar facilmente `render base` frente a `render con FPS aumentado`
+
+Parametros candidatos:
+
+- `fps_objetivo`
+- `modo_fps` con valores del estilo `ninguno`, `duplicar`, `interpolar_suave`,
+  `interpolar_total`
+
 ## V1 y V2
 
 ## V1 obligatoria
@@ -256,6 +284,7 @@ La segunda iteracion deberia añadir:
 
 - referencias por personaje segun color
 - segmentacion automatica de clips largos
+- interpolacion opcional de FPS para clips tipo stopmotion
 - mejora final a `Full HD`
 
 ## Decisiones de producto
@@ -275,6 +304,7 @@ En este stack conviene:
 - mantener `batch=1`
 
 La subida a `Full HD` deberia quedar para el bloque de mejora final.
+Si se añade interpolacion de FPS, deberia vivir antes de ese upscale final.
 
 ## Identidad de personajes por color
 
@@ -356,6 +386,7 @@ Solo despues de que la version base corra:
 
 - añadir referencias por personaje asociadas a color
 - estudiar troceado automatico de clips largos
+- decidir si se integra interpolacion opcional de FPS para stopmotion
 - conectar mejora final a `Full HD`
 
 ## Verificacion minima obligatoria
@@ -398,6 +429,7 @@ scripts/apps/comfyui-stage-e2e-fixture.sh
 scripts/apps/comfyui.sh status
 scripts/actions/comfyui-action.sh open-workflow render-video
 scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui abre workflow render-video"
+scripts/apps/comfyui-general-video-v1-validation.sh --controls bordes,pose,profundidad
 ```
 
 Y, cuando el runner operativo exista para esta ruta:
