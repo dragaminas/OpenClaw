@@ -40,6 +40,10 @@ function escapeRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function normalizeWorkflowRef(rawValue) {
+  return normalizeMessage(rawValue).replace(/^(workflow|flujo)\s+/i, "").trim();
+}
+
 function stripWakeWord(rawText, prefix) {
   const normalized = normalizeMessage(rawText);
   const low = normalized.toLowerCase();
@@ -79,6 +83,7 @@ function buildHelpText(prefix) {
     `${prefix} reinicia comfyui`,
     `${prefix} como esta comfyui`,
     `${prefix} comfyui workflows`,
+    `${prefix} que hace prepara-video`,
     `${prefix} comfyui abre workflow prepara-video`,
     `${prefix} comfyui ruta workflow prepara-video`,
     `${prefix} comfyui smoke`,
@@ -173,6 +178,14 @@ function parseLegacyCommand(stripped, prefix) {
         return { kind: "help" };
       case "workflows":
         return { kind: "comfyui-workflows" };
+      case "que":
+        if (tokens[2]?.toLowerCase() === "hace") {
+          const workflowRef = normalizeWorkflowRef(tokens.slice(3).join(" "));
+          return workflowRef
+            ? { kind: "comfyui-workflow-info", workflowRef }
+            : { kind: "error", text: "Dime el alias del workflow. Ejemplo: studio comfyui que hace prepara-video" };
+        }
+        return { kind: "error", text: `No reconozco esa accion de ComfyUI. Escribe "${prefix}" para ver ayuda.` };
       case "abre":
         if (workflowSubject === "workflow") {
           return workflowRef
@@ -203,6 +216,11 @@ function parseLegacyCommand(stripped, prefix) {
             : { kind: "error", text: "Dime el alias del workflow. Ejemplo: studio comfyui ruta workflow prepara-video" };
         }
         return { kind: "error", text: `No reconozco esa accion de ComfyUI. Escribe "${prefix}" para ver ayuda.` };
+      case "explica":
+      case "describe":
+        return normalizeWorkflowRef(rawArg)
+          ? { kind: "comfyui-workflow-info", workflowRef: normalizeWorkflowRef(rawArg) }
+          : { kind: "error", text: "Dime el alias del workflow. Ejemplo: studio comfyui explica prepara-video" };
       case "stop":
         return { kind: "comfyui-stop" };
       case "url":
@@ -328,6 +346,23 @@ function parseNaturalSpanish(normalized) {
     "lista los workflows de comfyui"
   ].includes(low)) {
     return { kind: "comfyui-workflows" };
+  }
+
+  const workflowInfo = extractProjectName(normalized, [
+    "que hace ",
+    "que hace el workflow ",
+    "que hace el flujo ",
+    "explica workflow ",
+    "explica el workflow ",
+    "explica ",
+    "describe workflow ",
+    "describe el workflow "
+  ]);
+  if (workflowInfo !== null) {
+    const normalizedWorkflowInfo = normalizeWorkflowRef(workflowInfo);
+    return normalizedWorkflowInfo
+      ? { kind: "comfyui-workflow-info", workflowRef: normalizedWorkflowInfo }
+      : { kind: "error", text: "Dime el alias del workflow. Ejemplo: studio que hace prepara-video" };
   }
 
   const openWorkflow = extractProjectName(normalized, [
@@ -605,6 +640,8 @@ async function handleBeforeDispatch(event, ctx, pluginConfig = {}, logger = cons
       return runComfyUIAction(["open"]);
     case "comfyui-workflows":
       return runComfyUIAction(["workflows"]);
+    case "comfyui-workflow-info":
+      return runComfyUIAction(["workflow-info", parsed.workflowRef]);
     case "comfyui-workflow-open":
       return runComfyUIAction(["open-workflow", parsed.workflowRef]);
     case "comfyui-workflow-path":

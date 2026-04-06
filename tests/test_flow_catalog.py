@@ -22,6 +22,7 @@ class BuiltinFlowCatalogAliasTests(unittest.TestCase):
         expected_matches = {
             "prepara-video": "UC-VID-01",
             "prepara video": "UC-VID-01",
+            "prepare-video": "UC-VID-01",
             "render-video": "UC-VID-02",
             "render video": "UC-VID-02",
             "explora-estilos": "UC-IMG-03",

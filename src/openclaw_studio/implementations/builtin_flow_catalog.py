@@ -184,7 +184,9 @@ BUILTIN_FLOW_CATALOG = (
         display_label="Texto a imagen",
         friendly_alias="texto-a-imagen",
         description=(
-            "Genera una imagen guiada por descripcion breve y referencias opcionales."
+            "Genera una imagen nueva desde un prompt, con referencias opcionales "
+            "de personaje o estilo. Es el flujo base para lookdev cuando todavia "
+            "no existe una imagen de partida."
         ),
         output_type=OutputArtifactType.IMAGE_SET,
         sample_user_requests=(
@@ -239,8 +241,9 @@ BUILTIN_FLOW_CATALOG = (
         display_label="Imagen base a frame renderizado",
         friendly_alias="render-frame",
         description=(
-            "Transforma una imagen base en un frame final con controles visuales "
-            "opcionales."
+            "Toma una imagen base o frame previo y lo convierte en un frame "
+            "renderizado final, manteniendo estructura con controles visuales. "
+            "Sirve para pasar de previz o lookdev a un frame mas terminado."
         ),
         output_type=OutputArtifactType.IMAGE_SET,
         sample_user_requests=(
@@ -304,7 +307,9 @@ BUILTIN_FLOW_CATALOG = (
         display_label="Video base a paquete de controles",
         friendly_alias="prepara-video",
         description=(
-            "Extrae materiales de control reutilizables desde una animacion base."
+            "Toma un video base o animatica y extrae materiales de control como "
+            "contorno, profundidad y pose. Es el paso de preparacion antes de "
+            "render-video y otros flujos que reutilizan esos controles."
         ),
         output_type=OutputArtifactType.CONTROL_PACKAGE,
         sample_user_requests=(
@@ -339,6 +344,8 @@ BUILTIN_FLOW_CATALOG = (
         ),
         friendly_aliases=(
             "prepara video",
+            "prepare-video",
+            "prepare video",
             "paquete de controles",
             "controles video",
         ),
@@ -348,8 +355,9 @@ BUILTIN_FLOW_CATALOG = (
         display_label="Video base y referencias a video renderizado",
         friendly_alias="render-video",
         description=(
-            "Renderiza un plano animado a partir de una base y referencias "
-            "visuales."
+            "Toma un video base, un prompt y referencias visuales para producir "
+            "un plano renderizado con look final. Puede reutilizar el paquete de "
+            "controles generado por prepara-video."
         ),
         output_type=OutputArtifactType.VIDEO,
         sample_user_requests=(
@@ -427,7 +435,8 @@ BUILTIN_FLOW_CATALOG = (
         display_label="Imagen inicial y final a video",
         friendly_alias="transicion-video",
         description=(
-            "Genera una transicion o clip guiado por dos keyframes extremos."
+            "Genera un clip de transicion entre una imagen inicial y una final, "
+            "rellenando el movimiento intermedio con ayuda del prompt."
         ),
         output_type=OutputArtifactType.VIDEO,
         sample_user_requests=(
@@ -477,7 +486,9 @@ BUILTIN_FLOW_CATALOG = (
         display_label="Video renderizado a video mejorado",
         friendly_alias="mejora-video",
         description=(
-            "Mejora una salida de video ya generada con foco en calidad final."
+            "Toma un video ya renderizado y lo mejora en resolucion, limpieza o "
+            "acabado final. Sirve como ultimo paso de pulido despues de "
+            "render-video."
         ),
         output_type=OutputArtifactType.ENHANCED_VIDEO,
         sample_user_requests=(
@@ -526,7 +537,9 @@ BUILTIN_FLOW_CATALOG = (
         display_label="Imagen o frame a variantes de estilo",
         friendly_alias="explora-estilos",
         description=(
-            "Explora estilos y acabados reutilizables sobre una base visual."
+            "Parte de una imagen o frame y genera variantes de estilo o acabado "
+            "sin perder la composicion base. Es util para explorar looks antes "
+            "de fijar uno."
         ),
         output_type=OutputArtifactType.IMAGE_SET,
         sample_user_requests=(

@@ -10,7 +10,11 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from openclaw_studio.application.session_engine import normalize_text
-from openclaw_studio.contracts.flows import ExecutionVariant, FlowDefinition
+from openclaw_studio.contracts.flows import (
+    ExecutionVariant,
+    FlowDefinition,
+    OutputArtifactType,
+)
 from openclaw_studio.implementations import BUILTIN_FLOW_CATALOG
 
 
@@ -33,12 +37,17 @@ class WorkflowTemplateEntry:
     use_case_id: str
     friendly_alias: str
     display_label: str
+    description: str
+    output_label: str
+    required_input_labels: tuple[str, ...]
+    optional_input_labels: tuple[str, ...]
     variant_id: str
     variant_display_label: str
     source_relpath: str
     source_path: str
     template_filename: str
     template_path: str
+    sample_user_request: str = ""
     module_name: str = MODULE_NAME
     loader_hint: str = ""
 
@@ -101,6 +110,21 @@ def build_workflow_template_entries(
                 use_case_id=flow_definition.use_case_id,
                 friendly_alias=flow_definition.friendly_alias,
                 display_label=flow_definition.display_label,
+                description=flow_definition.description,
+                output_label=_render_output_label(flow_definition.output_type),
+                required_input_labels=tuple(
+                    flow_definition.get_input_definition(input_key).display_label
+                    for input_key in flow_definition.required_input_keys
+                ),
+                optional_input_labels=tuple(
+                    flow_definition.get_input_definition(input_key).display_label
+                    for input_key in flow_definition.optional_input_keys
+                ),
+                sample_user_request=(
+                    flow_definition.sample_user_requests[0]
+                    if flow_definition.sample_user_requests
+                    else ""
+                ),
                 variant_id=resolved_variant.variant_id,
                 variant_display_label=resolved_variant.display_label,
                 source_relpath=source_relpath,
@@ -219,11 +243,22 @@ def render_workflow_list(entries: tuple[WorkflowTemplateEntry, ...]) -> str:
         "Biblioteca OpenClaw disponible en ComfyUI:",
     ]
     for entry in entries:
-        lines.append(
-            f"- {entry.friendly_alias} | {entry.use_case_id} | {entry.display_label}"
+        lines.extend(
+            (
+                f"- {entry.friendly_alias} | {entry.use_case_id} | {entry.display_label}",
+                f"  Hace: {entry.description}",
+                (
+                    "  Entrada obligatoria: "
+                    f"{_render_input_labels(entry.required_input_labels)}. "
+                    f"Salida: {entry.output_label}."
+                ),
+            )
         )
     lines.append(
         f"carga_desde=Templates > {MODULE_NAME} > <alias>"
+    )
+    lines.append(
+        "pregunta=studio que hace <alias>"
     )
     return "\n".join(lines)
 
@@ -236,6 +271,10 @@ def render_workflow_description(entry: WorkflowTemplateEntry) -> str:
             f"use_case_id={entry.use_case_id}",
             f"alias={entry.friendly_alias}",
             f"workflow={entry.display_label}",
+            f"description={entry.description}",
+            f"output={entry.output_label}",
+            f"required_inputs={_render_input_labels(entry.required_input_labels)}",
+            f"optional_inputs={_render_input_labels(entry.optional_input_labels)}",
             f"variant_id={entry.variant_id}",
             f"variant={entry.variant_display_label}",
             f"source={format_home_path(entry.source_path)}",
@@ -243,6 +282,32 @@ def render_workflow_description(entry: WorkflowTemplateEntry) -> str:
             f"carga_desde={entry.loader_hint}",
         )
     )
+
+
+def render_workflow_explanation(entry: WorkflowTemplateEntry) -> str:
+    """Render a workflow explanation in explicit, human-readable Spanish."""
+
+    lines = [
+        f"Workflow: {entry.friendly_alias} ({entry.use_case_id})",
+        f"Nombre: {entry.display_label}",
+        f"Hace: {entry.description}",
+        (
+            "Entrada obligatoria: "
+            f"{_render_input_labels(entry.required_input_labels)}."
+        ),
+        f"Salida principal: {entry.output_label}.",
+        f"Variante actual: {entry.variant_display_label}.",
+    ]
+    if entry.optional_input_labels:
+        lines.append(
+            "Entradas opcionales: "
+            f"{_render_input_labels(entry.optional_input_labels)}."
+        )
+    if entry.sample_user_request:
+        lines.append(f"Ejemplo: {entry.sample_user_request}")
+    lines.append(f"Se abre en: {entry.loader_hint}")
+    lines.append(f"Comando: studio comfyui abre workflow {entry.friendly_alias}")
+    return "\n".join(lines)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -271,6 +336,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Describe un workflow por alias amigable o use_case_id.",
     )
     describe_parser.add_argument("workflow_ref", help="Alias o use_case_id del workflow.")
+
+    explain_parser = subparsers.add_parser(
+        "explain",
+        help="Explica en lenguaje claro que hace un workflow.",
+    )
+    explain_parser.add_argument("workflow_ref", help="Alias o use_case_id del workflow.")
 
     return parser
 
@@ -301,6 +372,16 @@ def main(argv: list[str] | None = None) -> int:
             comfyui_dir=comfyui_dir,
         )
         print(render_workflow_description(entry))
+        return 0
+
+    if args.command == "explain":
+        sync_workflow_templates(repo_root, comfyui_dir)
+        entry = resolve_workflow_template_entry(
+            workflow_ref=args.workflow_ref,
+            repo_root=repo_root,
+            comfyui_dir=comfyui_dir,
+        )
+        print(render_workflow_explanation(entry))
         return 0
 
     parser.error(f"Comando no soportado: {args.command}")
@@ -342,6 +423,25 @@ def _publish_template_file(source_path: Path, template_path: Path) -> None:
         template_path.unlink()
 
     shutil.copyfile(source_path, template_path)
+
+
+def _render_output_label(output_type: OutputArtifactType) -> str:
+    """Render one output artifact type using product-facing language."""
+
+    output_labels = {
+        OutputArtifactType.IMAGE: "imagen",
+        OutputArtifactType.IMAGE_SET: "set de imagenes",
+        OutputArtifactType.CONTROL_PACKAGE: "paquete de controles",
+        OutputArtifactType.VIDEO: "video",
+        OutputArtifactType.ENHANCED_VIDEO: "video mejorado",
+    }
+    return output_labels[output_type]
+
+
+def _render_input_labels(input_labels: tuple[str, ...]) -> str:
+    """Join input labels in a compact human-friendly form."""
+
+    return ", ".join(input_labels) if input_labels else "ninguna"
 
 
 if __name__ == "__main__":

@@ -8,6 +8,8 @@ from pathlib import Path
 from openclaw_studio.comfyui_workflow_library import (
     MODULE_NAME,
     build_workflow_template_entries,
+    render_workflow_explanation,
+    render_workflow_list,
     resolve_workflow_template_entry,
     sync_workflow_templates,
 )
@@ -67,6 +69,34 @@ class ComfyUIWorkflowLibraryTests(unittest.TestCase):
             )[0].module_name,
             MODULE_NAME,
         )
+
+    def test_render_workflow_list_includes_description_inputs_and_question_hint(self) -> None:
+        entries = build_workflow_template_entries(
+            repo_root=self.repo_root,
+            comfyui_dir=self.comfyui_dir,
+        )
+
+        rendered = render_workflow_list(entries)
+
+        self.assertIn("Hace:", rendered)
+        self.assertIn("Entrada obligatoria:", rendered)
+        self.assertIn("Salida:", rendered)
+        self.assertIn("pregunta=studio que hace <alias>", rendered)
+
+    def test_render_workflow_explanation_is_human_readable(self) -> None:
+        entry = resolve_workflow_template_entry(
+            workflow_ref="prepara-video",
+            repo_root=self.repo_root,
+            comfyui_dir=self.comfyui_dir,
+        )
+
+        rendered = render_workflow_explanation(entry)
+
+        self.assertIn("Workflow: prepara-video (UC-VID-01)", rendered)
+        self.assertIn("Hace:", rendered)
+        self.assertIn("Entrada obligatoria:", rendered)
+        self.assertIn("Salida principal:", rendered)
+        self.assertIn("Comando: studio comfyui abre workflow prepara-video", rendered)
 
 
 if __name__ == "__main__":

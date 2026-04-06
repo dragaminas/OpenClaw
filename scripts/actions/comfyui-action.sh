@@ -19,6 +19,7 @@ Comandos disponibles:
 - url
 - workflows
 - open-workflow <alias|use_case_id>
+- workflow-info <alias|use_case_id>
 - workflow-path <alias|use_case_id>
 EOF
 }
@@ -53,12 +54,17 @@ case "$command_name" in
     [[ -n "$workflow_ref" ]] || die "Debes indicar un alias o use_case_id."
     "$REPO_ROOT/scripts/apps/comfyui-workflow-library.sh" open "$workflow_ref"
     ;;
+  workflow-info)
+    workflow_ref="${2:-}"
+    [[ -n "$workflow_ref" ]] || die "Debes indicar un alias o use_case_id."
+    "$REPO_ROOT/scripts/apps/comfyui-workflow-library.sh" explain "$workflow_ref"
+    ;;
   workflow-path)
     workflow_ref="${2:-}"
     [[ -n "$workflow_ref" ]] || die "Debes indicar un alias o use_case_id."
     "$REPO_ROOT/scripts/apps/comfyui-workflow-library.sh" describe "$workflow_ref"
     ;;
   *)
-    die "Uso: $0 [help|status|start|restart|open|stop|url|workflows|open-workflow <alias|use_case_id>|workflow-path <alias|use_case_id>]"
+    die "Uso: $0 [help|status|start|restart|open|stop|url|workflows|open-workflow <alias|use_case_id>|workflow-info <alias|use_case_id>|workflow-path <alias|use_case_id>]"
     ;;
 esac

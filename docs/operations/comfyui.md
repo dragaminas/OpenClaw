@@ -159,6 +159,7 @@ scripts/openclaw/test-studio-actions-plugin.sh "studio inicia comfyui"
 scripts/openclaw/test-studio-actions-plugin.sh "studio reinicia comfyui"
 scripts/openclaw/test-studio-actions-plugin.sh "studio abre comfyui"
 scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui workflows"
+scripts/openclaw/test-studio-actions-plugin.sh "studio que hace prepara-video"
 scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui abre workflow prepara-video"
 scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui ruta workflow prepara-video"
 scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui smoke"
@@ -175,6 +176,8 @@ scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui evidencia <run_id
 - `studio abre comfyui`
 - `studio para comfyui`
 - `studio comfyui workflows`
+- `studio que hace prepara-video`
+- `studio comfyui que hace prepara-video`
 - `studio comfyui abre workflow <alias>`
 - `studio comfyui ruta workflow <alias>`
 - `studio comfyui smoke`
@@ -212,6 +215,11 @@ Si `ComfyUI` ya estaba abierto antes de crear por primera vez el modulo
 `ComfyUI` con la query `?template=<alias>&source=openclaw-workflows`, para que
 el canvas cargue el template exacto de `OpenClaw` en vez de dejar al usuario en
 el ultimo grafo que tenia abierto.
+
+`studio comfyui workflows` ahora devuelve una descripcion explicita de cada
+workflow, incluyendo que hace, su entrada obligatoria y la salida principal.
+Ademas, `studio que hace <alias>` y `studio comfyui que hace <alias>` explican
+un workflow concreto usando el mismo catalogo canonico.
 
 ## Nota sobre Python
 

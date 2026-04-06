@@ -140,6 +140,8 @@ deberia quedar cerrado solo para smoke.
 ## Biblioteca visible de workflows
 
 - `studio comfyui workflows`
+- `studio que hace prepara-video`
+- `studio comfyui que hace prepara-video`
 - `studio comfyui abre workflow prepara-video`
 - `studio comfyui ruta workflow prepara-video`
 
@@ -152,6 +154,14 @@ catalogo Python de flujos y aliases amigables.
 seleccionado por URL, usando `template=<alias>&source=openclaw-workflows`, para
 que el usuario vea el workflow exacto de `OpenClaw` y no el ultimo grafo
 persistido por la sesion anterior.
+
+`studio comfyui workflows` no deberia limitarse a listar aliases. Debe devolver
+una descripcion breve y explicita de cada workflow, incluyendo que hace, cual
+es su entrada obligatoria y que salida produce.
+
+`studio que hace <alias>` y `studio comfyui que hace <alias>` deben resolver el
+workflow desde el mismo catalogo canonico y explicar el flujo en lenguaje
+humano, sin duplicar logica dentro de WhatsApp.
 
 ## Smoke validation
 
