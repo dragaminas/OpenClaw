@@ -218,6 +218,26 @@ Ese reinicio tambien conviene cuando cambian los helper nodes publicados dentro
 de `~/ComfyUI/custom_nodes/openclaw-workflows/`, por ejemplo la rama opcional
 de interpolacion FPS usada hoy por `render-video`.
 
+## Regla temporal de debug para templates publicados
+
+Durante la fase actual de `8.21`, la prioridad de los templates funcionales
+publicados en `openclaw-workflows` no es verse compactos, sino ser
+inspeccionables.
+
+Regla practica:
+
+- no colapsar el camino critico dentro de subgrafos opacos si eso impide ver
+  que nodos reales estan actuando
+- preferir grupos visuales y layout claro antes que encapsulacion
+- dejar visibles nodos de diagnostico con `fps`, conteos de frames y decisiones
+  de bypass cuando una rama opcional no actua
+- reservar el apellido `validation` para variantes rapidas o truncadas que no
+  deban abrirse como workflow funcional por defecto
+
+Esto no contradice la capa guiada de `WhatsApp`.
+La capa guiada puede simplificar la entrada, pero el template que abre en
+`ComfyUI` debe seguir siendo legible mientras estemos depurando el producto.
+
 `studio comfyui abre workflow <alias>` ya no solo abre la UI: ahora abre
 `ComfyUI` con la query `?template=<alias>&source=openclaw-workflows`, para que
 el canvas cargue el template exacto de `OpenClaw` en vez de dejar al usuario en

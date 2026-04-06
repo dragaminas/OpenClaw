@@ -108,6 +108,7 @@ Para abaratar tiempo, VRAM y riesgo, las pruebas smoke deberian usar:
 | `SMK-IMG-02-01` | `UC-IMG-02` | `1` imagen pequena + `1` prompt corto | el workflow carga, ejecuta y deja `1` still guardado |
 | `SMK-VID-01-01` | `UC-VID-01` | `1` clip pequeno | el workflow exporta al menos `outline` y `pose`; `depth` puede salir por `V3` o fallback `V2` |
 | `SMK-VID-02-01` | `UC-VID-02` | `1` clip pequeno o paquete de controles pequeno + `1` prompt corto | deja `1` render corto guardado sin edicion manual |
+| `SMK-GEN-VID-01` | `render-video` (`V1` general publicada) | `1` clip pequeno + `1` prompt corto | deja `1` render base y `1` salida `final_full_hd`, con segmentacion visible opcional dentro del mismo workflow |
 | `SMK-IMG-03-01` | `UC-IMG-03` | `1` still pequeno + refs opcionales | deja al menos `1` variante guardada |
 | `SMK-VID-03-01` | `UC-VID-03` | `1` frame inicial + `1` frame final + prompt opcional | genera `1` clip corto reconocible |
 | `SMK-VID-04-01` | `UC-VID-04` | `1` clip pequeno ya renderizado | genera `1` clip mejorado guardado |
@@ -134,6 +135,13 @@ cuando el workflow:
 Ese caso no sustituye la validacion seria de `8.18`; solo certifica que el
 workflow ya esta cableado y arranca de verdad.
 
+Para `SMK-GEN-VID-01`, el criterio minimo adicional es:
+
+- abrir el template publicado `render-video` desde `openclaw-workflows`
+- ejecutar la rama visible de segmentacion sin romper el caso base
+- publicar `render` y `final_full_hd` como artefactos separados dentro del
+  mismo caso smoke
+
 ## Criterio de no pase
 
 La smoke test debe marcarse como:
@@ -153,9 +161,10 @@ Orden minimo para desbloquear `8.18` con el menor riesgo posible:
 1. `SMK-IMG-02-01`
 2. `SMK-VID-01-01`
 3. `SMK-VID-02-01`
-4. `SMK-VID-04-01`
-5. `SMK-IMG-03-01`
-6. `SMK-VID-03-01`
+4. `SMK-GEN-VID-01`
+5. `SMK-VID-04-01`
+6. `SMK-IMG-03-01`
+7. `SMK-VID-03-01`
 
 ## Que deberia quedar listo al cerrar 8.19
 

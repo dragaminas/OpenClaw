@@ -62,6 +62,8 @@ Regla canonica:
 - `video_coloreado_por_personaje`
 - `mapa_color_a_personaje`
 - `referencias_personaje_por_color`
+- `mapa_posicion_prompt_a_entidad`
+- `referencias_entidad`
 - `referencias_estilo`
 - `duracion_objetivo`
 - `resolucion_objetivo`
@@ -85,16 +87,94 @@ El workflow general debe:
   colocada despues del render principal y antes del upscale final
 - publicar una secuencia renderizada final y una evidencia estable de la corrida
 
+## Regla de transparencia en fase de debug
+
+Mientras `8.21` siga en fase de depuracion, el workflow publicado para uso
+manual en `ComfyUI` no deberia esconder la logica critica dentro de un nodo
+opaco o de un subgrafo colapsado que el usuario no pueda inspeccionar con
+claridad.
+
+Regla practica:
+
+- el camino critico debe verse desplegado en el canvas
+- los grupos visuales pueden ordenar el workflow, pero no ocultar que nodos
+  concretos se ejecutan
+- si existe una version reutilizable basada en subgrafo o helper node, la
+  variante publicada para debug debe preferir la forma expandida y legible
+- cualquier encapsulacion aceptable en esta fase debe ir acompañada de nodos de
+  diagnostico visibles que expongan los valores relevantes
+
+Valores que deberian quedar visibles y persistidos en el propio workflow:
+
+- `source_fps`
+- `fps_objetivo`
+- `frame_count_entrada`
+- `frame_count_controles`
+- `frame_count_salida_render`
+- `frame_count_salida_interpolacion`
+- `width`
+- `height`
+- `aspect_ratio`
+- si la rama de interpolacion actuo o se salto
+- si se salto, el motivo resumido
+
+La regla no es "prohibir para siempre" los subgrafos.
+La regla es que, durante esta primera fase de debug, la biblioteca funcional de
+`OpenClaw` debe priorizar trazabilidad y comprension por encima de elegancia o
+compactacion visual.
+
 ## Comportamiento opcional deseado
 
 El workflow general deberia ademas:
 
-- aceptar un video base donde los personajes vengan codificados por color
-- permitir asociar referencias de personaje a cada color
-- usar esa asociacion para reforzar identidad visual de personajes a lo largo del plano
+- aceptar un video base donde los sujetos vengan codificados por color
+- permitir asociar referencias de identidad a cada color
+- permitir asociar referencias de identidad por posicion o descripcion textual del
+  sujeto en el frame inicial
+- permitir que la misma referencia represente un personaje o un objeto
+- usar esa asociacion para reforzar identidad visual de sujetos a lo largo del plano
 
 Esta parte es valiosa, pero no debe bloquear una primera version util del
 workflow general.
+
+## Lectura correcta de las referencias de identidad
+
+La siguiente fase no deberia quedar limitada a "personajes por color".
+La abstraccion correcta es una referencia de identidad o entidad, que puede
+representar:
+
+- un personaje
+- un objeto relevante
+- un vehiculo
+- cualquier sujeto visual cuya identidad queramos mantener
+
+Ejemplos validos:
+
+- `soldado protagonista`
+- `nina con abrigo rojo`
+- `nave espacial`
+- `coche patrulla`
+
+Cada referencia de identidad deberia poder anclarse por una o varias vias:
+
+- por color en el video base
+- por una descripcion textual posicional sobre el frame inicial
+- por ambas a la vez, si ayuda a resolver ambiguedades
+
+Ejemplos de anclaje textual posicional:
+
+- `la mujer a la izquierda`
+- `el sujeto en primer plano`
+- `la nave del fondo arriba a la derecha`
+- `el objeto rojo en el centro`
+
+Lectura de producto:
+
+- la referencia visual pertenece a la entidad
+- el color y la descripcion posicional son mecanismos opcionales de anclaje
+- una misma entidad puede tener anclaje por color, por posicion textual o por
+  combinacion de ambos
+- el caso base sin anclajes extra debe seguir funcionando
 
 ## Lectura correcta del alcance
 
@@ -280,6 +360,47 @@ Lectura correcta:
 - una variante futura tipo `Wan 2.2` por pares de frames sigue siendo deseable
   para stopmotion exigente, pero no bloquea esta fase funcional
 
+## Lectura correcta de una futura variante `Wan 2.2`
+
+`Wan 2.2` no deberia interpretarse como "solo sirve si el `fps` objetivo es un
+multiple muy grande del `fps` base".
+
+Lectura correcta:
+
+- pasar de `30` a `60 fps` no esta prohibido por `Wan 2.2`
+- lo que no suele funcionar bien es pretender que una longitud temporal muy
+  corta se comporte como si cada hueco entre frames se expandiera de forma
+  exacta y directa
+- en esta familia de nodos, el tiempo suele comprimirse en bloques temporales
+  mas gruesos; en el stack local ya vimos que una entrada de `3` frames al
+  nucleo `Wan/VACE` puede terminar colapsando a una sola unidad temporal util
+- por eso el problema no es "60 fps es imposible", sino "una entrada temporal
+  demasiado corta no deja material suficiente para interpolar"
+
+Consecuencia de producto:
+
+- una variante futura de interpolacion con `Wan 2.2` deberia trabajar por pares
+  o microtramos
+- puede generar una secuencia mas densa de la estrictamente necesaria y luego
+  remuestrear para llegar al `fps_objetivo` exacto
+- eso permite resolver tambien ratios no multiplos exactos sin exigir que el
+  `fps` final sea algo como `30 -> 150`
+
+Ejemplos correctos de lectura:
+
+- `30 -> 60` deberia ser posible con una variante adecuada de `Wan 2.2`
+- `30 -> 48` tambien
+- `30 -> 150` no es el unico caso util; solo seria un multiplicador mayor, con
+  mucho mas coste
+
+Conclusiones operativas:
+
+- para la V1 actual, la rama local de mezcla temporal lineal sigue siendo la
+  forma mas simple de experimentar
+- para stopmotion exigente, la mejora real deseable sigue siendo una rama
+  generativa tipo `Wan 2.2`, pero no depende de que el `fps` objetivo sea un
+  multiplo grande del original
+
 ## V1 y V2
 
 ## V1 obligatoria
@@ -297,13 +418,13 @@ La primera derivacion que deberia considerarse valida para esta tarea es:
 
 ## V2 deseable
 
-La segunda iteracion deberia añadir:
+La siguiente iteracion ya no necesita cerrar la base funcional de producto.
+Lo que queda deseable despues del cierre actual es:
 
-- referencias por personaje segun color
-- segmentacion automatica de clips largos
 - una variante mas avanzada de interpolacion FPS para stopmotion, idealmente
   apoyada en una ruta generativa tipo `Wan 2.2`
-- mejora final a `Full HD`
+- una recomposicion automatica local de segmentos en un unico master, cuando el
+  entorno disponga de una via estable tipo `ffmpeg`
 
 ## Decisiones de producto
 
@@ -329,6 +450,10 @@ Si se añade interpolacion de FPS, deberia vivir antes de ese upscale final.
 Este mecanismo debe tratarse como una capa adicional, no como requisito para
 que el workflow general exista.
 
+La forma correcta de leer esta fase ya no es solo "personajes por color", sino
+"anclajes de identidad por color o por descripcion posicional sobre el frame
+inicial".
+
 La primera pregunta es:
 
 - puede el workflow general renderizar bien un plano base usando prompt,
@@ -336,7 +461,131 @@ La primera pregunta es:
 
 La segunda pregunta, posterior, es:
 
-- puede usar colores del video como anclas para asociar personajes concretos
+- puede usar colores del video o anclajes textuales posicionales para asociar
+  entidades concretas a referencias visuales
+
+Regla recomendada para la siguiente subtarea:
+
+- modelar referencias de identidad como una capa comun
+- permitir que cada referencia declare uno o mas anclajes
+- soportar al menos estas dos familias de anclaje:
+  - `color`
+  - `prompt_posicional`
+- no limitar la entidad a persona; debe poder cubrir tambien objetos o sujetos
+  como `nave espacial`
+
+## Arquitectura operativa actual de `8.21.4`
+
+La `V1` publicada ya implementa una primera capa real y opcional de identidad
+sin abrir un workflow paralelo.
+
+La solucion concreta adoptada en el canvas es:
+
+- `BASE VIDEO` sigue siendo la entrada principal unica
+- cuando `usar_identidad_color=true`, ese mismo clip puede interpretarse como
+  un video base coloreado por entidad
+- la rama de identidad vive en un bloque visible `IDENTIDAD COLOR Y ENTIDADES`
+- el bloque expone `3` slots acotados de anclaje, cada uno con:
+  - `color_n`
+  - `entidad_n / anclaje_prompt_n`
+  - una referencia visual opcional `REF ENTIDAD n`
+- las referencias visuales opcionales se normalizan con `ImageResizeKJv2`
+- el workflow recompone `refimage` con `BATCH REFS IDENTIDAD`, usando:
+  - `image_1`: el `start image` derivado del primer frame
+  - `image_2..4`: las referencias opcionales realmente conectadas
+- el caso base sin color sigue funcionando porque esos inputs opcionales quedan
+  fuera del camino ejecutable mientras no se conecten
+- `CAPA IDENTIDAD COLOR -> ENTIDAD` refuerza el prompt base con un resumen
+  resuelto de color o posicion y deja diagnosticos visibles
+
+Diagnosticos visibles que quedan ahora en el workflow:
+
+- `IDENTIDAD COLOR ACTIVA?`
+- `REFS IDENTIDAD EXTRA`
+- `MAPEOS IDENTIDAD`
+- `RESUMEN IDENTIDAD`
+
+Lectura correcta del comportamiento:
+
+- si `usar_identidad_color=false`, la V1 vuelve al comportamiento base y la
+  rama queda en bypass logico
+- si `usar_identidad_color=true` y hay mapeos o refs, el prompt final añade
+  una guia explicita para preservar identidad de personajes u objetos
+- si `usar_identidad_color=true` pero faltan mapeos o refs, el resumen visible
+  lo deja claro en vez de ocultarlo
+
+Limitaciones conocidas de esta primera version:
+
+- no segmenta colores ni extrae mascaras por color dentro del propio workflow
+- no carga un segundo video auxiliar distinto del `BASE VIDEO`; la lectura
+  correcta es que el clip base puede ser ya la version coloreada
+- el set operativo actual esta acotado a `3` slots extra de identidad
+- los anclajes posicionales viven como texto guiado en
+  `entidad_n / anclaje_prompt_n`, no como deteccion automatica
+
+## Arquitectura operativa actual de `8.21.5`
+
+La `V1` publicada ya expone una primera capa real de segmentacion sin abrir un
+workflow alternativo.
+
+La solucion concreta adoptada es:
+
+- la capa visible vive dentro del mismo bloque de entrada como:
+  - `segmentar_clip_largo`
+  - `frames_por_segmento`
+  - `solape_segmentos`
+  - `segmento_actual`
+- `SELECCIONA SEGMENTO ACTUAL` recibe el batch del video cargado y decide si:
+  - deja pasar el clip completo
+  - o selecciona una ventana temporal concreta
+- la V1 deja visibles estos diagnosticos:
+  - `SEGMENTACION ACTIVA?`
+  - `TOTAL SEGMENTOS`
+  - `FRAMES SEGMENTO ACTUAL`
+  - `RESUMEN SEGMENTACION`
+
+Lectura correcta:
+
+- en canvas, la V1 puede renderizar un segmento concreto sin romper el caso
+  base completo
+- en validacion local, la misma logica se reutiliza para iterar todos los
+  segmentos y publicar evidencia por segmento
+- la recomposicion temporal queda definida por un manifiesto estable que indica
+  orden de segmentos y `drop_leading_frames_for_concat` a partir del segundo
+
+Limitacion conocida de esta primera version:
+
+- la recomposicion final automatica en un unico master sigue pendiente de una
+  herramienta local estable de concatenacion; hoy queda resuelta como
+  convencion y manifiesto, no como merge binario automatico
+
+## Arquitectura operativa actual de `8.21.6`
+
+La `V1` publicada ya integra una etapa visible de mejora final a `Full HD`
+dentro del mismo canvas.
+
+La solucion concreta adoptada es:
+
+- el render principal sigue guardandose como `GUARDA RENDER BASE`
+- la rama opcional de FPS sigue viviendo entre el render base y la mejora final
+- despues de esa rama, `MEJORA FINAL FULL HD` aplica un resize final preservando
+  aspect ratio hacia la caja objetivo `1920x1080`
+- la salida final se publica como `GUARDA RENDER FINAL FULL HD`
+
+Diagnosticos visibles que quedan ahora en el workflow:
+
+- `MEJORA FINAL ACTIVA?`
+- `ANCHO FINAL RESUELTO`
+- `ALTO FINAL RESUELTO`
+- `RESUMEN MEJORA FINAL`
+
+Lectura correcta:
+
+- si `usar_mejora_final_full_hd=true`, la V1 publica `final_full_hd`
+- si `usar_mejora_final_full_hd=false`, la rama queda en bypass visible y el
+  resumen lo deja explicito
+- la implementacion actual funciona como equivalente local visible del paso de
+  mejora final inspirado en `UC-VID-04`, sin esconder el camino critico
 
 ## Rutas y convenciones
 
@@ -400,12 +649,12 @@ Correr una prueba real local con `blenderTest.mp4`.
 
 ## Paso 6
 
-Solo despues de que la version base corra:
+Tras cerrar la version base, la `V1` publicada ya incorporo:
 
-- añadir referencias por personaje asociadas a color
-- estudiar troceado automatico de clips largos
-- decidir si se integra interpolacion opcional de FPS para stopmotion
-- conectar mejora final a `Full HD`
+- anclajes de identidad por color o por descripcion posicional
+- segmentacion por subsecciones iterables con evidencia por segmento
+- la rama opcional de interpolacion FPS entre render base y salida final
+- la mejora final visible a `Full HD`
 
 ## Verificacion minima obligatoria
 
@@ -447,6 +696,9 @@ no el de validacion rapida.
 - la variante operativa debe heredar el `fps` del video base
 - la variante operativa puede seguir usando una resolucion conservadora para
   `RTX 3060`, pero no debe truncar el clip por defecto
+- mientras esta etapa siga en debug, la variante operativa debe mostrar el
+  camino critico expandido y nodos de diagnostico visibles, en vez de esconder
+  el comportamiento dentro de cajas opacas
 - cualquier ruta rapida de comprobacion debe quedarse fuera de la UI funcional
   y llevar explicitamente el apellido `validation`
 
@@ -461,6 +713,8 @@ scripts/apps/comfyui.sh status
 scripts/actions/comfyui-action.sh open-workflow render-video
 scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui abre workflow render-video"
 scripts/apps/comfyui-general-video-v1-validation.sh --controls bordes,pose,profundidad
+PYTHONPATH=src python3 -m openclaw_studio.comfyui_smoke_validation --case-id SMK-GEN-VID-01
+PYTHONPATH=src python3 -m openclaw_studio.comfyui_general_video_v1_validation --controls bordes --control-width 256 --enable-segmentation --segment-length-frames 49 --segment-overlap-frames 1
 ```
 
 Y, cuando el runner operativo exista para esta ruta:
@@ -505,3 +759,5 @@ Cuando este workflow general exista de verdad, deberia poder:
 - una salida publicada y revisable
 - evidencia suficiente para decidir que partes ya son producto y cuales siguen
   pendientes
+
+A fecha `2026-04-06`, ese criterio ya queda satisfecho en esta maquina.

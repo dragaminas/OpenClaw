@@ -24,6 +24,26 @@ pasos.
 El prompt complejo sigue existiendo, pero como modo experto y no como requisito
 de entrada.
 
+## Regla temporal para la fase de debug
+
+La interfaz guiada puede simplificar la experiencia de entrada, pero eso no
+significa que el workflow publicado en el canvas de `ComfyUI` deba esconder su
+logica interna.
+
+Mientras la Fase `8` siga en modo de depuracion de producto:
+
+- la sesion guiada y `WhatsApp` pueden abstraer detalles de nodos
+- pero los templates funcionales visibles en `ComfyUI` deben priorizar
+  transparencia
+- el camino critico no deberia quedar encapsulado en cajas opacas si eso hace
+  mas dificil entender, ajustar o depurar el flujo
+- los valores interesantes del runtime deben quedar visibles en nodos o grupos
+  del propio canvas
+
+La simplificacion conversacional y la transparencia del canvas no son
+contradictorias.
+Son dos capas distintas del mismo sistema.
+
 ## Capas de arquitectura propuestas
 
 La base inicial en Python queda organizada asi:
