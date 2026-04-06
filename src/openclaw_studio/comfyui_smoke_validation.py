@@ -13,6 +13,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
+from openclaw_studio.comfyui_general_video_v1 import patch_general_video_v1_runtime
+
 
 FRONTEND_ONLY_NODE_TYPES = {
     "GetNode",
@@ -236,6 +238,15 @@ SMOKE_CASE_SPECS = (
         timeout_seconds=1800,
         use_case_id="UC-VID-04",
         preset_id="uc-vid-04-upscale-reference",
+    ),
+    SmokeCaseSpec(
+        case_id="SMK-GEN-VID-01",
+        display_label="UC-VID-02 general V1 smoke",
+        workflow_relpath="ComfyUIWorkflows/local/minimum/uc-vid-02-general-video-render-rtx3060-v1.json",
+        blocking=True,
+        timeout_seconds=1800,
+        use_case_id="UC-VID-02",
+        preset_id="uc-vid-02-general-video-render-v1",
     ),
 )
 
@@ -733,9 +744,18 @@ class WorkflowCompiler:
 
 
 class FixtureBuilder:
-    def __init__(self, fixtures_dir: Path, comfy_input_dir: Path) -> None:
+    def __init__(
+        self,
+        fixtures_dir: Path,
+        comfy_input_dir: Path,
+        *,
+        repo_root: Path,
+        studio_dir: Path,
+    ) -> None:
         self.fixtures_dir = fixtures_dir
         self.comfy_input_dir = comfy_input_dir
+        self.repo_root = repo_root
+        self.studio_dir = studio_dir
 
     def build(self, run_id: str) -> dict[str, str]:
         input_dir = self.comfy_input_dir
@@ -792,27 +812,32 @@ class FixtureBuilder:
                 ((130, 55, 185, 130), "#101010", False, 3),
             ],
         )
-        self._generate_video(
-            control_lineart,
-            size=(256, 144),
-            fps=12,
-            frames=3,
-            mode="lineart",
-        )
-        self._generate_video(
-            control_depth,
-            size=(256, 144),
-            fps=12,
-            frames=3,
-            mode="depth",
-        )
-        self._generate_video(
-            render_source,
-            size=(256, 144),
-            fps=12,
-            frames=3,
-            mode="render",
-        )
+        fallback_video = self._resolve_fallback_video()
+        if fallback_video is not None:
+            for target in (control_lineart, control_depth, render_source):
+                shutil.copy2(fallback_video, target)
+        else:
+            self._generate_video(
+                control_lineart,
+                size=(256, 144),
+                fps=12,
+                frames=3,
+                mode="lineart",
+            )
+            self._generate_video(
+                control_depth,
+                size=(256, 144),
+                fps=12,
+                frames=3,
+                mode="depth",
+            )
+            self._generate_video(
+                render_source,
+                size=(256, 144),
+                fps=12,
+                frames=3,
+                mode="render",
+            )
 
         file_map = {
             "start_image": start_image,
@@ -901,6 +926,32 @@ class FixtureBuilder:
         draw.rectangle((188 - 10 * frame_index, 84, 228 - 10 * frame_index, 114), fill="#22c55e")
         return image
 
+    def _resolve_fallback_video(self) -> Path | None:
+        try:
+            import av  # noqa: F401
+            import numpy  # noqa: F401
+            return None
+        except ModuleNotFoundError:
+            pass
+
+        candidates = (
+            self.studio_dir
+            / "Validation"
+            / "comfyui"
+            / "e2e"
+            / "blender-test"
+            / "fixtures"
+            / "blender-test__base__v001.mp4",
+            self.repo_root / "blenderTest.mp4",
+        )
+        for candidate in candidates:
+            if candidate.is_file():
+                return candidate
+        raise SmokeValidationError(
+            "No pude generar los fixtures de video para smoke y tampoco encontre "
+            "blenderTest.mp4 como fallback local."
+        )
+
 
 class SmokeRunner:
     def __init__(
@@ -942,6 +993,8 @@ class SmokeRunner:
         fixture_builder = FixtureBuilder(
             fixtures_dir=self.fixtures_dir,
             comfy_input_dir=self.comfy_input_dir,
+            repo_root=self.repo_root,
+            studio_dir=self.studio_dir,
         )
         fixture_paths = fixture_builder.build(self.run_id)
         self.object_info = self.client.get_object_info()
@@ -1090,6 +1143,20 @@ class SmokeRunner:
             )
             expected_outputs = [
                 self.comfy_output_dir / str(run_prefix / "vid04" / "upscale")
+            ]
+        elif spec.case_id == "SMK-GEN-VID-01":
+            mutate_workflow = lambda data: patch_general_vid_v1_smoke(
+                data,
+                fixture_paths=fixture_paths,
+                output_prefix_root=str(run_prefix / "general_v1"),
+            )
+            expected_outputs = [
+                self.comfy_output_dir / str(run_prefix / "general_v1" / "first_frame"),
+                self.comfy_output_dir / str(run_prefix / "general_v1" / "preprocess_depth"),
+                self.comfy_output_dir / str(run_prefix / "general_v1" / "preprocess_outline"),
+                self.comfy_output_dir / str(run_prefix / "general_v1" / "preprocess_pose"),
+                self.comfy_output_dir / str(run_prefix / "general_v1" / "render"),
+                self.comfy_output_dir / str(run_prefix / "general_v1" / "final_full_hd"),
             ]
         else:
             raise SmokeValidationError(
@@ -1560,6 +1627,37 @@ def patch_vid04(
     )
     root_node["inputs"][0]["link"] = next_link_id
     root_node["outputs"][0]["links"] = [next_link_id + 1]
+
+
+def patch_general_vid_v1_smoke(
+    workflow: dict[str, Any],
+    *,
+    fixture_paths: dict[str, str],
+    output_prefix_root: str,
+) -> None:
+    patch_general_video_v1_runtime(
+        workflow,
+        input_video_rel=fixture_paths["render_source"],
+        output_prefix_root=output_prefix_root,
+        frame_load_cap=0,
+        custom_width=256,
+        render_frame_rate=12,
+        enable_fps_interpolation=False,
+        target_fps=12.0,
+        use_borders=True,
+        use_pose=True,
+        use_depth=True,
+        enable_color_identity=False,
+        identity_anchors=[],
+        enable_segmentation=True,
+        segment_length_frames=2,
+        segment_overlap_frames=1,
+        segment_index=2,
+        enable_final_upscale=True,
+        final_width=1920,
+        final_height=1080,
+        fast_validation=True,
+    )
 
 
 def find_top_level_node(workflow: dict[str, Any], node_id: int) -> dict[str, Any]:
