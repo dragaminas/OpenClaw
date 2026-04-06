@@ -1,6 +1,8 @@
 # Resultados V1 del Workflow General de Video
 
 Este documento registra el cierre comprobado de `8.21.2` y `8.21.3`.
+Tambien deja constancia de la primera comprobacion real de la rama opcional de
+interpolacion FPS publicada despues de ese cierre inicial.
 
 ## Estado
 
@@ -60,9 +62,31 @@ Sigue pendiente para etapas posteriores:
 
 - referencias de personaje por color
 - segmentacion automatica de clips largos
-- interpolacion opcional de FPS para stopmotion
+- una variante generativa mas ambiciosa de interpolacion FPS para stopmotion;
+  hoy ya existe una rama funcional local de mezcla temporal lineal con
+  `usar_interpolacion_fps` y `fps_objetivo`
 - mejora final o upscale hasta `Full HD`
 - una corrida `full_quality` mas larga que vaya mas alla de la validacion rapida de base
+
+## Comprobacion posterior de interpolacion FPS
+
+Despues del cierre inicial de `8.21.3`, se verifico una corrida corta adicional
+con la rama opcional de FPS activada:
+
+- run_id: `general-video-v1-20260406-114555`
+- status: `pass`
+- prompt_id: `361c2927-6811-4041-9e98-0b75dbda8a08`
+- validation_root: `~/Studio/Validation/comfyui/e2e/blender-test/general-video-v1/general-video-v1-20260406-114555`
+- perfil: `frame_load_cap=3`, `render_frame_rate=48`, `enable_fps_interpolation=true`, `target_fps=48.0`, `full_quality=false`
+
+Lo que quedo comprobado en esa corrida:
+
+- `ComfyUI` cargo el helper node `OpenClawFPSInterpolation` desde el modulo
+  `openclaw-workflows`
+- `render-video` publico el template actualizado con la rama de FPS entre el
+  render principal y `RENDER FINAL`
+- la V1 siguio generando frame inicial, controles y video final reales con la
+  rama opcional activada
 
 ## Comandos ejecutados
 
@@ -73,4 +97,5 @@ python3 -m compileall src tests
 PYTHONPATH=src python3 -m unittest discover -s tests -v
 PYTHONPATH=src python3 -m openclaw_studio.comfyui_workflow_library sync
 scripts/apps/comfyui-general-video-v1-validation.sh --controls bordes,pose,profundidad
+scripts/apps/comfyui-general-video-v1-validation.sh --frame-load-cap 3 --render-frame-rate 48 --enable-fps-interpolation --target-fps 48
 ```

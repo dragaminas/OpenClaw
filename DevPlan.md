@@ -322,7 +322,7 @@ Tareas:
 - [done] 8.21.3 Ejecutar una validacion real local de la variante `V1` usando `blenderTest.mp4`, conservar artefactos, publicar evidencia revisable y dejar documentado que partes del workflow general ya funcionan de verdad en este sistema
 - [pending] 8.21.4 Añadir soporte opcional para identidad de personajes por color, incluyendo asociacion entre colores del video base y referencias de personaje, sin romper la ejecucion del caso base sin colores
 - [pending] 8.21.5 Añadir soporte para subdividir clips largos en subsecciones iterables, con una convencion estable para recomposicion temporal y evidencia por segmento
-- [pending] 8.21.6 Añadir una etapa de mejora final o upscale hasta `Full HD`, reutilizando preferentemente `UC-VID-04` o un template local equivalente y dejando claro si queda integrada en el mismo workflow o como paso encadenado posterior; si se introduce interpolacion o aumento de FPS para clips tipo stopmotion, deberia quedar colocada antes de este upscale final y no dentro de la V1 base
+- [in progress] 8.21.6 Añadir una etapa de mejora final o upscale hasta `Full HD`, reutilizando preferentemente `UC-VID-04` o un template local equivalente y dejando claro si queda integrada en el mismo workflow o como paso encadenado posterior; la rama opcional de interpolacion FPS previa a la salida ya puede activarse en la V1 funcional con un modo local de mezcla temporal lineal y `fps_objetivo`, pero sigue pendiente cerrarla como etapa de producto junto al upscale final y valorar una variante generativa tipo `Wan 2.2` para stopmotion exigente
 
 Regla de cierre para `8.21`:
 
@@ -359,7 +359,7 @@ Entregables por tarea:
 - [done] 8.21.3 evidencia y resultados de corrida real local con `blenderTest.mp4`, incluyendo `docs/comfyui/general-video-render-workflow-results.md`
 - [pending] 8.21.4 documentacion y artefactos de soporte para referencias por color
 - [pending] 8.21.5 documentacion y artefactos de segmentacion por subsecciones
-- [pending] 8.21.6 documentacion y artefactos de mejora final a `Full HD`, incluyendo la decision de si la interpolacion opcional de FPS vive en la misma etapa o en un paso encadenado inmediatamente anterior
+- [in progress] 8.21.6 documentacion y artefactos de mejora final a `Full HD`, incluyendo la rama opcional de interpolacion FPS previa a la salida ya publicada en la V1 funcional y la decision pendiente sobre su cierre final junto al upscale
 
 ## Riesgos a controlar
 

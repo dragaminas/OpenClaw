@@ -201,8 +201,9 @@ nativos bajo:
 - `~/ComfyUI/custom_nodes/openclaw-workflows/example_workflows/`
 
 La fuente de verdad sigue siendo `ComfyUIWorkflows/local/` en el repo. La
-biblioteca local publica symlinks o copias hacia esos JSON canonicos y deja los
-aliases humanos del catalogo Python como nombre visible:
+biblioteca local publica copias hacia esos JSON canonicos, deja los aliases
+humanos del catalogo Python como nombre visible y ahora tambien puede incluir
+helper nodes propios de `OpenClaw` dentro del mismo modulo `openclaw-workflows`:
 
 - `prepara-video`
 - `render-video`
@@ -212,6 +213,10 @@ aliases humanos del catalogo Python como nombre visible:
 Si `ComfyUI` ya estaba abierto antes de crear por primera vez el modulo
 `openclaw-workflows`, conviene reiniciarlo para que registre la ruta
 `/api/workflow_templates/openclaw-workflows/...`.
+
+Ese reinicio tambien conviene cuando cambian los helper nodes publicados dentro
+de `~/ComfyUI/custom_nodes/openclaw-workflows/`, por ejemplo la rama opcional
+de interpolacion FPS usada hoy por `render-video`.
 
 `studio comfyui abre workflow <alias>` ya no solo abre la UI: ahora abre
 `ComfyUI` con la query `?template=<alias>&source=openclaw-workflows`, para que

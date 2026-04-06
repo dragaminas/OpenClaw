@@ -243,8 +243,8 @@ Regla de producto:
 
 ## Bloque 5.5: Interpolacion opcional de FPS
 
-Este bloque no forma parte de la `V1` obligatoria, pero conviene dejarlo
-ubicado desde ahora para clips tipo stopmotion.
+Este bloque ya existe de forma opcional en la derivacion funcional actual, pero
+todavia no deberia considerarse la version final de producto para stopmotion.
 
 Regla:
 
@@ -257,11 +257,28 @@ Motivo:
   pipeline
 - permite comparar facilmente `render base` frente a `render con FPS aumentado`
 
-Parametros candidatos:
+Parametros actuales:
 
+- `usar_interpolacion_fps`
 - `fps_objetivo`
-- `modo_fps` con valores del estilo `ninguno`, `duplicar`, `interpolar_suave`,
-  `interpolar_total`
+
+Comportamiento actual:
+
+- si `usar_interpolacion_fps=false`, la rama devuelve los frames originales
+- si `fps_objetivo` coincide con el `fps` base, la rama no hace nada
+- si `fps_objetivo` es menor o igual que el `fps` base, la rama no hace nada
+- si `fps_objetivo` es mayor, calcula un numero objetivo de frames para
+  conservar duracion y genera los intermedios por mezcla temporal lineal
+- para ratios no multiplos exactos, no intenta repartir un numero entero fijo
+  de frames por hueco; remuestrea la secuencia completa al conteo objetivo
+  usando una interpolacion temporal continua
+
+Lectura correcta:
+
+- esta primera implementacion sirve para experimentar desde la UI y para clips
+  donde un aumento de FPS suave ya aporta valor
+- una variante futura tipo `Wan 2.2` por pares de frames sigue siendo deseable
+  para stopmotion exigente, pero no bloquea esta fase funcional
 
 ## V1 y V2
 
@@ -284,7 +301,8 @@ La segunda iteracion deberia añadir:
 
 - referencias por personaje segun color
 - segmentacion automatica de clips largos
-- interpolacion opcional de FPS para clips tipo stopmotion
+- una variante mas avanzada de interpolacion FPS para stopmotion, idealmente
+  apoyada en una ruta generativa tipo `Wan 2.2`
 - mejora final a `Full HD`
 
 ## Decisiones de producto
