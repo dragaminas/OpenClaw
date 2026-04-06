@@ -316,7 +316,20 @@ Tareas:
 - [pending] 8.18 Ejecutar la validacion diseñada para los workflows derivados y sus composiciones, registrar evidencia, conservar artefactos de entrada y salida y dejar claramente que partes quedaron aprobadas, cuales siguen pendientes y cuales requieren fallback o revision
 - [done] 8.19 Preparar una smoke validation minima que permita ejecutar `8.18` con un gate barato de funcionamiento real, usando imagenes pequenas y clips de video pequenos para comprobar solo que cada workflow carga, corre y guarda salida sin exigir calidad alta ni comparativas finas
 - [done] 8.20 Extender la misma estructura operativa creada en `8.19` para exponer `ComfyUI` y sus validaciones desde WhatsApp, sin crear runners, manifiestos, contratos ni rutas de evidencia paralelas; el runner de `ComfyUI` debe pasar a implementar una interfaz `runner` reutilizable tambien por otras aplicaciones, y el puente de `studio-actions` debe reutilizar y ampliar ese mismo contrato, los mismos identificadores de casos, la misma publicacion de artefactos y la misma forma de reportar estado para que sirva tanto para lanzar smoke tests y validaciones de `8.18` como para habilitar ya el uso real de `ComfyUI` desde la UI actual
-- [pending] 8.21 Diseñar, derivar y validar un workflow general de renderizacion de video para este sistema, reutilizando primero los workflows locales ya desarrollados en `OpenClaw` (`UC-VID-01`, `UC-VID-02`, `UC-VID-04`) y completando solo lo que falte con templates nativos de `ComfyUI` y, en ultimo termino, referencias externas; el workflow debe aceptar como obligatorios un video base, un prompt de escena/estilo y el encendido o apagado de controles de bordes, pose y profundidad; debe soportar como opcionales el etiquetado de personajes por color y referencias de personaje asociadas a esos colores; debe mostrar el frame inicial para inspeccion, conservar el aspect ratio del video de entrada, escoger una resolucion adecuada al hardware local, subdividir clips largos en subsecciones iterables, encadenar una mejora posterior hasta `Full HD` y dejar evidencia real de una corrida local usando `blenderTest.mp4` como fixture base de `8.15`
+- [pending] 8.21 Diseñar, derivar y validar un workflow general de renderizacion de video para este sistema, reutilizando primero los workflows locales ya desarrollados en `OpenClaw` (`UC-VID-01`, `UC-VID-02`, `UC-VID-04`) y completando solo lo que falte con templates nativos de `ComfyUI` y, en ultimo termino, referencias externas; el workflow debe aceptar como obligatorios un video base, un prompt de escena/estilo y una seleccion valida de `1` a `3` controles activos entre bordes, pose y profundidad; debe soportar como opcionales el etiquetado de personajes por color y referencias de personaje asociadas a esos colores; debe mostrar el frame inicial para inspeccion, conservar el aspect ratio del video de entrada, escoger una resolucion adecuada al hardware local, subdividir clips largos en subsecciones iterables, encadenar una mejora posterior hasta `Full HD` y dejar evidencia real de una corrida local usando `blenderTest.mp4` como fixture base de `8.15`
+- [done] 8.21.1 Especificar el workflow general, su contrato funcional, sus prioridades de producto y su relacion con `8.15`, `8.18` y `8.20`, dejando claro que la V1 solo exige video base, prompt, preview y una combinacion valida de `1` a `3` controles activos
+- [pending] 8.21.2 Derivar una primera variante `V1` en `ComfyUIWorkflows/local/` que reutilice `UC-VID-01` y `UC-VID-02`, preserve aspect ratio, muestre el primer frame y permita activar o desactivar bordes, pose y profundidad sin exigir los tres a la vez
+- [pending] 8.21.3 Ejecutar una validacion real local de la variante `V1` usando `blenderTest.mp4`, conservar artefactos, publicar evidencia revisable y dejar documentado que partes del workflow general ya funcionan de verdad en este sistema
+- [pending] 8.21.4 Añadir soporte opcional para identidad de personajes por color, incluyendo asociacion entre colores del video base y referencias de personaje, sin romper la ejecucion del caso base sin colores
+- [pending] 8.21.5 Añadir soporte para subdividir clips largos en subsecciones iterables, con una convencion estable para recomposicion temporal y evidencia por segmento
+- [pending] 8.21.6 Añadir una etapa de mejora final o upscale hasta `Full HD`, reutilizando preferentemente `UC-VID-04` o un template local equivalente y dejando claro si queda integrada en el mismo workflow o como paso encadenado posterior
+
+Regla de cierre para `8.21`:
+
+- `8.21` no deberia marcarse como `done` solo porque exista el documento de diseño
+- `8.21` puede avanzar por etapas cerrando `8.21.1`, `8.21.2`, `8.21.3`, etc.
+- la primera etapa realmente valiosa es `8.21.3`, porque certifica una `V1` corriendo de verdad en esta maquina
+- `8.21` solo deberia considerarse completamente cerrada cuando, como minimo, `8.21.1`, `8.21.2` y `8.21.3` esten hechas y exista un criterio explicito para lo que sigue pendiente en `8.21.4`, `8.21.5` y `8.21.6`
 
 Entregables por tarea:
 
@@ -341,7 +354,12 @@ Entregables por tarea:
 - [done] 8.19 `docs/comfyui/workflow-smoke-validation.md`
 - [done] 8.20 `docs/architecture/runner-interface.md`
 - [done] 8.20 `docs/comfyui/whatsapp-comfyui-extension.md`
-- [pending] 8.21 `docs/comfyui/general-video-render-workflow.md`
+- [done] 8.21.1 `docs/comfyui/general-video-render-workflow.md`
+- [pending] 8.21.2 workflow derivado `V1` versionado en `ComfyUIWorkflows/local/`
+- [pending] 8.21.3 evidencia y resultados de corrida real local con `blenderTest.mp4`
+- [pending] 8.21.4 documentacion y artefactos de soporte para referencias por color
+- [pending] 8.21.5 documentacion y artefactos de segmentacion por subsecciones
+- [pending] 8.21.6 documentacion y artefactos de mejora final a `Full HD`
 
 ## Riesgos a controlar
 
