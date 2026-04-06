@@ -22,7 +22,7 @@
       "mode": 0,
       "inputs": [],
       "outputs": [],
-      "title": "OpenClaw minimum derived from Mickmumpitz and ComfyUI template",
+      "title": "OpenClaw render-frame derived from local minimum template",
       "properties": {
         "fontSize": 17,
         "fontFamily": "Arial",
@@ -901,7 +901,7 @@
       "mode": 0,
       "inputs": [],
       "outputs": [],
-      "title": "Z-IMAGE TURBO CN 1.1",
+      "title": "OPENCLAW RENDER FRAME",
       "properties": {
         "fontSize": 56,
         "fontFamily": "Arial",

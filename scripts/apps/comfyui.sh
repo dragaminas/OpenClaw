@@ -7,6 +7,7 @@ source "$SCRIPT_DIR/../lib/common.sh"
 
 cmd="${1:-status}"
 comfyui_url="http://${COMFYUI_HOST}:${COMFYUI_PORT}/"
+open_target_url="${2:-$comfyui_url}"
 manager_requirements_file="$COMFYUI_DIR/manager_requirements.txt"
 
 open_browser() {
@@ -199,10 +200,10 @@ case "$cmd" in
   open-ui)
     print_header "ComfyUI open"
     "$0" start-service >/dev/null
-    if open_browser "$comfyui_url"; then
-      printf 'ComfyUI abierto en el navegador: %s\n' "$comfyui_url"
+    if open_browser "$open_target_url"; then
+      printf 'ComfyUI abierto en el navegador: %s\n' "$open_target_url"
     else
-      printf 'ComfyUI listo. Abre esta URL: %s\n' "$comfyui_url"
+      printf 'ComfyUI listo. Abre esta URL: %s\n' "$open_target_url"
     fi
     ;;
   service-status)

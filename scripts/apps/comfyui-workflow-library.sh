@@ -51,6 +51,15 @@ except Exception:
 PY
 }
 
+build_template_open_url() {
+  local workflow_alias="$1"
+
+  printf '%s?template=%s&source=%s\n' \
+    "$comfyui_url" \
+    "$workflow_alias" \
+    "openclaw-workflows"
+}
+
 case "$command_name" in
   help)
     print_help
@@ -87,11 +96,13 @@ case "$command_name" in
     fi
 
     workflow_template_route_ready "$workflow_alias" || die "ComfyUI no expuso el template openclaw-workflows/$workflow_alias tras preparar la biblioteca."
-    open_output="$("$REPO_ROOT/scripts/apps/comfyui.sh" open-ui 2>&1)"
+    template_open_url="$(build_template_open_url "$workflow_alias")"
+    open_output="$("$REPO_ROOT/scripts/apps/comfyui.sh" open-ui "$template_open_url" 2>&1)"
 
-    printf 'Workflow publicado en la biblioteca de ComfyUI.\n'
+    printf 'Workflow abierto en ComfyUI usando el template OpenClaw exacto.\n'
     printf '%s\n' "$workflow_description"
     printf 'ui_url=%s\n' "$comfyui_url"
+    printf 'template_url=%s\n' "$template_open_url"
     printf '%s\n' "$open_output"
     ;;
   *)

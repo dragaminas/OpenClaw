@@ -148,6 +148,11 @@ workflows de `OpenClaw` como templates nativos de `ComfyUI` bajo
 `custom_nodes/openclaw-workflows/example_workflows/`, reutilizando el mismo
 catalogo Python de flujos y aliases amigables.
 
+`studio comfyui abre workflow <alias>` debe abrir la UI web con el template ya
+seleccionado por URL, usando `template=<alias>&source=openclaw-workflows`, para
+que el usuario vea el workflow exacto de `OpenClaw` y no el ultimo grafo
+persistido por la sesion anterior.
+
 ## Smoke validation
 
 - `studio corre smoke de comfyui`

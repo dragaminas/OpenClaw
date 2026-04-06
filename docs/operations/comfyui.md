@@ -208,6 +208,11 @@ Si `ComfyUI` ya estaba abierto antes de crear por primera vez el modulo
 `openclaw-workflows`, conviene reiniciarlo para que registre la ruta
 `/api/workflow_templates/openclaw-workflows/...`.
 
+`studio comfyui abre workflow <alias>` ya no solo abre la UI: ahora abre
+`ComfyUI` con la query `?template=<alias>&source=openclaw-workflows`, para que
+el canvas cargue el template exacto de `OpenClaw` en vez de dejar al usuario en
+el ultimo grafo que tenia abierto.
+
 ## Nota sobre Python
 
 Si el venv se crea sin `pip`, normalmente faltara `python3-venv` o
