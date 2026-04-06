@@ -316,6 +316,7 @@ Tareas:
 - [pending] 8.18 Ejecutar la validacion diseñada para los workflows derivados y sus composiciones, registrar evidencia, conservar artefactos de entrada y salida y dejar claramente que partes quedaron aprobadas, cuales siguen pendientes y cuales requieren fallback o revision
 - [done] 8.19 Preparar una smoke validation minima que permita ejecutar `8.18` con un gate barato de funcionamiento real, usando imagenes pequenas y clips de video pequenos para comprobar solo que cada workflow carga, corre y guarda salida sin exigir calidad alta ni comparativas finas
 - [done] 8.20 Extender la misma estructura operativa creada en `8.19` para exponer `ComfyUI` y sus validaciones desde WhatsApp, sin crear runners, manifiestos, contratos ni rutas de evidencia paralelas; el runner de `ComfyUI` debe pasar a implementar una interfaz `runner` reutilizable tambien por otras aplicaciones, y el puente de `studio-actions` debe reutilizar y ampliar ese mismo contrato, los mismos identificadores de casos, la misma publicacion de artefactos y la misma forma de reportar estado para que sirva tanto para lanzar smoke tests y validaciones de `8.18` como para habilitar ya el uso real de `ComfyUI` desde la UI actual
+- [pending] 8.21 Diseñar, derivar y validar un workflow general de renderizacion de video para este sistema, reutilizando primero los workflows locales ya desarrollados en `OpenClaw` (`UC-VID-01`, `UC-VID-02`, `UC-VID-04`) y completando solo lo que falte con templates nativos de `ComfyUI` y, en ultimo termino, referencias externas; el workflow debe aceptar como obligatorios un video base, un prompt de escena/estilo y el encendido o apagado de controles de bordes, pose y profundidad; debe soportar como opcionales el etiquetado de personajes por color y referencias de personaje asociadas a esos colores; debe mostrar el frame inicial para inspeccion, conservar el aspect ratio del video de entrada, escoger una resolucion adecuada al hardware local, subdividir clips largos en subsecciones iterables, encadenar una mejora posterior hasta `Full HD` y dejar evidencia real de una corrida local usando `blenderTest.mp4` como fixture base de `8.15`
 
 Entregables por tarea:
 
@@ -340,6 +341,7 @@ Entregables por tarea:
 - [done] 8.19 `docs/comfyui/workflow-smoke-validation.md`
 - [done] 8.20 `docs/architecture/runner-interface.md`
 - [done] 8.20 `docs/comfyui/whatsapp-comfyui-extension.md`
+- [pending] 8.21 `docs/comfyui/general-video-render-workflow.md`
 
 ## Riesgos a controlar
 
