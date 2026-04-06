@@ -356,8 +356,9 @@ BUILTIN_FLOW_CATALOG = (
         friendly_alias="render-video",
         description=(
             "Toma un video base, un prompt y referencias visuales para producir "
-            "un plano renderizado con look final. Puede reutilizar el paquete de "
-            "controles generado por prepara-video."
+            "un plano renderizado con look final. La V1 general preserva aspect "
+            "ratio, muestra el primer frame y permite activar bordes, pose y "
+            "profundidad sobre la misma base."
         ),
         output_type=OutputArtifactType.VIDEO,
         sample_user_requests=(
@@ -391,6 +392,8 @@ BUILTIN_FLOW_CATALOG = (
                 maturity=ImplementationMaturity.AVAILABLE,
                 supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
                 workflow_file_references=(
+                    "ComfyUIWorkflows/local/minimum/"
+                    "uc-vid-02-general-video-render-rtx3060-v1.json",
                     "ComfyUIWorkflows/local/minimum/"
                     "uc-vid-02-ai-renderer-video-rtx3060-v1.json",
                     "ComfyUIWorkflows/"
