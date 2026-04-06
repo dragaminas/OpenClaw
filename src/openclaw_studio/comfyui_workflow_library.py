@@ -323,44 +323,55 @@ def render_workflow_explanation(entry: WorkflowTemplateEntry) -> str:
 def render_workflow_advisory_context(entry: WorkflowTemplateEntry) -> str:
     """Render richer workflow context intended for prompt injection."""
 
-    source_payload = json.loads(Path(entry.source_path).read_text(encoding="utf-8"))
-    graph_summary = summarize_workflow_graph(source_payload)
+    return "\n".join(_build_workflow_advisory_lines(entry))
+
+
+def render_workflow_comparison_advisory_context(
+    left_entry: WorkflowTemplateEntry,
+    right_entry: WorkflowTemplateEntry,
+) -> str:
+    """Render grounded comparison context for two real workflows."""
+
+    left_required_inputs = set(left_entry.required_input_labels)
+    right_required_inputs = set(right_entry.required_input_labels)
+
+    shared_required_inputs = sorted(left_required_inputs & right_required_inputs)
+    left_only_required_inputs = sorted(left_required_inputs - right_required_inputs)
+    right_only_required_inputs = sorted(right_required_inputs - left_required_inputs)
 
     lines = [
-        "OpenClaw workflow advisory context:",
-        f"workflow_alias={entry.friendly_alias}",
-        f"use_case_id={entry.use_case_id}",
-        f"workflow_name={entry.display_label}",
-        f"workflow_description={entry.description}",
-        f"output={entry.output_label}",
-        f"required_inputs={_render_input_labels(entry.required_input_labels)}",
-        f"optional_inputs={_render_input_labels(entry.optional_input_labels)}",
-        f"variant={entry.variant_display_label}",
-        f"source_path={format_home_path(entry.source_path)}",
-        f"template_path={format_home_path(entry.template_path)}",
-        f"load_in_ui={entry.loader_hint}",
+        "OpenClaw workflow comparison advisory context:",
+        f"left_alias={left_entry.friendly_alias}",
+        f"left_use_case_id={left_entry.use_case_id}",
+        f"left_workflow_name={left_entry.display_label}",
+        f"right_alias={right_entry.friendly_alias}",
+        f"right_use_case_id={right_entry.use_case_id}",
+        f"right_workflow_name={right_entry.display_label}",
+        "comparison_summary:",
+        f"- left_purpose={left_entry.description}",
+        f"- right_purpose={right_entry.description}",
+        f"- shared_required_inputs={_render_input_labels(tuple(shared_required_inputs))}",
+        f"- left_only_required_inputs={_render_input_labels(tuple(left_only_required_inputs))}",
+        f"- right_only_required_inputs={_render_input_labels(tuple(right_only_required_inputs))}",
+        f"- left_output={left_entry.output_label}",
+        f"- right_output={right_entry.output_label}",
+        (
+            "- usage_hints="
+            "Explica diferencias de proposito, entradas editables, salidas y "
+            "cuando conviene usar uno u otro. Si uno produce un artefacto que "
+            "alimenta al otro, dilo explicitamente."
+        ),
+        "",
+        "left_workflow:",
     ]
-    if entry.sample_user_request:
-        lines.append(f"sample_request={entry.sample_user_request}")
-
+    lines.extend(f"  {line}" for line in _build_workflow_advisory_lines(left_entry, include_heading=False))
     lines.extend(
         (
-            "workflow_graph_summary:",
-            f"- node_count={graph_summary['node_count']}",
-            f"- visible_titles={graph_summary['visible_titles']}",
-            f"- editable_entry_nodes={graph_summary['editable_entry_nodes']}",
-            f"- prompt_nodes={graph_summary['prompt_nodes']}",
-            f"- model_nodes={graph_summary['model_nodes']}",
-            f"- output_nodes={graph_summary['output_nodes']}",
-            f"- node_type_counts={graph_summary['node_type_counts']}",
-            (
-                "- usage_hints="
-                "Para explicar como usarlo, prioriza los entry_nodes editables, "
-                "luego los prompt_nodes, y trata los model_nodes como "
-                "infraestructura que normalmente no se toca."
-            ),
+            "",
+            "right_workflow:",
         )
     )
+    lines.extend(f"  {line}" for line in _build_workflow_advisory_lines(right_entry, include_heading=False))
     return "\n".join(lines)
 
 
@@ -402,6 +413,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="Devuelve contexto estructurado del workflow real para el agente.",
     )
     advisory_parser.add_argument("workflow_ref", help="Alias o use_case_id del workflow.")
+
+    compare_advisory_parser = subparsers.add_parser(
+        "compare-advisory-context",
+        help="Devuelve contexto estructurado para comparar dos workflows reales.",
+    )
+    compare_advisory_parser.add_argument("left_workflow_ref", help="Alias o use_case_id del primer workflow.")
+    compare_advisory_parser.add_argument("right_workflow_ref", help="Alias o use_case_id del segundo workflow.")
 
     return parser
 
@@ -452,6 +470,21 @@ def main(argv: list[str] | None = None) -> int:
             comfyui_dir=comfyui_dir,
         )
         print(render_workflow_advisory_context(entry))
+        return 0
+
+    if args.command == "compare-advisory-context":
+        sync_workflow_templates(repo_root, comfyui_dir)
+        left_entry = resolve_workflow_template_entry(
+            workflow_ref=args.left_workflow_ref,
+            repo_root=repo_root,
+            comfyui_dir=comfyui_dir,
+        )
+        right_entry = resolve_workflow_template_entry(
+            workflow_ref=args.right_workflow_ref,
+            repo_root=repo_root,
+            comfyui_dir=comfyui_dir,
+        )
+        print(render_workflow_comparison_advisory_context(left_entry, right_entry))
         return 0
 
     parser.error(f"Comando no soportado: {args.command}")
@@ -564,6 +597,56 @@ def summarize_workflow_graph(payload: dict[str, Any]) -> dict[str, str]:
             [f"{node_type} x{count}" for node_type, count in top_node_types]
         ),
     }
+
+
+def _build_workflow_advisory_lines(
+    entry: WorkflowTemplateEntry,
+    *,
+    include_heading: bool = True,
+) -> list[str]:
+    source_payload = json.loads(Path(entry.source_path).read_text(encoding="utf-8"))
+    graph_summary = summarize_workflow_graph(source_payload)
+
+    lines: list[str] = []
+    if include_heading:
+        lines.append("OpenClaw workflow advisory context:")
+    lines.extend(
+        (
+            f"workflow_alias={entry.friendly_alias}",
+            f"use_case_id={entry.use_case_id}",
+            f"workflow_name={entry.display_label}",
+            f"workflow_description={entry.description}",
+            f"output={entry.output_label}",
+            f"required_inputs={_render_input_labels(entry.required_input_labels)}",
+            f"optional_inputs={_render_input_labels(entry.optional_input_labels)}",
+            f"variant={entry.variant_display_label}",
+            f"source_path={format_home_path(entry.source_path)}",
+            f"template_path={format_home_path(entry.template_path)}",
+            f"load_in_ui={entry.loader_hint}",
+        )
+    )
+    if entry.sample_user_request:
+        lines.append(f"sample_request={entry.sample_user_request}")
+
+    lines.extend(
+        (
+            "workflow_graph_summary:",
+            f"- node_count={graph_summary['node_count']}",
+            f"- visible_titles={graph_summary['visible_titles']}",
+            f"- editable_entry_nodes={graph_summary['editable_entry_nodes']}",
+            f"- prompt_nodes={graph_summary['prompt_nodes']}",
+            f"- model_nodes={graph_summary['model_nodes']}",
+            f"- output_nodes={graph_summary['output_nodes']}",
+            f"- node_type_counts={graph_summary['node_type_counts']}",
+            (
+                "- usage_hints="
+                "Para explicar como usarlo, prioriza los entry_nodes editables, "
+                "luego los prompt_nodes, y trata los model_nodes como "
+                "infraestructura que normalmente no se toca."
+            ),
+        )
+    )
+    return lines
 
 
 def _is_editable_entry_node(node: dict[str, Any]) -> bool:

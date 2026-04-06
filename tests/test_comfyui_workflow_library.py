@@ -8,6 +8,7 @@ from pathlib import Path
 from openclaw_studio.comfyui_workflow_library import (
     MODULE_NAME,
     render_workflow_advisory_context,
+    render_workflow_comparison_advisory_context,
     build_workflow_template_entries,
     render_workflow_explanation,
     render_workflow_list,
@@ -113,6 +114,27 @@ class ComfyUIWorkflowLibraryTests(unittest.TestCase):
         self.assertIn("editable_entry_nodes=", rendered)
         self.assertIn("INPUT VIDEO [VHS_LoadVideo]", rendered)
         self.assertIn("output_nodes=", rendered)
+
+    def test_render_workflow_comparison_advisory_context_mentions_both_workflows(self) -> None:
+        left_entry = resolve_workflow_template_entry(
+            workflow_ref="prepara-video",
+            repo_root=self.repo_root,
+            comfyui_dir=self.comfyui_dir,
+        )
+        right_entry = resolve_workflow_template_entry(
+            workflow_ref="render-video",
+            repo_root=self.repo_root,
+            comfyui_dir=self.comfyui_dir,
+        )
+
+        rendered = render_workflow_comparison_advisory_context(left_entry, right_entry)
+
+        self.assertIn("OpenClaw workflow comparison advisory context:", rendered)
+        self.assertIn("left_alias=prepara-video", rendered)
+        self.assertIn("right_alias=render-video", rendered)
+        self.assertIn("shared_required_inputs=", rendered)
+        self.assertIn("left_workflow:", rendered)
+        self.assertIn("right_workflow:", rendered)
 
 
 if __name__ == "__main__":

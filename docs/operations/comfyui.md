@@ -160,6 +160,7 @@ scripts/openclaw/test-studio-actions-plugin.sh "studio reinicia comfyui"
 scripts/openclaw/test-studio-actions-plugin.sh "studio abre comfyui"
 scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui workflows"
 scripts/openclaw/test-studio-actions-plugin.sh "studio que hace prepara-video"
+scripts/openclaw/test-studio-actions-plugin.sh "studio compara prepara-video y render-video"
 scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui abre workflow prepara-video"
 scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui ruta workflow prepara-video"
 scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui smoke"
@@ -178,6 +179,7 @@ scripts/openclaw/test-studio-actions-plugin.sh "studio comfyui evidencia <run_id
 - `studio comfyui workflows`
 - `studio que hace prepara-video`
 - `studio comfyui que hace prepara-video`
+- `studio compara prepara-video y render-video`
 - `studio comfyui abre workflow <alias>`
 - `studio comfyui ruta workflow <alias>`
 - `studio comfyui smoke`

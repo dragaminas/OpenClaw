@@ -49,6 +49,31 @@ function normalizeWorkflowRef(rawValue) {
     .trim();
 }
 
+function parseWorkflowComparisonRefs(rawValue) {
+  const normalized = normalizeMessage(rawValue)
+    .replace(/^(entre)\s+/i, "")
+    .replace(/^(workflow|workflows|flujo|flujos)\s+/i, "")
+    .trim();
+
+  if (!normalized) return null;
+
+  for (const separator of [/\s+y\s+/i, /\s+con\s+/i, /\s+vs\.?\s+/i, /\s+contra\s+/i]) {
+    const parts = normalized
+      .split(separator)
+      .map((value) => normalizeWorkflowRef(value))
+      .filter(Boolean);
+
+    if (parts.length === 2) {
+      return {
+        leftWorkflowRef: parts[0],
+        rightWorkflowRef: parts[1]
+      };
+    }
+  }
+
+  return null;
+}
+
 function stripWakeWord(rawText, prefix) {
   const normalized = normalizeMessage(rawText);
   const low = normalized.toLowerCase();
@@ -89,6 +114,7 @@ function buildHelpText(prefix) {
     `${prefix} como esta comfyui`,
     `${prefix} comfyui workflows`,
     `${prefix} que hace prepara-video`,
+    `${prefix} compara prepara-video y render-video`,
     `${prefix} comfyui abre workflow prepara-video`,
     `${prefix} comfyui ruta workflow prepara-video`,
     `${prefix} comfyui smoke`,
@@ -226,6 +252,13 @@ function parseLegacyCommand(stripped, prefix) {
         return normalizeWorkflowRef(rawArg)
           ? { kind: "comfyui-workflow-info", workflowRef: normalizeWorkflowRef(rawArg) }
           : { kind: "error", text: "Dime el alias del workflow. Ejemplo: studio comfyui explica prepara-video" };
+      case "compara":
+      case "compare": {
+        const comparison = parseWorkflowComparisonRefs(rawArg);
+        return comparison
+          ? { kind: "comfyui-workflow-compare", ...comparison }
+          : { kind: "error", text: "Dime dos aliases. Ejemplo: studio comfyui compara prepara-video y render-video" };
+      }
       case "stop":
         return { kind: "comfyui-stop" };
       case "url":
@@ -368,6 +401,26 @@ function parseNaturalSpanish(normalized) {
     return normalizedWorkflowInfo
       ? { kind: "comfyui-workflow-info", workflowRef: normalizedWorkflowInfo }
       : { kind: "error", text: "Dime el alias del workflow. Ejemplo: studio que hace prepara-video" };
+  }
+
+  const workflowComparison = extractProjectName(normalized, [
+    "compara ",
+    "compara workflow ",
+    "compara workflows ",
+    "compara el workflow ",
+    "compara los workflows ",
+    "compara flujo ",
+    "compara flujos ",
+    "compara el flujo ",
+    "compara los flujos ",
+    "compara workflows de comfyui ",
+    "compara workflows en comfyui "
+  ]);
+  if (workflowComparison !== null) {
+    const comparison = parseWorkflowComparisonRefs(workflowComparison);
+    return comparison
+      ? { kind: "comfyui-workflow-compare", ...comparison }
+      : { kind: "error", text: "Dime dos aliases. Ejemplo: studio compara prepara-video y render-video" };
   }
 
   const openWorkflow = extractProjectName(normalized, [
@@ -639,15 +692,23 @@ function consumeWorkflowAdvisorRequest(promptText) {
 }
 
 function buildWorkflowAdvisorPromptContext(advisoryContext, promptText) {
+  const advisoryPayload = typeof advisoryContext === "string"
+    ? { mode: "single", advisoryContext }
+    : advisoryContext;
+  const mode = advisoryPayload?.mode === "compare" ? "compare" : "single";
+  const groundedContext = String(advisoryPayload?.advisoryContext ?? "").trim();
+
   return [
     "Studio advisory mode is active for this turn.",
     `The user asked: ${promptText}`,
     "Use the following grounded workflow context to answer interactively and naturally.",
-    "Explain how the workflow works and how to use it in ComfyUI.",
+    mode === "compare"
+      ? "Compare the workflows below. Explain what each one does, how they differ, and when to choose one or chain them together."
+      : "Explain how the workflow works and how to use it in ComfyUI.",
     "Prefer the real workflow entry nodes, prompt nodes, model nodes, and outputs from the context.",
     "Do not claim to see nodes or settings that are not present below.",
     "",
-    advisoryContext
+    groundedContext
   ].join("\n");
 }
 
@@ -669,7 +730,42 @@ async function prepareWorkflowAdvisorTurn(event, parsed) {
       };
     }
 
-    registerWorkflowAdvisorRequest(event?.content ?? event?.body ?? "", advisoryContext);
+    registerWorkflowAdvisorRequest(event?.content ?? event?.body ?? "", {
+      mode: "single",
+      advisoryContext
+    });
+    return { handled: false };
+  } catch (error) {
+    return {
+      handled: true,
+      text: buildFailureText(error)
+    };
+  }
+}
+
+async function prepareWorkflowComparisonAdvisorTurn(event, parsed) {
+  try {
+    const { stdout, stderr } = await execActionScript(comfyuiActionScript, [
+      "workflow-compare-advisory",
+      parsed.leftWorkflowRef,
+      parsed.rightWorkflowRef
+    ]);
+    const advisoryContext = [stdout, stderr]
+      .map((value) => String(value ?? "").trim())
+      .filter(Boolean)
+      .join("\n");
+
+    if (!advisoryContext) {
+      return {
+        handled: true,
+        text: "No pude preparar contexto suficiente para comparar esos workflows."
+      };
+    }
+
+    registerWorkflowAdvisorRequest(event?.content ?? event?.body ?? "", {
+      mode: "compare",
+      advisoryContext
+    });
     return { handled: false };
   } catch (error) {
     return {
@@ -718,6 +814,8 @@ async function handleBeforeDispatch(event, ctx, pluginConfig = {}, logger = cons
       return runComfyUIAction(["workflows"]);
     case "comfyui-workflow-info":
       return prepareWorkflowAdvisorTurn(event, parsed);
+    case "comfyui-workflow-compare":
+      return prepareWorkflowComparisonAdvisorTurn(event, parsed);
     case "comfyui-workflow-open":
       return runComfyUIAction(["open-workflow", parsed.workflowRef]);
     case "comfyui-workflow-path":
@@ -805,6 +903,8 @@ export {
   consumeWorkflowAdvisorRequest,
   handleBeforeDispatch,
   parseSafeActionMessage,
+  parseWorkflowComparisonRefs,
+  prepareWorkflowComparisonAdvisorTurn,
   prepareWorkflowAdvisorTurn,
   registerWorkflowAdvisorRequest
 };

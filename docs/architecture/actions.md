@@ -47,6 +47,7 @@ Modo tecnico:
 - `studio comfyui stop`
 - `studio comfyui url`
 - `studio comfyui workflows`
+- `studio compara prepara-video y render-video`
 - `studio comfyui abre workflow <alias>`
 - `studio comfyui ruta workflow <alias>`
 - `studio comfyui smoke`
@@ -80,6 +81,7 @@ El segundo modo sirve para preguntas como:
 
 - `studio que hace prepara-video`
 - `studio explica que hace prepare-video`
+- `studio compara prepara-video y render-video`
 
 En esos casos, `studio-actions` no deberia inventar una respuesta dura. Deberia
 inyectar al prompt del agente contexto derivado del workflow real y dejar que

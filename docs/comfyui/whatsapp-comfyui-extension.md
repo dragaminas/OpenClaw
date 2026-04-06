@@ -142,6 +142,7 @@ deberia quedar cerrado solo para smoke.
 - `studio comfyui workflows`
 - `studio que hace prepara-video`
 - `studio comfyui que hace prepara-video`
+- `studio compara prepara-video y render-video`
 - `studio comfyui abre workflow prepara-video`
 - `studio comfyui ruta workflow prepara-video`
 
@@ -162,6 +163,11 @@ es su entrada obligatoria y que salida produce.
 `studio que hace <alias>` y `studio comfyui que hace <alias>` deben resolver el
 workflow desde el mismo catalogo canonico y explicar el flujo en lenguaje
 humano, sin duplicar logica dentro de WhatsApp.
+
+`studio compara <alias_a> y <alias_b>` debe resolver ambos workflows canonicos
+y dejar pasar la consulta al agente con contexto grounded de los dos, para que
+OpenClaw compare proposito, entradas, salidas y encadenamiento posible entre
+ellos sin caer en una respuesta fija del plugin.
 
 Implementacion actual recomendada:
 
@@ -280,6 +286,7 @@ mismo contrato de runner.
 Hoy ya quedan expuestos por WhatsApp:
 
 - `studio comfyui workflows`
+- `studio compara prepara-video y render-video`
 - `studio comfyui abre workflow <alias>`
 - `studio comfyui ruta workflow <alias>`
 - `studio comfyui smoke`
