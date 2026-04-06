@@ -8,11 +8,11 @@
       "id": 1058,
       "type": "Label (rgthree)",
       "pos": [
-        -2190,
-        -1140
+        -3030,
+        -1225
       ],
       "size": [
-        148.8000015258789,
+        820,
         26
       ],
       "flags": {
@@ -22,7 +22,7 @@
       "mode": 0,
       "inputs": [],
       "outputs": [],
-      "title": "OpenClaw minimum AI Renderer derived from Mickmumpitz",
+      "title": "Derivado sobre UC-VID-01 + UC-VID-02 para OpenClaw",
       "properties": {
         "fontSize": 17,
         "fontFamily": "Arial",
@@ -162,80 +162,6 @@
       "shape": 1
     },
     {
-      "id": 1071,
-      "type": "Label (rgthree)",
-      "pos": [
-        -2100,
-        -950
-      ],
-      "size": [
-        150.6666702270508,
-        26
-      ],
-      "flags": {
-        "allow_interaction": true
-      },
-      "order": 4,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "Important Notes!",
-      "properties": {
-        "fontSize": 17,
-        "fontFamily": "Arial",
-        "fontColor": "#ffffff",
-        "textAlign": "left",
-        "backgroundColor": "transparent",
-        "padding": 0,
-        "borderRadius": 0,
-        "angle": 0,
-        "ue_properties": {
-          "version": "7.0.1",
-          "widget_ue_connectable": {}
-        }
-      },
-      "color": "#fff0",
-      "bgcolor": "#fff0",
-      "shape": 1
-    },
-    {
-      "id": 1065,
-      "type": "Label (rgthree)",
-      "pos": [
-        -2100,
-        -1070
-      ],
-      "size": [
-        243.00000610351563,
-        26
-      ],
-      "flags": {
-        "allow_interaction": true
-      },
-      "order": 5,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "Input / Output / Model Loaders",
-      "properties": {
-        "fontSize": 17,
-        "fontFamily": "Arial",
-        "fontColor": "#ffffff",
-        "textAlign": "left",
-        "backgroundColor": "transparent",
-        "padding": 0,
-        "borderRadius": 0,
-        "angle": 0,
-        "ue_properties": {
-          "version": "7.0.1",
-          "widget_ue_connectable": {}
-        }
-      },
-      "color": "#fff0",
-      "bgcolor": "#fff0",
-      "shape": 1
-    },
-    {
       "id": 1067,
       "type": "Reroute",
       "pos": [
@@ -276,85 +202,11 @@
       "shape": 1
     },
     {
-      "id": 1069,
-      "type": "Label (rgthree)",
-      "pos": [
-        -2100,
-        -1040
-      ],
-      "size": [
-        140,
-        26
-      ],
-      "flags": {
-        "allow_interaction": true
-      },
-      "order": 7,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "Base Video y Controles",
-      "properties": {
-        "fontSize": 17,
-        "fontFamily": "Arial",
-        "fontColor": "#ffffff",
-        "textAlign": "left",
-        "backgroundColor": "transparent",
-        "padding": 0,
-        "borderRadius": 0,
-        "angle": 0,
-        "ue_properties": {
-          "version": "7.0.1",
-          "widget_ue_connectable": {}
-        }
-      },
-      "color": "#fff0",
-      "bgcolor": "#fff0",
-      "shape": 1
-    },
-    {
-      "id": 1062,
-      "type": "Label (rgthree)",
-      "pos": [
-        -2100,
-        -1000
-      ],
-      "size": [
-        154.83333435058594,
-        26
-      ],
-      "flags": {
-        "allow_interaction": true
-      },
-      "order": 8,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "Render y Salidas",
-      "properties": {
-        "fontSize": 17,
-        "fontFamily": "Arial",
-        "fontColor": "#ffffff",
-        "textAlign": "left",
-        "backgroundColor": "transparent",
-        "padding": 0,
-        "borderRadius": 0,
-        "angle": 0,
-        "ue_properties": {
-          "version": "7.0.1",
-          "widget_ue_connectable": {}
-        }
-      },
-      "color": "#fff0",
-      "bgcolor": "#fff0",
-      "shape": 1
-    },
-    {
       "id": 2859,
       "type": "SetNode",
       "pos": [
-        -1600,
-        -700
+        -1980,
+        -150
       ],
       "size": [
         210,
@@ -396,8 +248,8 @@
       "id": 373,
       "type": "GetNode",
       "pos": [
-        -720,
-        -680
+        -1710,
+        -540
       ],
       "size": [
         210,
@@ -437,8 +289,8 @@
       "id": 2687,
       "type": "SetNode",
       "pos": [
-        -1577.9338842975208,
-        -436.77685950413223
+        -1980,
+        -510
       ],
       "size": [
         210,
@@ -475,122 +327,11 @@
       "shape": 1
     },
     {
-      "id": 2395,
-      "type": "Label (rgthree)",
-      "pos": [
-        -2260,
-        -210
-      ],
-      "size": [
-        38,
-        38
-      ],
-      "flags": {
-        "allow_interaction": true
-      },
-      "order": 10,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "\u2192",
-      "properties": {
-        "fontSize": 38,
-        "fontFamily": "Arial",
-        "fontColor": "#ffffff",
-        "textAlign": "left",
-        "backgroundColor": "transparent",
-        "padding": 0,
-        "borderRadius": 0,
-        "angle": 0,
-        "ue_properties": {
-          "version": "7.0.1",
-          "widget_ue_connectable": {}
-        }
-      },
-      "color": "#fff0",
-      "bgcolor": "#fff0",
-      "shape": 1
-    },
-    {
-      "id": 2393,
-      "type": "Label (rgthree)",
-      "pos": [
-        -2260,
-        -10
-      ],
-      "size": [
-        38,
-        38
-      ],
-      "flags": {
-        "allow_interaction": true
-      },
-      "order": 11,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "\u2192",
-      "properties": {
-        "fontSize": 38,
-        "fontFamily": "Arial",
-        "fontColor": "#ffffff",
-        "textAlign": "left",
-        "backgroundColor": "transparent",
-        "padding": 0,
-        "borderRadius": 0,
-        "angle": 0,
-        "ue_properties": {
-          "version": "7.0.1",
-          "widget_ue_connectable": {}
-        }
-      },
-      "color": "#fff0",
-      "bgcolor": "#fff0",
-      "shape": 1
-    },
-    {
-      "id": 2388,
-      "type": "Label (rgthree)",
-      "pos": [
-        -2260,
-        -790
-      ],
-      "size": [
-        140,
-        38
-      ],
-      "flags": {
-        "allow_interaction": true
-      },
-      "order": 12,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "\u2192",
-      "properties": {
-        "fontSize": 38,
-        "fontFamily": "Arial",
-        "fontColor": "#ffffff",
-        "textAlign": "left",
-        "backgroundColor": "transparent",
-        "padding": 0,
-        "borderRadius": 0,
-        "angle": 0,
-        "ue_properties": {
-          "version": "7.0.1",
-          "widget_ue_connectable": {}
-        }
-      },
-      "color": "#fff0",
-      "bgcolor": "#fff0",
-      "shape": 1
-    },
-    {
       "id": 3071,
       "type": "GetNode",
       "pos": [
-        200.4815922229038,
-        -699.7177630349731
+        1430,
+        -720
       ],
       "size": [
         210,
@@ -629,8 +370,8 @@
       "id": 3091,
       "type": "GetNode",
       "pos": [
-        200.4815922229038,
-        -649.7177630349731
+        1430,
+        -660
       ],
       "size": [
         210,
@@ -669,8 +410,8 @@
       "id": 3336,
       "type": "SetNode",
       "pos": [
-        -2150,
-        90
+        -2990,
+        240
       ],
       "size": [
         210,
@@ -714,8 +455,8 @@
       "id": 3335,
       "type": "SetNode",
       "pos": [
-        -2150,
-        -70
+        -2990,
+        20
       ],
       "size": [
         235.68334045410157,
@@ -759,8 +500,8 @@
       "id": 3334,
       "type": "VAELoader",
       "pos": [
-        -2150,
-        -20
+        -2990,
+        150
       ],
       "size": [
         410,
@@ -801,8 +542,8 @@
       "id": 3329,
       "type": "ModelSamplingSD3",
       "pos": [
-        -2150,
-        -390
+        -2990,
+        -410
       ],
       "size": [
         410,
@@ -850,8 +591,8 @@
       "id": 3328,
       "type": "LoraLoaderModelOnly",
       "pos": [
-        -2150,
-        -530
+        -2990,
+        -540
       ],
       "size": [
         410,
@@ -898,7 +639,7 @@
       "id": 3327,
       "type": "LoraLoaderModelOnly",
       "pos": [
-        -2150,
+        -2990,
         -670
       ],
       "size": [
@@ -946,8 +687,8 @@
       "id": 3332,
       "type": "SetNode",
       "pos": [
-        -2150,
-        -280
+        -2990,
+        -250
       ],
       "size": [
         235.68334045410157,
@@ -991,8 +732,8 @@
       "id": 3333,
       "type": "CLIPLoader",
       "pos": [
-        -2150,
-        -230
+        -2990,
+        -120
       ],
       "size": [
         410,
@@ -1035,7 +776,7 @@
       "id": 3326,
       "type": "UNETLoader",
       "pos": [
-        -2150,
+        -2990,
         -800
       ],
       "size": [
@@ -1075,115 +816,11 @@
       "shape": 1
     },
     {
-      "id": 2400,
-      "type": "Label (rgthree)",
-      "pos": [
-        -2260,
-        -510
-      ],
-      "size": [
-        140,
-        38
-      ],
-      "flags": {
-        "allow_interaction": true
-      },
-      "order": 18,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "\u2192",
-      "properties": {
-        "fontSize": 38,
-        "fontFamily": "Arial",
-        "fontColor": "#ffffff",
-        "textAlign": "left",
-        "backgroundColor": "transparent",
-        "padding": 0,
-        "borderRadius": 0,
-        "angle": 0,
-        "ue_properties": {
-          "version": "7.0.1",
-          "widget_ue_connectable": {}
-        }
-      },
-      "color": "#fff0",
-      "bgcolor": "#fff0",
-      "shape": 1
-    },
-    {
-      "id": 2394,
-      "type": "MarkdownNote",
-      "pos": [
-        -2630,
-        -820
-      ],
-      "size": [
-        350,
-        110
-      ],
-      "flags": {},
-      "order": 19,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "Model download links",
-      "properties": {
-        "ue_properties": {
-          "version": "7.0.1",
-          "widget_ue_connectable": {}
-        }
-      },
-      "widgets_values": [
-        "wan-14B_vace_skyreels_v3_R2V_e4m3fn_v1.safetensors:\n\n[https://huggingface.co/Inner-Reflections/VACE_Skyreels_V3_R2V_Merge/blob/main/wan-14B_vace_skyreels_v3_R2V_e4m3fn_v1.safetensors](https://huggingface.co/Inner-Reflections/VACE_Skyreels_V3_R2V_Merge/blob/main/wan-14B_vace_skyreels_v3_R2V_e4m3fn_v1.safetensors)\n\n\ud83d\udcc1 ComfyUI/models/diffusion_models"
-      ],
-      "color": "#222",
-      "bgcolor": "#000",
-      "shape": 1
-    },
-    {
-      "id": 3355,
-      "type": "Label (rgthree)",
-      "pos": [
-        -2260,
-        -660
-      ],
-      "size": [
-        140,
-        38
-      ],
-      "flags": {
-        "allow_interaction": true
-      },
-      "order": 20,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "\u2192",
-      "properties": {
-        "fontSize": 38,
-        "fontFamily": "Arial",
-        "fontColor": "#ffffff",
-        "textAlign": "left",
-        "backgroundColor": "transparent",
-        "padding": 0,
-        "borderRadius": 0,
-        "angle": 0,
-        "ue_properties": {
-          "version": "7.0.1",
-          "widget_ue_connectable": {}
-        }
-      },
-      "color": "#fff0",
-      "bgcolor": "#fff0",
-      "shape": 1
-    },
-    {
       "id": 2860,
       "type": "SetNode",
       "pos": [
-        -1600,
-        -750
+        -1980,
+        -210
       ],
       "size": [
         210,
@@ -1255,8 +892,8 @@
       "id": 2607,
       "type": "VHS_VideoInfo",
       "pos": [
-        -1577.9338842975208,
-        -486.77685950413223
+        -1980,
+        -760
       ],
       "size": [
         234.9333267211914,
@@ -1334,14 +971,15 @@
         "Node name for S&R": "VHS_VideoInfo"
       },
       "widgets_values": {},
-      "shape": 1
+      "shape": 1,
+      "title": "INFO VIDEO"
     },
     {
       "id": 3087,
       "type": "GetNode",
       "pos": [
-        200.4815922229038,
-        -599.7177630349731
+        1430,
+        -600
       ],
       "size": [
         210,
@@ -1380,8 +1018,8 @@
       "id": 3359,
       "type": "GetNode",
       "pos": [
-        200.4815922229038,
-        -549.7177630349731
+        1430,
+        -540
       ],
       "size": [
         210,
@@ -1420,8 +1058,8 @@
       "id": 3076,
       "type": "GetNode",
       "pos": [
-        200.4815922229038,
-        -749.7177630349731
+        1430,
+        -780
       ],
       "size": [
         237.15,
@@ -1455,8 +1093,8 @@
       "id": 3083,
       "type": "GetNode",
       "pos": [
-        600.4815922229049,
-        -719.7177630349731
+        1430,
+        -480
       ],
       "size": [
         210,
@@ -1488,11 +1126,11 @@
       "id": 1066,
       "type": "Label (rgthree)",
       "pos": [
-        -2190,
-        -1200
+        -3030,
+        -1290
       ],
       "size": [
-        476.1333312988281,
+        920,
         56
       ],
       "flags": {
@@ -1525,8 +1163,8 @@
       "id": 1795,
       "type": "SetNode",
       "pos": [
-        -720,
-        -630
+        -1710,
+        -460
       ],
       "size": [
         210,
@@ -1570,12 +1208,12 @@
       "id": 3364,
       "type": "ImageResizeKJv2",
       "pos": [
-        -770,
-        10
+        -1400,
+        120
       ],
       "size": [
-        270,
-        336
+        220,
+        60
       ],
       "flags": {
         "collapsed": true
@@ -1660,18 +1298,19 @@
         2,
         "cpu"
       ],
-      "shape": 1
+      "shape": 1,
+      "title": "AJUSTA REFERENCIA 2"
     },
     {
       "id": 3365,
       "type": "ImageResizeKJv2",
       "pos": [
-        -350,
-        10
+        -1400,
+        460
       ],
       "size": [
-        270,
-        336
+        220,
+        60
       ],
       "flags": {
         "collapsed": true
@@ -1756,18 +1395,19 @@
         2,
         "cpu"
       ],
-      "shape": 1
+      "shape": 1,
+      "title": "AJUSTA REFERENCIA 3"
     },
     {
       "id": 280,
       "type": "ImageResizeKJv2",
       "pos": [
-        -770,
-        -420
+        -1400,
+        -480
       ],
       "size": [
-        270,
-        336
+        220,
+        60
       ],
       "flags": {
         "collapsed": true
@@ -1852,135 +1492,15 @@
         2,
         "cpu"
       ],
-      "shape": 1
-    },
-    {
-      "id": 2421,
-      "type": "MarkdownNote",
-      "pos": [
-        -2630,
-        -230
-      ],
-      "size": [
-        350,
-        110
-      ],
-      "flags": {},
-      "order": 28,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "Model download links",
-      "properties": {
-        "ue_properties": {
-          "version": "7.0.1",
-          "widget_ue_connectable": {}
-        }
-      },
-      "widgets_values": [
-        "umt5-xxl-enc-bf16.safetensors:\n\n[https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/blob/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/blob/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors)\n\n\ud83d\udcc1 ComfyUI/models/text_encoders"
-      ],
-      "color": "#222",
-      "bgcolor": "#000",
-      "shape": 1
-    },
-    {
-      "id": 3366,
-      "type": "Note",
-      "pos": [
-        -1180,
-        410
-      ],
-      "size": [
-        260,
-        90
-      ],
-      "flags": {
-        "collapsed": false
-      },
-      "order": 29,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "properties": {
-        "ue_properties": {
-          "version": "7.0.1",
-          "widget_ue_connectable": {}
-        }
-      },
-      "widgets_values": [
-        "Optionally, use this preprocess node to process your input."
-      ],
-      "color": "#ffc14b",
-      "bgcolor": "#f1ad37",
-      "shape": 1
-    },
-    {
-      "id": 3356,
-      "type": "MarkdownNote",
-      "pos": [
-        -2630,
-        -660
-      ],
-      "size": [
-        350,
-        100
-      ],
-      "flags": {},
-      "order": 30,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "Model download links",
-      "properties": {
-        "ue_properties": {
-          "version": "7.0.1",
-          "widget_ue_connectable": {}
-        }
-      },
-      "widgets_values": [
-        "Wan2.1_T2V_14B_FusionX_LoRA.safetensors:\n\n[https://huggingface.co/vrgamedevgirl84/Wan14BT2VFusioniX/blob/main/FusionX_LoRa/Wan2.1_T2V_14B_FusionX_LoRA.safetensors](https://huggingface.co/vrgamedevgirl84/Wan14BT2VFusioniX/blob/main/FusionX_LoRa/Wan2.1_T2V_14B_FusionX_LoRA.safetensors)\n\n\ud83d\udcc1 ComfyUI/models/loras"
-      ],
-      "color": "#222",
-      "bgcolor": "#000",
-      "shape": 1
-    },
-    {
-      "id": 2423,
-      "type": "MarkdownNote",
-      "pos": [
-        -2630,
-        -510
-      ],
-      "size": [
-        350,
-        130
-      ],
-      "flags": {},
-      "order": 31,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "Model download links",
-      "properties": {
-        "ue_properties": {
-          "version": "7.0.1",
-          "widget_ue_connectable": {}
-        }
-      },
-      "widgets_values": [
-        "Recommended LoRA for realistic output. Swap or disable this to explore other styles (e.g., anime, 3D, illustration).\n\nLenovo.safetensors:\n\n[https://civitai.com/models/1662740?modelVersionId=2066914](https://civitai.com/models/1662740?modelVersionId=2066914)\n\n\ud83d\udcc1 ComfyUI/models/loras"
-      ],
-      "color": "#222",
-      "bgcolor": "#000",
-      "shape": 1
+      "shape": 1,
+      "title": "AJUSTA START IMAGE"
     },
     {
       "id": 265,
       "type": "VHS_LoadVideo",
       "pos": [
-        -1620,
-        -560
+        -2370,
+        -760
       ],
       "size": [
         340,
@@ -2118,8 +1638,8 @@
       "id": 374,
       "type": "GetNode",
       "pos": [
-        -720,
-        -730
+        -1710,
+        -600
       ],
       "size": [
         210,
@@ -2159,8 +1679,8 @@
       "id": 3354,
       "type": "SetNode",
       "pos": [
-        -720,
-        -540
+        -1710,
+        -200
       ],
       "size": [
         210,
@@ -2201,54 +1721,11 @@
       "shape": 1
     },
     {
-      "id": 3358,
-      "type": "421fb6e6-9560-46e3-b6a4-c84b699c0410",
-      "pos": [
-        -1180,
-        300
-      ],
-      "size": [
-        260,
-        60
-      ],
-      "flags": {
-        "collapsed": false
-      },
-      "order": 33,
-      "mode": 4,
-      "inputs": [
-        {
-          "name": "image",
-          "type": "IMAGE",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "name": "image",
-          "type": "IMAGE",
-          "links": null
-        }
-      ],
-      "properties": {
-        "proxyWidgets": [
-          [
-            "3277",
-            "method"
-          ]
-        ],
-        "cnr_id": "comfy-core",
-        "ver": "0.11.1"
-      },
-      "widgets_values": [],
-      "shape": 1
-    },
-    {
       "id": 2845,
       "type": "3d3e41f0-5880-459f-8b57-8311a154436c",
       "pos": [
-        -1620,
-        -800
+        -2370,
+        -210
       ],
       "size": [
         340,
@@ -2323,14 +1800,15 @@
       "widgets_values": [],
       "color": "#e7e7e7",
       "bgcolor": "#d3d3d3",
-      "shape": 1
+      "shape": 1,
+      "title": "SELECCION TAMANO"
     },
     {
       "id": 3272,
       "type": "6e804fbf-99c2-4c99-9f6c-5a7ca57b06d1",
       "pos": [
-        -1230,
-        -800
+        1080,
+        -720
       ],
       "size": [
         340,
@@ -2413,18 +1891,19 @@
         0.2,
         "normal"
       ],
-      "shape": 1
+      "shape": 1,
+      "title": "MEZCLA BORDES + PROFUNDIDAD"
     },
     {
       "id": 2375,
       "type": "Note",
       "pos": [
-        -1620,
-        -1010
+        -2370,
+        -970
       ],
       "size": [
-        340,
-        90
+        520,
+        110
       ],
       "flags": {
         "collapsed": false
@@ -2440,38 +1919,7 @@
         }
       },
       "widgets_values": [
-        "frame_load_cap = Number of frames generated. Must follow the Wan formula: 4n+1 (e.g. 41, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81)."
-      ],
-      "color": "#ffc14b",
-      "bgcolor": "#f1ad37",
-      "shape": 1
-    },
-    {
-      "id": 3177,
-      "type": "Note",
-      "pos": [
-        -770,
-        -1010
-      ],
-      "size": [
-        380,
-        88
-      ],
-      "flags": {
-        "collapsed": false
-      },
-      "order": 38,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "properties": {
-        "ue_properties": {
-          "version": "7.0.1",
-          "widget_ue_connectable": {}
-        }
-      },
-      "widgets_values": [
-        "Multiple Reference Images automatically disables the startframe input on WanVideo VACE Start To End Frame."
+        "En corridas largas de Wan/VACE conviene usar frame_load_cap con formula 4n+1. La validacion rapida de V1 puede usar menos frames solo para comprobar la base."
       ],
       "color": "#ffc14b",
       "bgcolor": "#f1ad37",
@@ -2481,12 +1929,12 @@
       "id": 3362,
       "type": "ImageResizeKJv2",
       "pos": [
-        -350,
-        -420
+        -1400,
+        -220
       ],
       "size": [
-        270,
-        336
+        220,
+        60
       ],
       "flags": {
         "collapsed": true
@@ -2571,14 +2019,15 @@
         2,
         "cpu"
       ],
-      "shape": 1
+      "shape": 1,
+      "title": "AJUSTA REFERENCIA 1"
     },
     {
       "id": 3228,
       "type": "c475d739-ec74-430f-a7bd-aab0fdd85070",
       "pos": [
-        150.4815922229038,
-        -799.7177630349731
+        1680,
+        -800
       ],
       "size": [
         390,
@@ -2665,41 +2114,11 @@
       "title": "NUCLEO RENDER GENERAL"
     },
     {
-      "id": 2422,
-      "type": "MarkdownNote",
-      "pos": [
-        -2630,
-        -30
-      ],
-      "size": [
-        350,
-        110
-      ],
-      "flags": {},
-      "order": 41,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "Model download links",
-      "properties": {
-        "ue_properties": {
-          "version": "7.0.1",
-          "widget_ue_connectable": {}
-        }
-      },
-      "widgets_values": [
-        "wan_2.1_vae.safetensors:\n\n[https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/blob/main/split_files/vae/wan_2.1_vae.safetensors](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/blob/main/split_files/vae/wan_2.1_vae.safetensors)\n\n\ud83d\udcc1 ComfyUI/models/vae"
-      ],
-      "color": "#222",
-      "bgcolor": "#000",
-      "shape": 1
-    },
-    {
       "id": 4001,
       "type": "DownloadAndLoadDepthAnythingV2Model",
       "pos": [
-        -1660,
-        -660
+        -820,
+        -620
       ],
       "size": [
         350,
@@ -2736,8 +2155,8 @@
       "id": 4002,
       "type": "DepthAnything_V2",
       "pos": [
-        -1660,
-        -470
+        -820,
+        -450
       ],
       "size": [
         350,
@@ -2782,8 +2201,8 @@
       "id": 4003,
       "type": "CannyEdgePreprocessor",
       "pos": [
-        -1240,
-        -660
+        -430,
+        -620
       ],
       "size": [
         340,
@@ -2825,8 +2244,8 @@
       "id": 4004,
       "type": "OpenposePreprocessor",
       "pos": [
-        -820,
-        -660
+        -40,
+        -620
       ],
       "size": [
         340,
@@ -2876,8 +2295,8 @@
       "id": 4005,
       "type": "VHS_VideoCombine",
       "pos": [
-        -1660,
-        -230
+        -820,
+        -40
       ],
       "size": [
         350,
@@ -2951,8 +2370,8 @@
       "id": 4006,
       "type": "VHS_VideoCombine",
       "pos": [
-        -1240,
-        -230
+        -430,
+        -40
       ],
       "size": [
         340,
@@ -3026,8 +2445,8 @@
       "id": 4007,
       "type": "VHS_VideoCombine",
       "pos": [
-        -820,
-        -230
+        -40,
+        -40
       ],
       "size": [
         340,
@@ -3101,8 +2520,8 @@
       "id": 4008,
       "type": "GetFrameByIndex",
       "pos": [
-        -380,
-        -780
+        -1700,
+        -760
       ],
       "size": [
         300,
@@ -3152,12 +2571,12 @@
       "id": 4009,
       "type": "SaveImage",
       "pos": [
-        -30,
+        -1380,
         -820
       ],
       "size": [
-        590,
-        630
+        400,
+        320
       ],
       "flags": {},
       "order": 73,
@@ -3194,8 +2613,8 @@
       "id": 4010,
       "type": "PrimitiveBoolean",
       "pos": [
-        -1660,
-        -980
+        -820,
+        -880
       ],
       "size": [
         220,
@@ -3231,8 +2650,8 @@
       "id": 4011,
       "type": "PrimitiveBoolean",
       "pos": [
-        -1660,
-        -900
+        -820,
+        -810
       ],
       "size": [
         220,
@@ -3266,8 +2685,8 @@
       "id": 4012,
       "type": "PrimitiveBoolean",
       "pos": [
-        -1660,
-        -820
+        -820,
+        -740
       ],
       "size": [
         220,
@@ -3303,8 +2722,8 @@
       "id": 4013,
       "type": "ImpactLogicalOperators",
       "pos": [
-        -1350,
-        -950
+        -430,
+        -860
       ],
       "size": [
         260,
@@ -3349,8 +2768,8 @@
       "id": 4014,
       "type": "ImpactLogicalOperators",
       "pos": [
-        -1350,
-        -850
+        -430,
+        -770
       ],
       "size": [
         260,
@@ -3395,8 +2814,8 @@
       "id": 4015,
       "type": "ImpactLogicalOperators",
       "pos": [
-        -1050,
-        -900
+        -40,
+        -860
       ],
       "size": [
         260,
@@ -3441,8 +2860,8 @@
       "id": 4016,
       "type": "6e804fbf-99c2-4c99-9f6c-5a7ca57b06d1",
       "pos": [
-        -1080,
-        -640
+        360,
+        -720
       ],
       "size": [
         340,
@@ -3532,8 +2951,8 @@
       "id": 4017,
       "type": "6e804fbf-99c2-4c99-9f6c-5a7ca57b06d1",
       "pos": [
-        -790,
-        -640
+        720,
+        -720
       ],
       "size": [
         340,
@@ -3623,8 +3042,8 @@
       "id": 4018,
       "type": "6e804fbf-99c2-4c99-9f6c-5a7ca57b06d1",
       "pos": [
-        -520,
-        -550
+        1080,
+        -520
       ],
       "size": [
         340,
@@ -3714,8 +3133,8 @@
       "id": 4020,
       "type": "VHS_VideoCombine",
       "pos": [
-        920,
-        -210
+        2140,
+        -260
       ],
       "size": [
         350,
@@ -4222,54 +3641,93 @@
   ],
   "groups": [
     {
-      "id": 12,
-      "title": "FRAME INICIAL",
+      "id": 201,
+      "title": "MODELOS WAN",
       "bounding": [
-        -810,
-        -900,
-        880,
-        950
+        -3040,
+        -930,
+        560,
+        1290
       ],
-      "color": "#81f97f",
+      "color": "#43536b",
       "font_size": 24,
       "flags": {}
     },
     {
-      "id": 14,
-      "title": "VIDEO BASE Y CONTROLES",
+      "id": 202,
+      "title": "ENTRADA VIDEO",
       "bounding": [
-        -1660,
-        -900,
-        810,
-        1450
+        -2450,
+        -930,
+        640,
+        1290
       ],
-      "color": "#dad7d7",
+      "color": "#6b6650",
       "font_size": 24,
       "flags": {}
     },
     {
-      "id": 75,
-      "title": "FP8 MODEL LOADERS",
+      "id": 203,
+      "title": "FRAME INICIAL Y REFERENCIAS",
       "bounding": [
-        -2190,
-        -900,
-        490,
-        1030
+        -1850,
+        -930,
+        850,
+        1680
       ],
-      "color": "#dad7d7",
+      "color": "#56774f",
       "font_size": 24,
       "flags": {}
     },
     {
-      "id": 82,
+      "id": 204,
+      "title": "PREPROCESS CONTROLES",
+      "bounding": [
+        -900,
+        -930,
+        980,
+        1290
+      ],
+      "color": "#6d4f7c",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 205,
+      "title": "SELECCION DE CONTROL",
+      "bounding": [
+        320,
+        -930,
+        1120,
+        620
+      ],
+      "color": "#6a5a3e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 206,
       "title": "RENDER GENERAL",
       "bounding": [
-        110.48159222290414,
-        -899.7177630349731,
-        1010,
+        1560,
+        -930,
+        620,
         760
       ],
       "color": "#a1309b",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 207,
+      "title": "SALIDA Y EVIDENCIA",
+      "bounding": [
+        2100,
+        -930,
+        560,
+        760
+      ],
+      "color": "#3f7284",
       "font_size": 24,
       "flags": {}
     }

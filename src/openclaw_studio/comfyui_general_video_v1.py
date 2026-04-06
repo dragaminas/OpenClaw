@@ -48,6 +48,29 @@ LEGACY_NODE_IDS_TO_REMOVE = {
     3372,
 }
 
+REDUNDANT_ANNOTATION_NODE_IDS = {
+    1062,
+    1065,
+    1069,
+    1071,
+    2388,
+    2393,
+    2395,
+    2400,
+    3177,
+    3355,
+    3366,
+    2394,
+    2421,
+    2422,
+    2423,
+    3356,
+}
+
+ORPHAN_NODE_IDS_TO_REMOVE = {
+    3358,
+}
+
 
 def default_repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -81,6 +104,11 @@ def derive_general_video_v1_workflow(repo_root: Path | None = None) -> dict[str,
     base_workflow["nodes"].extend(cloned_nodes)
 
     _wire_general_video_v1(base_workflow)
+    _remove_nodes(
+        base_workflow,
+        REDUNDANT_ANNOTATION_NODE_IDS | ORPHAN_NODE_IDS_TO_REMOVE,
+    )
+    _layout_general_video_v1(base_workflow)
     _sync_top_level_links(base_workflow)
     return base_workflow
 
@@ -198,16 +226,9 @@ def _find_subgraph_node(subgraph: dict[str, Any], node_id: int) -> dict[str, Any
 
 def _retitle_base_sections(workflow: dict[str, Any]) -> None:
     _find_node(workflow, 1066)["title"] = "OPENCLAW GENERAL VIDEO RENDER V1"
-    _find_node(workflow, 1069)["title"] = "Base Video y Controles"
-    _find_node(workflow, 1062)["title"] = "Render y Salidas"
-    for group in workflow.get("groups", []):
-        title = group.get("title")
-        if title == "STARTIMAGE":
-            group["title"] = "FRAME INICIAL"
-        elif title == "VIDEO INPUT & SIZE SELECTION":
-            group["title"] = "VIDEO BASE Y CONTROLES"
-        elif title == "SAMPLER":
-            group["title"] = "RENDER GENERAL"
+    _find_node(workflow, 1058)["title"] = (
+        "Derivado sobre UC-VID-01 + UC-VID-02 para OpenClaw"
+    )
 
 
 def _configure_base_loader(workflow: dict[str, Any]) -> None:
@@ -226,6 +247,13 @@ def _configure_render_core_defaults(workflow: dict[str, Any]) -> None:
     _find_node(workflow, 3228)["title"] = "NUCLEO RENDER GENERAL"
     _find_node(workflow, 3228)["widgets_values"][0] = DEFAULT_PROMPT
     _find_node(workflow, 3333)["widgets_values"][0] = DEFAULT_CLIP_NAME
+    _find_node(workflow, 2607)["title"] = "INFO VIDEO"
+    _find_node(workflow, 2845)["title"] = "SELECCION TAMANO"
+    _find_node(workflow, 3272)["title"] = "MEZCLA BORDES + PROFUNDIDAD"
+    _find_node(workflow, 280)["title"] = "AJUSTA START IMAGE"
+    _find_node(workflow, 3362)["title"] = "AJUSTA REFERENCIA 1"
+    _find_node(workflow, 3364)["title"] = "AJUSTA REFERENCIA 2"
+    _find_node(workflow, 3365)["title"] = "AJUSTA REFERENCIA 3"
     render_subgraph = _find_subgraph_definition(
         workflow, "c475d739-ec74-430f-a7bd-aab0fdd85070"
     )
@@ -508,6 +536,149 @@ def set_general_video_v1_controls(
     _find_node(workflow, 4010)["widgets_values"][0] = use_borders
     _find_node(workflow, 4011)["widgets_values"][0] = use_pose
     _find_node(workflow, 4012)["widgets_values"][0] = use_depth
+
+
+def _layout_general_video_v1(workflow: dict[str, Any]) -> None:
+    title_node = _find_node(workflow, 1066)
+    title_node["pos"] = [-3030, -1290]
+    title_node["size"] = [920, 56]
+
+    subtitle_node = _find_node(workflow, 1058)
+    subtitle_node["pos"] = [-3030, -1225]
+    subtitle_node["size"] = [820, 26]
+
+    note_frame_cap = _find_node(workflow, 2375)
+    note_frame_cap["pos"] = [-2370, -970]
+    note_frame_cap["size"] = [520, 110]
+    note_frame_cap["widgets_values"] = [
+        (
+            "En corridas largas de Wan/VACE conviene usar frame_load_cap con "
+            "formula 4n+1. La validacion rapida de V1 puede usar menos frames "
+            "solo para comprobar la base."
+        )
+    ]
+
+    positions = {
+        3326: (-2990, -800),
+        3327: (-2990, -670),
+        3328: (-2990, -540),
+        3329: (-2990, -410),
+        3332: (-2990, -250),
+        3333: (-2990, -120),
+        3335: (-2990, 20),
+        3334: (-2990, 150),
+        3336: (-2990, 240),
+        265: (-2370, -760),
+        2607: (-1980, -760),
+        2687: (-1980, -510),
+        2845: (-2370, -210),
+        2860: (-1980, -210),
+        2859: (-1980, -150),
+        4008: (-1700, -760),
+        4009: (-1380, -820),
+        374: (-1710, -600),
+        373: (-1710, -540),
+        1795: (-1710, -460),
+        280: (-1400, -480),
+        3354: (-1710, -200),
+        3362: (-1400, -220),
+        3364: (-1400, 120),
+        3365: (-1400, 460),
+        4010: (-820, -880),
+        4011: (-820, -810),
+        4012: (-820, -740),
+        4001: (-820, -620),
+        4002: (-820, -450),
+        4005: (-820, -40),
+        4003: (-430, -620),
+        4006: (-430, -40),
+        4004: (-40, -620),
+        4007: (-40, -40),
+        4013: (-430, -860),
+        4014: (-430, -770),
+        4015: (-40, -860),
+        4016: (360, -720),
+        4017: (720, -720),
+        3272: (1080, -720),
+        4018: (1080, -520),
+        3076: (1430, -780),
+        3071: (1430, -720),
+        3091: (1430, -660),
+        3087: (1430, -600),
+        3359: (1430, -540),
+        3083: (1430, -480),
+        3228: (1680, -800),
+        4020: (2140, -260),
+    }
+    for node_id, pos in positions.items():
+        node = _find_node(workflow, node_id)
+        node["pos"] = [pos[0], pos[1]]
+
+    _find_node(workflow, 4009)["size"] = [400, 320]
+    for node_id in (280, 3362, 3364, 3365):
+        _find_node(workflow, node_id)["size"] = [220, 60]
+
+    workflow["groups"] = [
+        _group(
+            group_id=201,
+            title="MODELOS WAN",
+            bounding=[-3040, -930, 560, 1290],
+            color="#43536b",
+        ),
+        _group(
+            group_id=202,
+            title="ENTRADA VIDEO",
+            bounding=[-2450, -930, 640, 1290],
+            color="#6b6650",
+        ),
+        _group(
+            group_id=203,
+            title="FRAME INICIAL Y REFERENCIAS",
+            bounding=[-1850, -930, 850, 1680],
+            color="#56774f",
+        ),
+        _group(
+            group_id=204,
+            title="PREPROCESS CONTROLES",
+            bounding=[-900, -930, 980, 1290],
+            color="#6d4f7c",
+        ),
+        _group(
+            group_id=205,
+            title="SELECCION DE CONTROL",
+            bounding=[320, -930, 1120, 620],
+            color="#6a5a3e",
+        ),
+        _group(
+            group_id=206,
+            title="RENDER GENERAL",
+            bounding=[1560, -930, 620, 760],
+            color="#a1309b",
+        ),
+        _group(
+            group_id=207,
+            title="SALIDA Y EVIDENCIA",
+            bounding=[2100, -930, 560, 760],
+            color="#3f7284",
+        ),
+    ]
+
+
+def _group(
+    *,
+    group_id: int,
+    title: str,
+    bounding: list[float],
+    color: str,
+) -> dict[str, Any]:
+    return {
+        "id": group_id,
+        "title": title,
+        "bounding": bounding,
+        "color": color,
+        "font_size": 24,
+        "flags": {},
+    }
 
 
 def _wire_general_video_v1(workflow: dict[str, Any]) -> None:

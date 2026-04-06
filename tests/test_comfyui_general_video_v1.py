@@ -60,6 +60,99 @@ class GeneralVideoV1WorkflowTests(unittest.TestCase):
         self.assertFalse(get_node(workflow, 4011)["widgets_values"][0])
         self.assertTrue(get_node(workflow, 4012)["widgets_values"][0])
 
+    def test_layout_keeps_main_blocks_separated_and_grouped(self) -> None:
+        workflow = derive_general_video_v1_workflow(self.repo_root)
+
+        group_titles = [group["title"] for group in workflow["groups"]]
+        self.assertEqual(
+            group_titles,
+            [
+                "MODELOS WAN",
+                "ENTRADA VIDEO",
+                "FRAME INICIAL Y REFERENCIAS",
+                "PREPROCESS CONTROLES",
+                "SELECCION DE CONTROL",
+                "RENDER GENERAL",
+                "SALIDA Y EVIDENCIA",
+            ],
+        )
+
+        key_nodes = {
+            265,
+            2607,
+            2687,
+            2845,
+            2859,
+            2860,
+            2375,
+            4008,
+            4009,
+            374,
+            373,
+            1795,
+            280,
+            3354,
+            3362,
+            3364,
+            3365,
+            4010,
+            4011,
+            4012,
+            4001,
+            4002,
+            4003,
+            4004,
+            4005,
+            4006,
+            4007,
+            4013,
+            4014,
+            4015,
+            4016,
+            4017,
+            3272,
+            4018,
+            3076,
+            3071,
+            3091,
+            3087,
+            3359,
+            3083,
+            3228,
+            4020,
+            3326,
+            3327,
+            3328,
+            3329,
+            3332,
+            3333,
+            3335,
+            3334,
+            3336,
+        }
+
+        boxes = []
+        for node_id in key_nodes:
+            node = get_node(workflow, node_id)
+            pos = node.get("pos") or [0, 0]
+            size = node.get("size") or [140, 80]
+            boxes.append(
+                (
+                    node_id,
+                    pos[0],
+                    pos[1],
+                    size[0],
+                    size[1],
+                )
+            )
+
+        for index, left in enumerate(boxes):
+            for right in boxes[index + 1 :]:
+                self.assertFalse(
+                    _overlap(left, right),
+                    msg=f"Nodes {left[0]} and {right[0]} should not overlap in the didactic layout.",
+                )
+
     def test_control_setter_rejects_all_controls_disabled(self) -> None:
         workflow = derive_general_video_v1_workflow(self.repo_root)
 
@@ -78,3 +171,14 @@ class GeneralVideoV1WorkflowTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def _overlap(left: tuple[int, float, float, float, float], right: tuple[int, float, float, float, float]) -> bool:
+    _, left_x, left_y, left_w, left_h = left
+    _, right_x, right_y, right_w, right_h = right
+    return (
+        left_x < right_x + right_w
+        and left_x + left_w > right_x
+        and left_y < right_y + right_h
+        and left_y + left_h > right_y
+    )
