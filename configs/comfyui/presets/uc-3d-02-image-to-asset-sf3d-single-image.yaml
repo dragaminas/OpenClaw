@@ -1,0 +1,17 @@
+preset_id: uc-3d-02-image-to-asset-sf3d-single-image
+display_label: Imagen a asset 3D Stable Fast 3D
+use_case_id: UC-3D-02
+hardware_profile: minimum
+workflow: ComfyUIWorkflows/local/minimum/uc-3d-02-image-to-asset-sf3d-single-image-v1.json
+defaults:
+  categoria_activo: objeto
+  modo_texturizado: shape_first
+  texture_resolution: 1024
+  remesh: none
+paths:
+  input_image: comfyui/input/3d/object_ref.png
+  output_prefix: comfyui/output/3d/assets/<entity_id>/<entity_id>__mesh_sf3d__v001
+user_messages:
+  start: "Voy a generar el asset 3D con Stable Fast 3D a partir de una sola imagen."
+  blocked: "Falta la extension oficial de SF3D, sus dependencias o el acceso al modelo."
+  success: "El asset 3D base quedo listo para importacion y revision."

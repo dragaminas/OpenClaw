@@ -1,0 +1,16 @@
+preset_id: uc-3d-03-text-to-scene-sf3d-asset-pack-bridge
+display_label: Texto a set 3D con puente SF3D
+use_case_id: UC-3D-03
+hardware_profile: minimum
+workflow: ComfyUIWorkflows/local/adaptable/uc-3d-03-text-to-scene-sf3d-asset-pack-bridge-v1.json
+defaults:
+  tipo_escena: interior
+  salida_objetivo: asset_set
+  bridge_from_use_case: UC-IMG-01
+paths:
+  input_image: comfyui/input/3d/uc3d03_scene_seed.png
+  output_prefix: comfyui/output/3d/scenes/<entity_id>/<entity_id>__scene_asset_set__v001
+user_messages:
+  start: "Voy a convertir la idea en una imagen semilla y despues en piezas 3D por separado."
+  blocked: "La ruta de escena con SF3D sigue pendiente de activar o validar en local."
+  success: "La escena base quedo publicada como set de activos o blockout."

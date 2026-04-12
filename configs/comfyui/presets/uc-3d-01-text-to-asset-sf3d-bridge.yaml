@@ -1,0 +1,16 @@
+preset_id: uc-3d-01-text-to-asset-sf3d-bridge
+display_label: Texto a asset 3D con puente SF3D
+use_case_id: UC-3D-01
+hardware_profile: minimum
+workflow: ComfyUIWorkflows/local/adaptable/uc-3d-01-text-to-asset-sf3d-bridge-v1.json
+defaults:
+  categoria_activo: objeto
+  modo_texturizado: shape_first
+  bridge_from_use_case: UC-IMG-01
+paths:
+  input_image: comfyui/input/3d/uc3d01_prompt_seed.png
+  output_prefix: comfyui/output/3d/assets/<entity_id>/<entity_id>__mesh_sf3d__v001
+user_messages:
+  start: "Voy a usar primero una imagen semilla y despues la pasare por Stable Fast 3D."
+  blocked: "Falta dejar operativa la extension oficial de SF3D o el acceso al modelo gated."
+  success: "El asset 3D base quedo publicado para revisarlo en Blender."

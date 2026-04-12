@@ -1,0 +1,16 @@
+preset_id: uc-3d-04-image-to-scene-sf3d-asset-pack
+display_label: Imagen a set 3D con SF3D por piezas
+use_case_id: UC-3D-04
+hardware_profile: minimum
+workflow: ComfyUIWorkflows/local/adaptable/uc-3d-04-image-to-scene-sf3d-asset-pack-v1.json
+defaults:
+  tipo_escena: interior
+  salida_objetivo: asset_set
+  decomposition_priority: objects_plus_shell
+paths:
+  input_image: comfyui/input/3d/scene_ref.png
+  output_prefix: comfyui/output/3d/scenes/<entity_id>/<entity_id>__scene_parts_sf3d__v001
+user_messages:
+  start: "Voy a separar la escena en piezas reutilizables y a pasar cada una por SF3D."
+  blocked: "Falta el baseline SF3D operativo para cerrar esta descomposicion en local."
+  success: "La escena se publico como piezas reutilizables y shell composable."
