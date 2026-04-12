@@ -30,6 +30,13 @@ Cada JSON derivado incluye metadatos en `extra.openclaw` con:
 | `adaptable/uc-3d-03-text-to-scene-sf3d-asset-pack-bridge-v1.json` | `stable-fast-3d/demo_files/workflows/sf3d_example.json` | puente `UC-3D-03` orientado a set de activos y envolventes |
 | `adaptable/uc-3d-04-image-to-scene-sf3d-asset-pack-v1.json` | `stable-fast-3d/demo_files/workflows/sf3d_example.json` | descomposicion de escena a activos o shell usando `SF3D` por pieza |
 
+## Archivo historico
+
+Las variantes exploratorias previas de `Hunyuan 3D` y `PartCrafter` se han
+conservado en `historical/hunyuan-3d-validacion-de-hipotesis/` como anexo de
+validacion tecnica. No forman parte del baseline vigente del producto ni deben
+publicarse como workflows activos del `MVP`.
+
 ## Que se ha normalizado aqui
 
 - nombres de entrada y salida mas previsibles

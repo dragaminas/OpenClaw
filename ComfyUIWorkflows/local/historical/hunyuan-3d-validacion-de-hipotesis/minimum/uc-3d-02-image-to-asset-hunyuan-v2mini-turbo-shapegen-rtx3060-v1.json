@@ -1,0 +1,310 @@
+{
+  "id": "5f4f7274-e69f-4e0a-a1da-73f7c8073b89",
+  "revision": 0,
+  "last_node_id": 6,
+  "last_link_id": 5,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        2580.0,
+        -620.0
+      ],
+      "size": [
+        290.0,
+        326.0
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.3.40"
+      },
+      "widgets_values": [
+        "openclaw_object_ref.png",
+        "image"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "[Comfy3D] Multi Background Remover",
+      "pos": [
+        2905.0,
+        -612.0
+      ],
+      "size": [
+        292.0,
+        106.0
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image_front",
+          "type": "IMAGE",
+          "link": 1
+        },
+        {
+          "name": "image_back",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image_left",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image_right",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "LIST",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "[Comfy3D] Multi Background Remover"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 3,
+      "type": "[Comfy3D] Load Hunyuan3D V2 ShapeGen Pipeline",
+      "pos": [
+        2904.0,
+        -770.0
+      ],
+      "size": [
+        292.0,
+        82.0
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "shapegen_pipe",
+          "type": "DIFFUSERS_PIPE",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "[Comfy3D] Load Hunyuan3D V2 ShapeGen Pipeline"
+      },
+      "widgets_values": [
+        "Hunyuan3D-2mini-Turbo",
+        "safetensors",
+        true
+      ]
+    },
+    {
+      "id": 4,
+      "type": "[Comfy3D] Hunyuan3D V2 ShapeGen MV",
+      "pos": [
+        3236.0,
+        -690.0
+      ],
+      "size": [
+        292.0,
+        178.0
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "shapegen_pipe",
+          "type": "DIFFUSERS_PIPE",
+          "link": 3
+        },
+        {
+          "name": "images",
+          "type": "LIST",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mesh",
+          "type": "MESH",
+          "links": [
+            4
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "[Comfy3D] Hunyuan3D V2 ShapeGen MV"
+      },
+      "widgets_values": [
+        1234,
+        "randomize",
+        5,
+        5,
+        128
+      ]
+    },
+    {
+      "id": 5,
+      "type": "[Comfy3D] Save 3D Mesh",
+      "pos": [
+        3560.0,
+        -760.0
+      ],
+      "size": [
+        270.0,
+        58.0
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mesh",
+          "type": "MESH",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "save_path",
+          "type": "STRING",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "[Comfy3D] Save 3D Mesh"
+      },
+      "widgets_values": [
+        "openclaw/uc-3d-02/mesh_shape_v2mini.glb"
+      ]
+    },
+    {
+      "id": 6,
+      "type": "[Comfy3D] Preview 3DMesh",
+      "pos": [
+        3560.0,
+        -640.0
+      ],
+      "size": [
+        600.0,
+        500.0
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mesh_file_path",
+          "type": "STRING",
+          "widget": {
+            "name": "mesh_file_path"
+          },
+          "link": 5
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "[Comfy3D] Preview 3DMesh"
+      },
+      "widgets_values": [
+        "",
+        null
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      2,
+      0,
+      4,
+      1,
+      "LIST"
+    ],
+    [
+      3,
+      3,
+      0,
+      4,
+      0,
+      "DIFFUSERS_PIPE"
+    ],
+    [
+      4,
+      4,
+      0,
+      5,
+      0,
+      "MESH"
+    ],
+    [
+      5,
+      5,
+      0,
+      6,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.82,
+      "offset": [
+        -2148.0,
+        912.0
+      ]
+    },
+    "frontendVersion": "1.20.4",
+    "openclaw": {
+      "derived_from": "runtime prompt validated with openclaw-hunyuan3d-lite on 2026-04-12",
+      "use_case_id": "UC-3D-02",
+      "hardware_profile": "minimum",
+      "role": "validated_local_baseline"
+    }
+  },
+  "version": 0.4
+}
