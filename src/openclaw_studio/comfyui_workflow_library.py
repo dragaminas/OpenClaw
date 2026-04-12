@@ -554,6 +554,8 @@ def _render_output_label(output_type: OutputArtifactType) -> str:
         OutputArtifactType.CONTROL_PACKAGE: "paquete de controles",
         OutputArtifactType.VIDEO: "video",
         OutputArtifactType.ENHANCED_VIDEO: "video mejorado",
+        OutputArtifactType.THREE_D_ASSET: "asset 3D",
+        OutputArtifactType.THREE_D_ASSET_SET: "set de activos 3D",
     }
     return output_labels[output_type]
 

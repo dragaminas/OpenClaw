@@ -169,6 +169,75 @@ STYLE_EXPLORATION_FOCUS_INPUT = FlowInputDefinition(
     ),
 )
 
+ADDITIONAL_IMAGES_INPUT = FlowInputDefinition(
+    input_key="imagenes_adicionales",
+    display_label="Imagenes adicionales",
+    prompt_text="Opcional: añade vistas o referencias extra separadas por comas.",
+    value_type=InputValueType.IMAGE_LIST,
+    example_values=("refs/object_side.png, refs/object_back.png",),
+)
+
+ASSET_CATEGORY_3D_INPUT = FlowInputDefinition(
+    input_key="categoria_activo",
+    display_label="Categoria 3D",
+    prompt_text="Indica si buscas un objeto, personaje o envolvente.",
+    value_type=InputValueType.CHOICE,
+    default_value="objeto",
+    selectable_options=(
+        SelectableOption("objeto", "objeto"),
+        SelectableOption("personaje", "personaje"),
+        SelectableOption("envolvente", "envolvente"),
+    ),
+)
+
+SCENE_TYPE_3D_INPUT = FlowInputDefinition(
+    input_key="tipo_escena",
+    display_label="Tipo de escena",
+    prompt_text="Indica si la referencia se parece mas a interior, exterior o paisaje.",
+    value_type=InputValueType.CHOICE,
+    default_value="interior",
+    selectable_options=(
+        SelectableOption("interior", "interior"),
+        SelectableOption("exterior", "exterior"),
+        SelectableOption("paisaje", "paisaje"),
+    ),
+)
+
+APPROX_SCALE_3D_INPUT = FlowInputDefinition(
+    input_key="escala_aproximada",
+    display_label="Escala aproximada",
+    prompt_text="Opcional: indica tamano aproximado, por ejemplo 1.8 m o silla de comedor.",
+    value_type=InputValueType.SHORT_TEXT,
+    example_values=("1.8 m", "silla de comedor", "habitacion de 4x5 m"),
+)
+
+TEXTURE_MODE_3D_INPUT = FlowInputDefinition(
+    input_key="modo_texturizado",
+    display_label="Modo de texturizado",
+    prompt_text="Opcional: que prioridad quieres para la V1.",
+    value_type=InputValueType.CHOICE,
+    default_value="shape_first",
+    selectable_options=(
+        SelectableOption("shape_first", "shape first"),
+        SelectableOption("texture_if_possible", "textura si cabe"),
+        SelectableOption("multiview_priority", "priorizar multivista"),
+    ),
+)
+
+OUTPUT_TARGET_3D_INPUT = FlowInputDefinition(
+    input_key="salida_objetivo",
+    display_label="Salida objetivo",
+    prompt_text="Opcional: que prefieres recibir primero.",
+    value_type=InputValueType.CHOICE,
+    default_value="asset_set",
+    selectable_options=(
+        SelectableOption("asset", "asset"),
+        SelectableOption("asset_set", "set de activos"),
+        SelectableOption("blockout", "blockout"),
+        SelectableOption("envolvente", "envolvente"),
+    ),
+)
+
 BASELINE_COMPATIBLE_PROFILES = (
     HardwareProfile.MINIMUM,
     HardwareProfile.MEDIUM,
@@ -593,6 +662,211 @@ BUILTIN_FLOW_CATALOG = (
             "explora estilos",
             "variantes de estilo",
             "estilo imagen",
+        ),
+    ),
+    FlowDefinition(
+        use_case_id="UC-3D-01",
+        display_label="Texto a objeto o personaje 3D",
+        friendly_alias="texto-a-3d",
+        description=(
+            "Prepara un asset 3D desde texto usando una ruta puente: primero "
+            "se obtiene una imagen semilla y despues se pasa por Stable Fast "
+            "3D. La V1 prioriza assets reutilizables y handoff limpio a "
+            "Blender."
+        ),
+        output_type=OutputArtifactType.THREE_D_ASSET,
+        sample_user_requests=(
+            "quiero crear un objeto 3d desde texto",
+            "quiero un personaje 3d desde una descripcion",
+        ),
+        routing_phrases=("texto a 3d", "objeto 3d", "personaje 3d"),
+        required_input_keys=("prompt", "categoria_activo"),
+        optional_input_keys=(
+            "referencias_estilo",
+            "escala_aproximada",
+            "modo_texturizado",
+        ),
+        input_definitions=(
+            PROMPT_INPUT,
+            ASSET_CATEGORY_3D_INPUT,
+            STYLE_REFERENCES_INPUT,
+            APPROX_SCALE_3D_INPUT,
+            TEXTURE_MODE_3D_INPUT,
+        ),
+        execution_variants=(
+            ExecutionVariant(
+                variant_id="sf3d-text-bridge-v1",
+                display_label="Puente texto -> imagen -> Stable Fast 3D",
+                maturity=ImplementationMaturity.ADAPTABLE,
+                supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
+                workflow_file_references=(
+                    "ComfyUIWorkflows/local/adaptable/"
+                    "uc-3d-01-text-to-asset-sf3d-bridge-v1.json",
+                ),
+                notes=(
+                    "La V1 no promete text-to-3D nativo puro dentro del mismo "
+                    "grafo; usa una imagen semilla staged antes del bloque "
+                    "SF3D.",
+                ),
+            ),
+        ),
+        friendly_aliases=(
+            "texto a 3d",
+            "objeto 3d desde texto",
+            "personaje 3d desde texto",
+        ),
+    ),
+    FlowDefinition(
+        use_case_id="UC-3D-02",
+        display_label="Imagen a objeto o personaje 3D",
+        friendly_alias="imagen-a-3d",
+        description=(
+            "Convierte una imagen de referencia en un asset 3D util. La V1 "
+            "baseline prioriza Stable Fast 3D con una sola imagen y deja la "
+            "calidad hero o multivista para lineas futuras fuera de este MVP."
+        ),
+        output_type=OutputArtifactType.THREE_D_ASSET,
+        sample_user_requests=(
+            "quiero pasar esta imagen a 3d",
+            "quiero un objeto 3d a partir de esta foto",
+        ),
+        routing_phrases=("imagen a 3d", "foto a 3d", "asset 3d"),
+        required_input_keys=("entrada_base", "categoria_activo"),
+        optional_input_keys=(
+            "imagenes_adicionales",
+            "escala_aproximada",
+            "modo_texturizado",
+        ),
+        input_definitions=(
+            BASE_IMAGE_INPUT,
+            ASSET_CATEGORY_3D_INPUT,
+            ADDITIONAL_IMAGES_INPUT,
+            APPROX_SCALE_3D_INPUT,
+            TEXTURE_MODE_3D_INPUT,
+        ),
+        execution_variants=(
+            ExecutionVariant(
+                variant_id="sf3d-single-image-baseline",
+                display_label="Stable Fast 3D single-image baseline",
+                maturity=ImplementationMaturity.ADAPTABLE,
+                supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
+                workflow_file_references=(
+                    "ComfyUIWorkflows/local/minimum/"
+                    "uc-3d-02-image-to-asset-sf3d-single-image-v1.json",
+                ),
+                notes=(
+                    "Baseline MVP apoyado en la extension oficial de SF3D para "
+                    "ComfyUI, pensado para exportar un GLB util y revisarlo en "
+                    "Blender.",
+                ),
+            ),
+        ),
+        friendly_aliases=(
+            "imagen a 3d",
+            "foto a 3d",
+            "objeto 3d desde imagen",
+        ),
+    ),
+    FlowDefinition(
+        use_case_id="UC-3D-03",
+        display_label="Texto a set de activos o escena 3D",
+        friendly_alias="texto-a-escena-3d",
+        description=(
+            "Arranca una escena 3D desde texto, pero la V1 la trata como un "
+            "puente hacia una imagen semilla y despues prioriza set de "
+            "activos, blockout o envolvente antes que escena monolitica "
+            "final."
+        ),
+        output_type=OutputArtifactType.THREE_D_ASSET_SET,
+        sample_user_requests=(
+            "quiero una escena 3d desde texto",
+            "quiero un set 3d para interiorismo desde una descripcion",
+        ),
+        routing_phrases=("texto a escena 3d", "set 3d", "blockout 3d"),
+        required_input_keys=("prompt", "tipo_escena"),
+        optional_input_keys=(
+            "categoria_activo",
+            "escala_aproximada",
+            "salida_objetivo",
+        ),
+        input_definitions=(
+            PROMPT_INPUT,
+            SCENE_TYPE_3D_INPUT,
+            ASSET_CATEGORY_3D_INPUT,
+            APPROX_SCALE_3D_INPUT,
+            OUTPUT_TARGET_3D_INPUT,
+        ),
+        execution_variants=(
+            ExecutionVariant(
+                variant_id="sf3d-scene-text-bridge",
+                display_label="Puente texto -> imagen -> SF3D por activo",
+                maturity=ImplementationMaturity.ADAPTABLE,
+                supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
+                workflow_file_references=(
+                    "ComfyUIWorkflows/local/adaptable/"
+                    "uc-3d-03-text-to-scene-sf3d-asset-pack-bridge-v1.json",
+                ),
+                notes=(
+                    "La escena V1 se entiende como descomposicion por activos "
+                    "o envolventes, ejecutando SF3D una pieza cada vez.",
+                ),
+            ),
+        ),
+        friendly_aliases=(
+            "texto a escena 3d",
+            "texto a set 3d",
+            "escena 3d desde texto",
+        ),
+    ),
+    FlowDefinition(
+        use_case_id="UC-3D-04",
+        display_label="Imagen a set de activos o escena 3D",
+        friendly_alias="imagen-a-escena-3d",
+        description=(
+            "Toma una imagen de interior, exterior o paisaje y la intenta "
+            "descomponer en piezas 3D reutilizables. La ruta V1 prioriza "
+            "crops, envolventes y activos aislados generados con Stable Fast "
+            "3D antes que una escena fusionada."
+        ),
+        output_type=OutputArtifactType.THREE_D_ASSET_SET,
+        sample_user_requests=(
+            "quiero reconstruir esta escena en 3d",
+            "quiero sacar los elementos 3d de esta referencia",
+        ),
+        routing_phrases=("imagen a escena 3d", "descompone escena 3d", "interiorismo 3d"),
+        required_input_keys=("entrada_base", "tipo_escena"),
+        optional_input_keys=(
+            "imagenes_adicionales",
+            "escala_aproximada",
+            "salida_objetivo",
+        ),
+        input_definitions=(
+            BASE_IMAGE_INPUT,
+            SCENE_TYPE_3D_INPUT,
+            ADDITIONAL_IMAGES_INPUT,
+            APPROX_SCALE_3D_INPUT,
+            OUTPUT_TARGET_3D_INPUT,
+        ),
+        execution_variants=(
+            ExecutionVariant(
+                variant_id="sf3d-scene-image-v1",
+                display_label="Descomposicion scene-first a assets con SF3D",
+                maturity=ImplementationMaturity.ADAPTABLE,
+                supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
+                workflow_file_references=(
+                    "ComfyUIWorkflows/local/adaptable/"
+                    "uc-3d-04-image-to-scene-sf3d-asset-pack-v1.json",
+                ),
+                notes=(
+                    "El resultado esperado es set de activos, envolvente o "
+                    "blockout util, no escena monolitica perfecta.",
+                ),
+            ),
+        ),
+        friendly_aliases=(
+            "imagen a escena 3d",
+            "escena 3d desde imagen",
+            "set 3d desde imagen",
         ),
     ),
 )

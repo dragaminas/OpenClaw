@@ -26,6 +26,8 @@ class BuiltinFlowCatalogAliasTests(unittest.TestCase):
             "render-video": "UC-VID-02",
             "render video": "UC-VID-02",
             "explora-estilos": "UC-IMG-03",
+            "texto a 3d": "UC-3D-01",
+            "imagen-a-3d": "UC-3D-02",
         }
 
         for request_text, expected_use_case_id in expected_matches.items():

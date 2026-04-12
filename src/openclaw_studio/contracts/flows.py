@@ -42,6 +42,8 @@ class OutputArtifactType(StrEnum):
     CONTROL_PACKAGE = "control_package"
     VIDEO = "video"
     ENHANCED_VIDEO = "enhanced_video"
+    THREE_D_ASSET = "three_d_asset"
+    THREE_D_ASSET_SET = "three_d_asset_set"
 
 
 @dataclass(frozen=True)

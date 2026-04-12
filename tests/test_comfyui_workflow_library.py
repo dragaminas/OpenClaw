@@ -44,6 +44,14 @@ class ComfyUIWorkflowLibraryTests(unittest.TestCase):
         self.assertEqual(use_case_entry.use_case_id, alias_entry.use_case_id)
         self.assertEqual(use_case_entry.template_filename, "prepara-video.json")
 
+        entry_3d = resolve_workflow_template_entry(
+            workflow_ref="imagen-a-3d",
+            repo_root=self.repo_root,
+            comfyui_dir=self.comfyui_dir,
+        )
+        self.assertEqual(entry_3d.use_case_id, "UC-3D-02")
+        self.assertEqual(entry_3d.template_filename, "imagen-a-3d.json")
+
     def test_sync_creates_template_module_and_manifest(self) -> None:
         sync_result = sync_workflow_templates(
             repo_root=self.repo_root,
@@ -102,6 +110,20 @@ class ComfyUIWorkflowLibraryTests(unittest.TestCase):
         self.assertIn("Salida principal:", rendered)
         self.assertIn("Comando: studio comfyui abre workflow prepara-video", rendered)
 
+    def test_render_workflow_explanation_for_3d_alias_is_human_readable(self) -> None:
+        entry = resolve_workflow_template_entry(
+            workflow_ref="imagen-a-3d",
+            repo_root=self.repo_root,
+            comfyui_dir=self.comfyui_dir,
+        )
+
+        rendered = render_workflow_explanation(entry)
+
+        self.assertIn("Workflow: imagen-a-3d (UC-3D-02)", rendered)
+        self.assertIn("Categoria 3D", rendered)
+        self.assertIn("Variante actual: Stable Fast 3D single-image baseline.", rendered)
+        self.assertIn("Comando: studio comfyui abre workflow imagen-a-3d", rendered)
+
     def test_render_workflow_advisory_context_mentions_real_graph_structure(self) -> None:
         entry = resolve_workflow_template_entry(
             workflow_ref="prepara-video",
@@ -116,6 +138,20 @@ class ComfyUIWorkflowLibraryTests(unittest.TestCase):
         self.assertIn("editable_entry_nodes=", rendered)
         self.assertIn("INPUT VIDEO [VHS_LoadVideo]", rendered)
         self.assertIn("output_nodes=", rendered)
+
+    def test_render_workflow_advisory_context_for_3d_alias_mentions_real_graph_structure(self) -> None:
+        entry = resolve_workflow_template_entry(
+            workflow_ref="imagen-a-3d",
+            repo_root=self.repo_root,
+            comfyui_dir=self.comfyui_dir,
+        )
+
+        rendered = render_workflow_advisory_context(entry)
+
+        self.assertIn("workflow_alias=imagen-a-3d", rendered)
+        self.assertIn("editable_entry_nodes=", rendered)
+        self.assertIn("LoadImage [LoadImage] -> openclaw_object_ref.png", rendered)
+        self.assertIn("StableFast3DSampler x1", rendered)
 
     def test_render_workflow_comparison_advisory_context_mentions_both_workflows(self) -> None:
         left_entry = resolve_workflow_template_entry(
