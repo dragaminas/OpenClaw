@@ -1,0 +1,66 @@
+# Manifiesto de Modelos para la Linea 3D
+
+Este documento implementa la tarea `9.6` como inventario operativo y deja
+trazado el set minimo de modelos que hay que ubicar para cerrar la `V1`.
+
+## Estado local auditado
+
+Con corte `2026-04-12`, la extension oficial de `SF3D` ya esta integrada en el
+runtime local, pero el modelo gated sigue sin poder descargarse por falta de
+autenticacion.
+
+Nota operativa:
+
+- la extension oficial descarga desde el repo gated
+  `stabilityai/stable-fast-3d`
+- hoy no hay token activo en el `venv`
+- `SF3D.from_pretrained(...)` devuelve `GatedRepoError: 401 Unauthorized`
+- no se encontro cache local del modelo en `~/.cache/huggingface`
+
+## Canon de ubicacion propuesto
+
+Para la extension oficial, la ubicacion primaria de descarga es el cache de
+`Hugging Face`:
+
+- `~/.cache/huggingface/hub/`
+
+La extension `ComfyUI` vive en:
+
+- `custom_nodes/stable-fast-3d/`
+
+## Modelos priorizados
+
+| Grupo | Ruta canonica esperada | Uso | Estado local |
+| --- | --- | --- | --- |
+| `Stable Fast 3D` | `~/.cache/huggingface/hub/.../stabilityai--stable-fast-3d/...` | baseline `UC-3D-01` y `UC-3D-02` | ausente |
+| `texture_baker` | `custom_nodes/stable-fast-3d/texture_baker/` instalado en el `venv` | bake de textura y export | presente |
+| `uv_unwrapper` | `custom_nodes/stable-fast-3d/uv_unwrapper/` instalado en el `venv` | UV unwrap | presente |
+
+## Orden minimo de descarga
+
+Para una `V1` alineada con la decision de producto:
+
+1. acceso al repo gated `stabilityai/stable-fast-3d`
+2. descarga de `config.yaml`
+3. descarga de `model.safetensors`
+4. instalacion de `texture_baker`
+5. instalacion de `uv_unwrapper`
+
+## Lectura por perfil
+
+| Perfil | Set minimo |
+| --- | --- |
+| `minimum` | `Stable Fast 3D` |
+| `medium` | `minimum` + mas textura o mas lotes |
+| `maximum` | `medium` + linea externa futura fuera de `ComfyUI` |
+
+## Regla
+
+Este manifiesto no debe confundirse con "ya descargado".
+
+Hoy deja documentado:
+
+- que falta realmente
+- donde deberia vivir
+- en que orden tiene sentido traerlo
+- y por que la falta actual es acceso gated, no un nombre de workflow
