@@ -121,7 +121,7 @@ class ComfyUIWorkflowLibraryTests(unittest.TestCase):
 
         self.assertIn("Workflow: imagen-a-3d (UC-3D-02)", rendered)
         self.assertIn("Categoria 3D", rendered)
-        self.assertIn("Variante actual: Stable Fast 3D single-image baseline.", rendered)
+        self.assertIn("Variante actual: Stable Fast 3D single-image (fase 9, benchmark).", rendered)
         self.assertIn("Comando: studio comfyui abre workflow imagen-a-3d", rendered)
 
     def test_render_workflow_advisory_context_mentions_real_graph_structure(self) -> None:
