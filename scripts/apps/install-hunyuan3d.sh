@@ -215,7 +215,82 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 12. Resumen final
+# 12. Descargar model-viewer.min.js local (elimina dependencia de CDN externo)
+# ---------------------------------------------------------------------------
+# gradio_app.py copia assets/model-viewer.min.js a gradio_cache/outputs/ al
+# arrancar. Sin este archivo los iframes del viewer 3D no cargan nada.
+MV_JS="$HUNYUAN3D_DIR/assets/model-viewer.min.js"
+MV_URL="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.1.1/dist/model-viewer.min.js"
+if [[ -f "$MV_JS" && -s "$MV_JS" ]]; then
+    log_ok "model-viewer.min.js ya existe en assets/."
+else
+    log_info "Descargando model-viewer.min.js desde jsDelivr ..."
+    if curl -fsSL -o "$MV_JS" "$MV_URL"; then
+        log_ok "model-viewer.min.js descargado ($(du -h "$MV_JS" | cut -f1))."
+    else
+        log_err "No se pudo descargar model-viewer.min.js."
+        log_info "Descargalo manualmente desde: $MV_URL"
+        log_info "y guardalo en: $MV_JS"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# 13. Parche de rutas estaticas: /static → /outputs en gradio_app.py y templates
+# ---------------------------------------------------------------------------
+# FastAPI.mount("/static") toma precedencia sobre la ruta interna de Gradio,
+# provocando 404 en fuentes IBMPlexSans, CSS y JS del cliente Gradio.
+# El JS roto hace que el formulario envie data:[] al backend → generacion falla.
+# Fix: el mount de outputs se registra en /outputs; Gradio conserva /static.
+GRADIO_APP="$HUNYUAN3D_DIR/gradio_app.py"
+TMPL_PLAIN="$HUNYUAN3D_DIR/assets/modelviewer-template.html"
+TMPL_TEXTURED="$HUNYUAN3D_DIR/assets/modelviewer-textured-template.html"
+
+if grep -q 'mount("/outputs"' "$GRADIO_APP" 2>/dev/null; then
+    log_ok "Parche /static→/outputs ya aplicado en gradio_app.py."
+else
+    log_info "Aplicando parche /static→/outputs en gradio_app.py y templates HTML..."
+    GRADIO_APP="$GRADIO_APP" TMPL_PLAIN="$TMPL_PLAIN" TMPL_TEXTURED="$TMPL_TEXTURED" \
+    python3 - <<'PYEOF'
+import os, re
+
+def patch_file(path, replacements):
+    with open(path) as f:
+        txt = f.read()
+    for old, new in replacements:
+        txt = txt.replace(old, new)
+    with open(path, 'w') as f:
+        f.write(txt)
+
+# gradio_app.py: rename mount path and update iframe URL + print message
+patch_file(os.environ['GRADIO_APP'], [
+    ('app.mount("/static", StaticFiles(directory=static_dir, html=True), name="static")',
+     'app.mount("/outputs", StaticFiles(directory=static_dir, html=True), name="outputs")'),
+    ('/static/{rel_path}', '/outputs/{rel_path}'),
+])
+print("[install-hunyuan3d] gradio_app.py parchado.")
+
+# HTML templates: todas las referencias /static/ → /outputs/
+for key in ('TMPL_PLAIN', 'TMPL_TEXTURED'):
+    path = os.environ.get(key, '')
+    if path and os.path.isfile(path):
+        with open(path) as f:
+            txt = f.read()
+        txt = txt.replace('/static/', '/outputs/')
+        with open(path, 'w') as f:
+            f.write(txt)
+        print(f"[install-hunyuan3d] {os.path.basename(path)} parchado.")
+PYEOF
+    if grep -q 'mount("/outputs"' "$GRADIO_APP" 2>/dev/null; then
+        log_ok "Parche /static→/outputs aplicado correctamente."
+    else
+        log_err "El parche no pudo aplicarse en gradio_app.py."
+        log_info "Edita manualmente: app.mount(\"/static\") → app.mount(\"/outputs\")"
+        log_info "y en los templates HTML: /static/ → /outputs/"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# 14. Resumen final
 # ---------------------------------------------------------------------------
 echo ""
 log_ok "=========================================================="

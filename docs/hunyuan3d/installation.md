@@ -203,3 +203,41 @@ scripts/apps/comfyui.sh start-service       # restaurar ComfyUI
 
 Hunyuan3D sin `--enable_t23d` (sólo imagen→3D) usa ~5 GB y puede convivir
 con ComfyUI en modo `--low_vram_mode`.
+
+## Parche de rutas estáticas: `/static` → `/outputs`
+
+**Síntoma:** la UI carga visualmente pero los botones no hacen nada; el
+backend recibe `data: []` en lugar de los valores del formulario. En el
+Inspector del navegador aparecen 404 en fuentes IBM Plex Sans/Mono:
+
+```
+GET /static/fonts/IBMPlexSans/IBMPlexSans-Regular.woff2  404
+GET /static/fonts/IBMPlexMono/IBMPlexMono-Regular.woff2  404
+```
+
+**Causa:** `gradio_app.py` registra un `FastAPI.mount("/static", ...)` para
+servir los outputs generados (`gradio_cache/`). FastAPI resuelve esa ruta
+antes que la sub-app de Gradio, por lo que todos los assets internos de
+Gradio (fuentes, CSS, JS del cliente) devuelven 404. El JS cliente roto no
+puede recoger los valores del formulario y envía `data: []`.
+
+**Fix:** el mount de outputs se mueve a `/outputs`; Gradio recupera `/static`
+para sus propios assets. Tres archivos modificados:
+
+| Archivo | Cambio |
+|---------|--------|
+| `gradio_app.py` | `mount("/static")` → `mount("/outputs")`; `iframe_tag` URL |
+| `assets/modelviewer-template.html` | `/static/` → `/outputs/` |
+| `assets/modelviewer-textured-template.html` | `/static/` → `/outputs/` |
+
+El instalador (`install-hunyuan3d.sh`, paso 13) aplica este parche
+automáticamente de forma idempotente.
+
+## Dependencia CDN eliminada: `model-viewer.min.js`
+
+**Síntoma:** los iframes de visualización 3D no cargan en entornos sin acceso
+a jsDelivr (CDN externo).
+
+**Fix:** `install-hunyuan3d.sh` (paso 12) descarga el script a
+`assets/model-viewer.min.js`. `gradio_app.py` lo copia a `gradio_cache/` al
+arrancar y los templates HTML lo sirven desde `/outputs/model-viewer.min.js`.
