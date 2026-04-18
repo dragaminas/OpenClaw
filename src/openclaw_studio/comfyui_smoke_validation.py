@@ -647,6 +647,27 @@ class WorkflowCompiler:
             return result
 
         values = list(widgets)
+        proxy_widgets = node.get("properties", {}).get("proxyWidgets") or []
+        if proxy_widgets:
+            widgets_by_name: dict[str, Any] = {}
+            for index, proxy_entry in enumerate(proxy_widgets):
+                if not isinstance(proxy_entry, list) or len(proxy_entry) < 2:
+                    continue
+                owner_id, widget_name = proxy_entry[0], proxy_entry[1]
+                if str(owner_id) != "-1":
+                    continue
+                if index >= len(values):
+                    continue
+                widgets_by_name[str(widget_name)] = values[index]
+
+            result: dict[str, Any] = {}
+            for input_entry in node.get("inputs", []):
+                widget_name = input_entry.get("widget", {}).get("name")
+                if widget_name and widget_name in widgets_by_name:
+                    result[input_entry["name"]] = widgets_by_name[widget_name]
+            if result:
+                return result
+
         result: dict[str, Any] = {}
         cursor = 0
         for input_entry in node.get("inputs", []):

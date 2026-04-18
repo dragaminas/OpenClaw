@@ -46,6 +46,35 @@ Acciones:
 - compilar `texture_baker` y `uv_unwrapper`
 - no intentar esconder este fallo detras de otro stack 3D mas pesado
 
+## Runtime de `transformers` incompatible
+
+Sintomas:
+
+- aparece `cannot import name 'find_pruneable_heads_and_indices'`
+- `SF3D` falla antes incluso de cargar la imagen
+
+Acciones:
+
+- alinear `transformers` con la baseline validada de `SF3D`
+- en este entorno, la correccion operativa fue `transformers==4.42.3`
+- si otras extensiones dependen de un `huggingface_hub` mas nuevo, aislar
+  `SF3D` en un runtime o `venv` dedicado
+
+## `texture_baker` sin kernel `CUDA`
+
+Sintomas:
+
+- aparece `Could not run 'texture_baker_cpp::rasterize' with arguments from the 'CUDA' backend`
+- la malla se genera, pero el bake de texturas cae
+
+Acciones:
+
+- aceptar un fallback de bake en `CPU` para cerrar el `MVP`
+- o recompilar `texture_baker` con `CUDA` real si se quiere recuperar ese
+  tramo en GPU
+- no confundir este problema con falta de acceso al modelo o con un fallo del
+  workflow
+
 ## OOM o memoria insuficiente
 
 Sintomas:

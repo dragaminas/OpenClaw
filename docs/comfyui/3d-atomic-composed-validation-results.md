@@ -4,55 +4,56 @@ Este documento implementa la tarea `9.14` del `DevPlan` en su estado actual.
 
 ## Estado
 
-- estado: `blocked_missing_asset`
-- fecha: `2026-04-12`
+- estado: `pass_objetos_pending_escenas`
+- fecha: `2026-04-18`
 - gate ejecutado: `PF-3D-01`
 
 ## Resultado del gate
 
-`PF-3D-01` falla hoy por estos motivos:
+`PF-3D-01` pasa en la baseline `SF3D` de objetos:
 
 - la extension oficial `stable-fast-3d` ya esta instalada y expone nodos en
   `ComfyUI`
 - las dependencias nativas de `SF3D` ya quedaron alineadas
-- pero el modelo `stabilityai/stable-fast-3d` sigue inaccesible por
-  `GatedRepoError: 401 Unauthorized`
-- por tanto no hay todavia artefactos `3D` reales de la baseline `SF3D`
+- el modelo `stabilityai/stable-fast-3d` ya es accesible con token y cache
+- existe imagen fixture staged
+- las carpetas de salida son escribibles
+- `Blender` esta disponible para la comprobacion de handoff
 
 ## Impacto sobre las pruebas
 
-Casos no ejecutados por bloqueo previo:
+Casos aprobados:
 
 - `AT-3D-OBJ-01`
+  - `UC-3D-02` genera `validation_sf3d_cpu_fallback_00001_.glb`
 - `AT-3D-OBJ-02`
+  - ese `glb` importa en `Blender` con `7948` vertices y `13096` caras
+- `CP-3D-01`
+  - `UC-3D-01` completa la ruta `texto -> imagen -> SF3D -> Blender`
+  - artefacto: `validation_sf3d_bridge_00001_.glb`
+
+Casos aun pendientes:
+
 - `AT-3D-SCN-01`
 - `AT-3D-SCN-02`
-- `CP-3D-01`
 - `CP-3D-02`
 - `CP-3D-03`
 
 ## Lo que queda establecido
 
-- la validacion ya tiene gate, casos y criterio estable
-- el bloqueo esta documentado con evidencia real del entorno
-- no hay ambiguedad entre "el runtime esta roto" y "falta acceso al modelo"
+- la linea de objetos `SF3D` funciona de verdad en este sistema
+- el puente `texto -> imagen -> SF3D` ya no es solo teorico
+- el handoff a `Blender` tambien queda demostrado
+- la parte pendiente se concentra ya en la linea de escenas y composicion
 
 ## Comandos usados
 
 ```bash
 curl -sf http://127.0.0.1:8188/object_info | jq 'keys[]' | rg 'StableFast3D'
-/home/eric/ComfyUI/.venv/bin/python - <<'PY'
-from huggingface_hub import get_token
-print(bool(get_token()))
-PY
-/home/eric/ComfyUI/.venv/bin/python - <<'PY'
-import sys
-sys.path.insert(0, '/home/eric/ComfyUI/custom_nodes/stable-fast-3d')
-from sf3d.system import SF3D
-SF3D.from_pretrained(
-    'stabilityai/stable-fast-3d',
-    config_name='config.yaml',
-    weight_name='model.safetensors',
-)
-PY
+ls -lt /home/eric/ComfyUI/output/openclaw/uc-3d-01
+ls -lt /home/eric/ComfyUI/output/openclaw/uc-3d-02
+blender -b --python /tmp/openclaw_blender_import_check.py -- \
+  /home/eric/ComfyUI/output/openclaw/uc-3d-02/validation_sf3d_cpu_fallback_00001_.glb
+blender -b --python /tmp/openclaw_blender_import_check.py -- \
+  /home/eric/ComfyUI/output/openclaw/uc-3d-01/validation_sf3d_bridge_00001_.glb
 ```

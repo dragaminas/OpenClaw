@@ -10,7 +10,8 @@ ExecStart=__COMFYUI_VENV_DIR__/bin/python __COMFYUI_DIR__/main.py --listen __COM
 Restart=on-failure
 RestartSec=5
 Environment=HOME=__WORK_HOME__
-Environment=PATH=__COMFYUI_VENV_DIR__/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PATH=__COMFYUI_VENV_DIR__/bin:__COMFYUI_VENV_DIR__/lib/python3.12/site-packages/nvidia/cu13/bin:/usr/local/bin:/usr/bin:/bin
+Environment=CUDA_HOME=__COMFYUI_VENV_DIR__/lib/python3.12/site-packages/nvidia/cu13
 
 [Install]
 WantedBy=default.target

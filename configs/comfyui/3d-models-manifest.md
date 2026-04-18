@@ -5,17 +5,17 @@ trazado el set minimo de modelos que hay que ubicar para cerrar la `V1`.
 
 ## Estado local auditado
 
-Con corte `2026-04-12`, la extension oficial de `SF3D` ya esta integrada en el
-runtime local, pero el modelo gated sigue sin poder descargarse por falta de
-autenticacion.
+Con corte `2026-04-18`, la extension oficial de `SF3D` ya esta integrada en el
+runtime local y el modelo gated ya queda accesible con token activo y cache
+local.
 
 Nota operativa:
 
 - la extension oficial descarga desde el repo gated
   `stabilityai/stable-fast-3d`
-- hoy no hay token activo en el `venv`
-- `SF3D.from_pretrained(...)` devuelve `GatedRepoError: 401 Unauthorized`
-- no se encontro cache local del modelo en `~/.cache/huggingface`
+- hoy existe token activo bajo el `HOME` del servicio
+- el modelo ya quedo descargado en `~/.cache/huggingface`
+- la carga real ya se valido con `UC-3D-01` y `UC-3D-02`
 
 ## Canon de ubicacion propuesto
 
@@ -32,7 +32,7 @@ La extension `ComfyUI` vive en:
 
 | Grupo | Ruta canonica esperada | Uso | Estado local |
 | --- | --- | --- | --- |
-| `Stable Fast 3D` | `~/.cache/huggingface/hub/.../stabilityai--stable-fast-3d/...` | baseline `UC-3D-01` y `UC-3D-02` | ausente |
+| `Stable Fast 3D` | `~/.cache/huggingface/hub/.../models--stabilityai--stable-fast-3d/...` | baseline `UC-3D-01` y `UC-3D-02` | presente |
 | `texture_baker` | `custom_nodes/stable-fast-3d/texture_baker/` instalado en el `venv` | bake de textura y export | presente |
 | `uv_unwrapper` | `custom_nodes/stable-fast-3d/uv_unwrapper/` instalado en el `venv` | UV unwrap | presente |
 
@@ -56,11 +56,9 @@ Para una `V1` alineada con la decision de producto:
 
 ## Regla
 
-Este manifiesto no debe confundirse con "ya descargado".
+Este manifiesto ya no es solo plan de descarga; ahora deja documentado:
 
-Hoy deja documentado:
-
-- que falta realmente
-- donde deberia vivir
-- en que orden tiene sentido traerlo
-- y por que la falta actual es acceso gated, no un nombre de workflow
+- donde vive el baseline `SF3D`
+- que el acceso gated ya quedo resuelto
+- que `UC-3D-01` y `UC-3D-02` ya consumieron ese modelo con exito
+- y que cualquier linea futura `Hunyuan3D` debe seguir tratandose aparte

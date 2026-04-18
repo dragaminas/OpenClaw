@@ -4,6 +4,20 @@ Este documento implementa la tarea `9.2` del `DevPlan`.
 Compara los stacks candidatos iniciales para la linea `3D` del proyecto y
 cierra la decision de `MVP` para la fase 9.
 
+## Nota de vigencia
+
+Con corte `2026-04-18`, este documento debe leerse como registro historico de
+la decision tomada para la fase 9, no como apuesta vigente e incuestionada del
+producto 3D.
+
+La evidencia posterior deja una lectura mas afinada:
+
+- `SF3D` sirvio como baseline tecnico dentro de `ComfyUI`
+- la fase 9 probo ejecucion, exportacion e importacion en `Blender`
+- esa evidencia no basta por si sola para declarar calidad visual suficiente
+- la linea activa a explorar a continuacion pasa a ser `Hunyuan3D` nativo, ya
+  fuera de `ComfyUI`, segun `docs/hunyuan3d/phase-10-native-transition.md`
+
 ## Corte temporal y alcance
 
 Fecha de corte de esta evaluacion: `2026-04-12`.
