@@ -269,60 +269,33 @@ Para instalar por primera vez (clona repo, crea venv, descarga pesos `~25 GB`):
 bash scripts/apps/install-hunyuan3d.sh
 ```
 
-Para arrancar la **web UI** (interfaz grafica en el navegador):
+Para operacion diaria:
 
 ```bash
-cd ~/Hunyuan3D-2
-source .venv/bin/activate
-python3 gradio_app.py \
-  --model_path tencent/Hunyuan3D-2mini \
-  --subfolder hunyuan3d-dit-v2-mini-turbo \
-  --texgen_model_path tencent/Hunyuan3D-2 \
-  --low_vram_mode \
-  --enable_flashvdm
+scripts/apps/hunyuan3d.sh status
+scripts/apps/hunyuan3d.sh service-status
+scripts/apps/hunyuan3d.sh start-service
+scripts/apps/hunyuan3d.sh restart-service
+scripts/apps/hunyuan3d.sh stop-service
+scripts/apps/hunyuan3d.sh open-ui
 ```
 
-Web UI disponible en: `http://127.0.0.1:7860`
+Puertos:
 
-Para arrancar el **servidor API** (automatizacion y runner):
-
-```bash
-cd ~/Hunyuan3D-2
-source .venv/bin/activate
-python3 api_server.py \
-  --host 127.0.0.1 \
-  --port 8081 \
-  --model_path tencent/Hunyuan3D-2mini
-```
-
-API disponible en: `http://127.0.0.1:8081`  
-Endpoint principal: `POST /generate` (JSON con imagen en `base64`)  
-Estado de un job: `GET /status/{uid}`
-
-Para arrancar como **servicio systemd de usuario** (opcional):
-
-```bash
-# Activar una sola vez
-systemctl --user enable --now hunyuan3d.service
-
-# Operacion diaria
-systemctl --user status hunyuan3d.service
-systemctl --user start hunyuan3d.service
-systemctl --user restart hunyuan3d.service
-systemctl --user stop hunyuan3d.service
-
-# Ver logs
-journalctl --user -u hunyuan3d.service -f
-```
+- web UI: `http://127.0.0.1:7860`
+- API: `http://127.0.0.1:8081` — `POST /generate` (JSON con imagen en `base64`), `GET /status/{uid}`
 
 Para verificar la instalacion y ejecutar una corrida smoke:
 
 ```bash
-bash scripts/apps/hunyuan3d-smoke-validation.sh
+scripts/apps/hunyuan3d.sh smoke-test
 ```
 
-El smoke corre 4 gates: instalacion, API en `:8081`, generacion de un `glb`
-y confirmacion de importacion en Blender.
+Para activar el servicio systemd (opcional, arranca con el usuario):
+
+```bash
+systemctl --user enable --now hunyuan3d.service
+```
 
 Notas de convivencia con `ComfyUI`:
 
