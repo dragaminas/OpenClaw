@@ -1,6 +1,31 @@
+# Secretos y configuracion local
 .codex
 .env
+
+# Python
 __pycache__/
 *.pyc
-blenderTest.mp4
+*.pyo
+*.egg-info/
+.venv/
+dist/
+build/
+
+# Temporales y outputs de trabajo
+tmp/
+*.tmp
+*.log
+
+# Artefactos de instalacion
 *.deb
+*.rpm
+*.tar.gz
+*.zip
+cuda-keyring*
+
+# Artefactos de pruebas y desarrollo
+blenderTest.mp4
+*.blend1
+.pytest_cache/
+.coverage
+htmlcov/
