@@ -301,7 +301,9 @@ Notas de convivencia con `ComfyUI`:
 
 - `ComfyUI` escucha en `:8188`; `Hunyuan3D` en `:7860` (web UI) y `:8081` (API)
 - cada app tiene su propio `venv` — no se mezclan dependencias
-- se pueden ejecutar a la vez sin conflicto de puertos ni de GPU si se alterna el acceso
+- con `--enable_t23d` activo, `HunyuanDiT` usa CPU offload (vive en RAM, no en VRAM) para dejar espacio al modelo de forma 3D; pasa a GPU sólo durante inferencia texto→imagen
+- `ComfyUI` activo ocupa ~10.6 GB de VRAM — incompatible con `--enable_t23d`; para usar texto→3D: `comfyui.sh stop-service` → `hunyuan3d.sh start-service`
+- sin `--enable_t23d` (sólo imagen→3D) el consumo es ~5 GB y puede convivir con ComfyUI en `--low_vram_mode`
 
 Documentacion detallada: [`docs/hunyuan3d/installation.md`](/home/eric/Documents/OpenClaw/docs/hunyuan3d/installation.md)
 
