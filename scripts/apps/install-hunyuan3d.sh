@@ -147,7 +147,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 9. Instalar plantilla de servicio systemd si no existe
+# 9. Sincronizar plantilla de servicio systemd (siempre, para aplicar cambios)
 # ---------------------------------------------------------------------------
 SYSTEMD_TEMPLATE="$SCRIPT_DIR/../../configs/systemd-user/hunyuan3d.service.template"
 SYSTEMD_DIR="$HOME/.config/systemd/user"
@@ -155,17 +155,25 @@ SYSTEMD_SERVICE="$SYSTEMD_DIR/hunyuan3d.service"
 
 if [[ -f "$SYSTEMD_TEMPLATE" ]]; then
     mkdir -p "$SYSTEMD_DIR"
-    if [[ ! -f "$SYSTEMD_SERVICE" ]]; then
-        cp "$SYSTEMD_TEMPLATE" "$SYSTEMD_SERVICE"
-        log_ok "Plantilla de servicio copiada a $SYSTEMD_SERVICE"
-        log_info "Activa el servicio con: systemctl --user enable --now hunyuan3d.service"
-    else
-        log_ok "Servicio systemd ya existe en $SYSTEMD_SERVICE"
-    fi
+    cp "$SYSTEMD_TEMPLATE" "$SYSTEMD_SERVICE"
+    systemctl --user daemon-reload 2>/dev/null || true
+    log_ok "Unidad systemd sincronizada: $SYSTEMD_SERVICE"
+    log_info "Para activar el servicio: systemctl --user enable --now hunyuan3d.service"
+else
+    log_err "No se encontro la plantilla $SYSTEMD_TEMPLATE"
 fi
 
 # ---------------------------------------------------------------------------
-# 10. Resumen final
+# 10. Compilar extensiones CUDA (best-effort)
+# ---------------------------------------------------------------------------
+log_info "Intentando compilar extensiones CUDA (custom_rasterizer, differentiable_renderer)..."
+HUNYUAN3D_DIR="$HUNYUAN3D_DIR" bash "$SCRIPT_DIR/hunyuan3d.sh" compile-extensions \
+  2>&1 && log_ok "Extensiones CUDA compiladas." \
+  || log_err "No se pudieron compilar las extensiones CUDA (la generacion de forma 3D funciona igual)."
+log_info "Si la compilacion fallo, ejecuta: scripts/apps/hunyuan3d.sh compile-extensions"
+
+# ---------------------------------------------------------------------------
+# 11. Resumen final
 # ---------------------------------------------------------------------------
 echo ""
 log_ok "=========================================================="
@@ -173,20 +181,17 @@ log_ok "Instalacion completada."
 log_ok "  Directorio: $HUNYUAN3D_DIR"
 log_ok "  Venv:       $VENV_DIR"
 log_ok ""
-log_ok "Para arrancar la web UI (gradio):"
-log_ok "  bash scripts/apps/comfyui.sh status   # verificar que ComfyUI esta en reposo"
-log_ok "  source $VENV_DIR/bin/activate"
-log_ok "  python3 gradio_app.py \\"
-log_ok "    --model_path tencent/Hunyuan3D-2mini \\"
-log_ok "    --subfolder hunyuan3d-dit-v2-mini-turbo \\"
-log_ok "    --texgen_model_path tencent/Hunyuan3D-2 \\"
-log_ok "    --low_vram_mode \\"
-log_ok "    --enable_flashvdm"
+log_ok "Para compilar extensiones CUDA (necesario para textura):"
+log_ok "  scripts/apps/hunyuan3d.sh compile-extensions"
 log_ok ""
-log_ok "Para arrancar el servidor API:"
-log_ok "  source $VENV_DIR/bin/activate"
-log_ok "  python3 api_server.py --host 127.0.0.1 --port 8081 \\"
-log_ok "    --model_path tencent/Hunyuan3D-2mini"
+log_ok "Para arrancar como servicio systemd:"
+log_ok "  systemctl --user enable --now hunyuan3d.service"
+log_ok "  scripts/apps/hunyuan3d.sh wait-ready"
+log_ok ""
+log_ok "Para operacion diaria:"
+log_ok "  scripts/apps/hunyuan3d.sh status"
+log_ok "  scripts/apps/hunyuan3d.sh start-service"
+log_ok "  scripts/apps/hunyuan3d.sh open-ui"
 log_ok ""
 log_ok "Ver docs/hunyuan3d/installation.md para guia completa."
 log_ok "=========================================================="

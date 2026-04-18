@@ -214,7 +214,68 @@ case "$cmd" in
     bash "$SCRIPT_DIR/hunyuan3d-smoke-validation.sh"
     ;;
 
+  compile-extensions)
+    print_header "Hunyuan3D compile-extensions"
+    [[ -x "$HUNYUAN3D_VENV_DIR/bin/python3" ]] || \
+      die "Venv no encontrado en $HUNYUAN3D_VENV_DIR. Ejecuta: bash scripts/apps/install-hunyuan3d.sh"
+
+    # Version de CUDA con la que fue compilado PyTorch
+    TORCH_CUDA="$("$HUNYUAN3D_VENV_DIR/bin/python3" -c \
+      "import torch; print(torch.version.cuda)" 2>/dev/null || true)"
+    [[ -n "$TORCH_CUDA" ]] || die "No se pudo determinar la version CUDA de PyTorch"
+    kv "torch_requires_cuda" "$TORCH_CUDA"
+    CUDA_MAJOR="${TORCH_CUDA%%.*}"
+
+    # Detectar nvcc cuya version coincida con PyTorch CUDA
+    NVCC_BIN=""
+    CUDA_HOME_DETECTED=""
+    for candidate in \
+        "/usr/local/cuda-${TORCH_CUDA}" \
+        "/usr/local/cuda" \
+        "/usr/lib/nvidia-cuda-toolkit" \
+        "$(dirname "$(dirname "$(command -v nvcc 2>/dev/null || echo /nonexistent)")")"; do
+      nvcc_path="${candidate}/bin/nvcc"
+      if [[ -x "$nvcc_path" ]]; then
+        nvcc_ver="$("$nvcc_path" --version 2>/dev/null | grep -oP 'release \K[0-9]+\.[0-9]+')"
+        if [[ "$nvcc_ver" == "$TORCH_CUDA" ]]; then
+          NVCC_BIN="$nvcc_path"
+          CUDA_HOME_DETECTED="$candidate"
+          break
+        fi
+      fi
+    done
+
+    if [[ -z "$NVCC_BIN" ]]; then
+      warn "No se encontro nvcc version ${TORCH_CUDA} (CUDA ${CUDA_MAJOR})"
+      warn ""
+      warn "Para instalar el toolkit CUDA ${CUDA_MAJOR}:"
+      warn "  wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb"
+      warn "  sudo dpkg -i cuda-keyring_1.1-1_all.deb"
+      warn "  sudo apt update"
+      warn "  sudo apt install -y cuda-nvcc-${CUDA_MAJOR}-0"
+      warn ""
+      warn "Luego vuelve a ejecutar: scripts/apps/hunyuan3d.sh compile-extensions"
+      die "nvcc ${TORCH_CUDA} requerido para compilar extensiones CUDA"
+    fi
+
+    kv "nvcc" "$NVCC_BIN"
+    kv "cuda_home" "$CUDA_HOME_DETECTED"
+    export CUDA_HOME="$CUDA_HOME_DETECTED"
+
+    kv "step" "compilando custom_rasterizer"
+    (cd "$HUNYUAN3D_DIR/hy3dgen/texgen/custom_rasterizer" && \
+      "$HUNYUAN3D_VENV_DIR/bin/python3" setup.py install 2>&1 | tail -5)
+    kv "custom_rasterizer" "OK"
+
+    kv "step" "compilando differentiable_renderer"
+    (cd "$HUNYUAN3D_DIR/hy3dgen/texgen/differentiable_renderer" && \
+      "$HUNYUAN3D_VENV_DIR/bin/python3" setup.py install 2>&1 | tail -5)
+    kv "differentiable_renderer" "OK"
+
+    kv "resultado" "extensiones compiladas — reinicia el servicio para aplicar"
+    ;;
+
   *)
-    die "Uso: $0 [status|check-port|url|install|start-service|stop-service|restart-service|wait-ready|open-ui|service-status|smoke-test]"
+    die "Uso: $0 [status|check-port|url|install|compile-extensions|start-service|stop-service|restart-service|wait-ready|open-ui|service-status|smoke-test]"
     ;;
 esac

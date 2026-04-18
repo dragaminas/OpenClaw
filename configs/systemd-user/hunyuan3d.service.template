@@ -6,11 +6,14 @@ After=network.target
 Type=simple
 WorkingDirectory=%h/Hunyuan3D-2
 ExecStart=%h/Hunyuan3D-2/.venv/bin/python3 gradio_app.py \
+  --host 127.0.0.1 \
+  --port 7860 \
   --model_path tencent/Hunyuan3D-2mini \
   --subfolder hunyuan3d-dit-v2-mini-turbo \
   --texgen_model_path tencent/Hunyuan3D-2 \
   --low_vram_mode \
-  --enable_flashvdm
+  --enable_flashvdm \
+  --enable_t23d
 StandardOutput=append:%h/logs/hunyuan3d/gradio.log
 StandardError=append:%h/logs/hunyuan3d/gradio-error.log
 Restart=on-failure
