@@ -32,6 +32,7 @@ class ImplementationMaturity(StrEnum):
     AVAILABLE = "available"
     ADAPTABLE = "adaptable"
     FUTURE = "future"
+    LEGACY = "legacy"
 
 
 class OutputArtifactType(StrEnum):

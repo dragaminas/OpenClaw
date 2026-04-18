@@ -695,18 +695,28 @@ BUILTIN_FLOW_CATALOG = (
         ),
         execution_variants=(
             ExecutionVariant(
-                variant_id="sf3d-text-bridge-v1",
-                display_label="Puente texto -> imagen -> Stable Fast 3D",
+                variant_id="hunyuan3d-2mini-turbo-text-bridge-v1",
+                display_label="Puente texto -> imagen -> Hunyuan3D-2mini-Turbo",
                 maturity=ImplementationMaturity.ADAPTABLE,
+                supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
+                notes=(
+                    "Motor nativo Hunyuan3D fase 10. ComfyUI genera imagen "
+                    "semilla; Hunyuan3D-2mini-Turbo produce el glb en modo "
+                    "shape-first con low_vram_mode.",
+                ),
+            ),
+            ExecutionVariant(
+                variant_id="sf3d-text-bridge-v1",
+                display_label="Puente texto -> imagen -> Stable Fast 3D (fase 9, benchmark)",
+                maturity=ImplementationMaturity.LEGACY,
                 supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
                 workflow_file_references=(
                     "ComfyUIWorkflows/local/adaptable/"
                     "uc-3d-01-text-to-asset-sf3d-bridge-v1.json",
                 ),
                 notes=(
-                    "La V1 no promete text-to-3D nativo puro dentro del mismo "
-                    "grafo; usa una imagen semilla staged antes del bloque "
-                    "SF3D.",
+                    "Benchmark de fase 9. SF3D relegado a referencia técnica. "
+                    "La ruta principal pasa ahora por Hunyuan3D nativo.",
                 ),
             ),
         ),
@@ -746,18 +756,27 @@ BUILTIN_FLOW_CATALOG = (
         ),
         execution_variants=(
             ExecutionVariant(
-                variant_id="sf3d-single-image-baseline",
-                display_label="Stable Fast 3D single-image baseline",
+                variant_id="hunyuan3d-2mini-turbo-single-image-v1",
+                display_label="Imagen -> Hunyuan3D-2mini-Turbo baseline",
                 maturity=ImplementationMaturity.ADAPTABLE,
+                supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
+                notes=(
+                    "Motor nativo Hunyuan3D fase 10. shape-first con "
+                    "low_vram_mode. Primera corrida a validar en UC-3D-02.",
+                ),
+            ),
+            ExecutionVariant(
+                variant_id="sf3d-single-image-baseline",
+                display_label="Stable Fast 3D single-image (fase 9, benchmark)",
+                maturity=ImplementationMaturity.LEGACY,
                 supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
                 workflow_file_references=(
                     "ComfyUIWorkflows/local/minimum/"
                     "uc-3d-02-image-to-asset-sf3d-single-image-v1.json",
                 ),
                 notes=(
-                    "Baseline MVP apoyado en la extension oficial de SF3D para "
-                    "ComfyUI, pensado para exportar un GLB util y revisarlo en "
-                    "Blender.",
+                    "Benchmark de fase 9. SF3D relegado a referencia técnica. "
+                    "La ruta principal pasa ahora por Hunyuan3D nativo.",
                 ),
             ),
         ),
@@ -798,17 +817,27 @@ BUILTIN_FLOW_CATALOG = (
         ),
         execution_variants=(
             ExecutionVariant(
-                variant_id="sf3d-scene-text-bridge",
-                display_label="Puente texto -> imagen -> SF3D por activo",
+                variant_id="hunyuan3d-2mini-turbo-scene-text-bridge-v1",
+                display_label="Texto -> imagen concepto -> Hunyuan3D por activo",
                 maturity=ImplementationMaturity.ADAPTABLE,
+                supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
+                notes=(
+                    "Motor nativo Hunyuan3D fase 10. Cada pieza de la escena "
+                    "se genera por separado con Hunyuan3D-2mini-Turbo. "
+                    "Composición final en Blender.",
+                ),
+            ),
+            ExecutionVariant(
+                variant_id="sf3d-scene-text-bridge",
+                display_label="Puente texto -> imagen -> SF3D por activo (fase 9, benchmark)",
+                maturity=ImplementationMaturity.LEGACY,
                 supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
                 workflow_file_references=(
                     "ComfyUIWorkflows/local/adaptable/"
                     "uc-3d-03-text-to-scene-sf3d-asset-pack-bridge-v1.json",
                 ),
                 notes=(
-                    "La escena V1 se entiende como descomposicion por activos "
-                    "o envolventes, ejecutando SF3D una pieza cada vez.",
+                    "Benchmark de fase 9. SF3D relegado a referencia técnica.",
                 ),
             ),
         ),
@@ -849,17 +878,27 @@ BUILTIN_FLOW_CATALOG = (
         ),
         execution_variants=(
             ExecutionVariant(
-                variant_id="sf3d-scene-image-v1",
-                display_label="Descomposicion scene-first a assets con SF3D",
+                variant_id="hunyuan3d-2mini-turbo-scene-image-v1",
+                display_label="Imagen -> recortes -> Hunyuan3D por activo",
                 maturity=ImplementationMaturity.ADAPTABLE,
+                supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
+                notes=(
+                    "Motor nativo Hunyuan3D fase 10. La referencia se "
+                    "descompone en recortes; cada activo se genera con "
+                    "Hunyuan3D-2mini-Turbo. Composición final en Blender.",
+                ),
+            ),
+            ExecutionVariant(
+                variant_id="sf3d-scene-image-v1",
+                display_label="Descomposición scene-first a assets con SF3D (fase 9, benchmark)",
+                maturity=ImplementationMaturity.LEGACY,
                 supported_hardware_profiles=BASELINE_COMPATIBLE_PROFILES,
                 workflow_file_references=(
                     "ComfyUIWorkflows/local/adaptable/"
                     "uc-3d-04-image-to-scene-sf3d-asset-pack-v1.json",
                 ),
                 notes=(
-                    "El resultado esperado es set de activos, envolvente o "
-                    "blockout util, no escena monolitica perfecta.",
+                    "Benchmark de fase 9. SF3D relegado a referencia técnica.",
                 ),
             ),
         ),
