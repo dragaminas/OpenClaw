@@ -165,3 +165,41 @@ El archivo de plantilla esta en:
   y no buscar un entorno comun
 - el modo de convivencia descrito en `docs/hunyuan3d/native-runtime-architecture.md`
   es la referencia operativa cuando ambas apps corren en la misma sesion
+
+## Restricción de VRAM con `--enable_t23d` (RTX 3060 12 GB)
+
+Con `--enable_t23d` activo, Hunyuan3D carga tres modelos en GPU:
+
+| Modelo | VRAM aprox. |
+|--------|-------------|
+| texgen pipeline (tencent/Hunyuan3D-2) | ~3 GB |
+| HunyuanDiT text→imagen (CPU offload) | 0 GB en VRAM (\*) |
+| shape model (Hunyuan3D-2mini turbo) | ~2 GB |
+| overhead PyTorch / CUDA | ~1 GB |
+| **Total** | **~6 GB durante arranque** |
+
+(\*) El instalador aplica un parche a `hy3dgen/text2image.py` que reemplaza
+`.to(device)` por `enable_model_cpu_offload()`. El modelo HunyuanDiT (~7 GB)
+reside en RAM del sistema (≥44 GB disponibles) y sólo ocupa VRAM durante la
+inferencia texto→imagen, liberándola automáticamente al terminar.
+
+**Sin el parche**, el texgen + HunyuanDiT ocupa ~11 GB de los 11.62 GB
+disponibles, y el shape model no puede cargarse (CUDA OOM).
+
+### Coexistencia con ComfyUI
+
+ComfyUI activo ocupa ~10.6 GB de VRAM. **No es posible** arrancar Hunyuan3D
+con `--enable_t23d` mientras ComfyUI esté corriendo en la misma GPU.
+
+Flujo recomendado para usar Hunyuan3D texto→3D:
+
+```bash
+scripts/apps/comfyui.sh stop-service        # liberar VRAM
+scripts/apps/hunyuan3d.sh start-service     # arrancar Hunyuan3D
+# ... usar la UI en http://127.0.0.1:7860 ...
+scripts/apps/hunyuan3d.sh stop-service      # liberar VRAM
+scripts/apps/comfyui.sh start-service       # restaurar ComfyUI
+```
+
+Hunyuan3D sin `--enable_t23d` (sólo imagen→3D) usa ~5 GB y puede convivir
+con ComfyUI en modo `--low_vram_mode`.

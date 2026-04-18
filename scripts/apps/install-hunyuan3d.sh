@@ -79,7 +79,9 @@ log_info "Instalando dependencias auxiliares ..."
 "$PIP" install -q \
     "huggingface_hub>=0.19" \
     "trimesh" \
-    "gradio"
+    "gradio" \
+    "sentencepiece" \
+    "tiktoken"
 
 log_ok "Dependencias auxiliares instaladas."
 
@@ -173,7 +175,47 @@ HUNYUAN3D_DIR="$HUNYUAN3D_DIR" bash "$SCRIPT_DIR/hunyuan3d.sh" compile-extension
 log_info "Si la compilacion fallo, ejecuta: scripts/apps/hunyuan3d.sh compile-extensions"
 
 # ---------------------------------------------------------------------------
-# 11. Resumen final
+# 11. Parche de memoria: CPU offload para HunyuanDiT (text-to-3D en GPUs <=12 GB)
+# ---------------------------------------------------------------------------
+# El pipeline HunyuanDiT (texto→imagen) carga ~8 GB en VRAM. Sin offload, no
+# queda espacio para el modelo de forma 3D en tarjetas de 12 GB (ej. RTX 3060).
+# El parche reemplaza .to(device) por enable_model_cpu_offload() para que el
+# modelo resida en RAM durante startup y sólo ocupe VRAM durante inferencia.
+T2I_FILE="$HUNYUAN3D_DIR/hy3dgen/text2image.py"
+if [[ -f "$T2I_FILE" ]]; then
+    if grep -q "enable_model_cpu_offload" "$T2I_FILE"; then
+        log_ok "Parche CPU offload ya aplicado en text2image.py."
+    else
+        # Reemplaza .to(device) por enable_model_cpu_offload() en __init__
+        T2I_FILE="$T2I_FILE" python3 - <<'PYEOF'
+import re, os
+path = os.environ['T2I_FILE']
+txt = open(path).read()
+# Remove .to(device) call chained on the pipeline constructor
+txt = re.sub(r'(\)\s*)\.to\(device\)', r'\1', txt)
+# Insert enable_model_cpu_offload after self.pipe assignment
+txt = re.sub(
+    r'(self\.pipe\s*=\s*AutoPipelineForText2Image\.from_pretrained\([^)]+\))',
+    r'\1\n        # CPU offload: model stays in RAM, moves to GPU only during inference.\n        # Required on GPUs <=12 GB to leave room for the 3D shape model.\n        self.pipe.enable_model_cpu_offload()',
+    txt)
+# Fix torch.Generator to use stored self.device instead of self.pipe.device
+txt = txt.replace('torch.Generator(device=self.pipe.device)', 'torch.Generator(device=self.device)')
+open(path, 'w').write(txt)
+print("Parche aplicado.")
+PYEOF
+        if grep -q "enable_model_cpu_offload" "$T2I_FILE"; then
+            log_ok "Parche CPU offload aplicado en $T2I_FILE."
+        else
+            log_err "El parche CPU offload no pudo aplicarse automaticamente."
+            log_info "Edita manualmente $T2I_FILE: cambia .to(device) por .enable_model_cpu_offload()"
+        fi
+    fi
+else
+    log_err "No se encontro $T2I_FILE – omitiendo parche CPU offload."
+fi
+
+# ---------------------------------------------------------------------------
+# 12. Resumen final
 # ---------------------------------------------------------------------------
 echo ""
 log_ok "=========================================================="
@@ -192,6 +234,11 @@ log_ok "Para operacion diaria:"
 log_ok "  scripts/apps/hunyuan3d.sh status"
 log_ok "  scripts/apps/hunyuan3d.sh start-service"
 log_ok "  scripts/apps/hunyuan3d.sh open-ui"
+log_ok ""
+log_ok "NOTA GPU: --enable_t23d requiere ~9 GB de VRAM libre."
+log_ok "  Si ComfyUI esta activo, para ComfyUI antes de arrancar Hunyuan3D:"
+log_ok "  scripts/apps/comfyui.sh stop-service"
+log_ok "  scripts/apps/hunyuan3d.sh start-service"
 log_ok ""
 log_ok "Ver docs/hunyuan3d/installation.md para guia completa."
 log_ok "=========================================================="
