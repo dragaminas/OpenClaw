@@ -3,4 +3,4 @@
 __pycache__/
 *.pyc
 blenderTest.mp4
-tmp/
+*.deb
