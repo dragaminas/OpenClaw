@@ -207,6 +207,15 @@ Despues de la wake word ya se admite lenguaje natural sencillo:
 - `studio reinicia comfyui`
 - `studio como esta comfyui`
 
+Para la linea 3D nativa `Hunyuan3D`:
+
+- `studio imagen-a-3d` — genera un objeto 3D desde una imagen (`UC-3D-02`)
+- `studio texto-a-3d` — genera un objeto 3D desde texto (`UC-3D-01`)
+- `studio imagen-a-escena-3d` — genera set de activos desde imagen (`UC-3D-04`)
+- `studio texto-a-escena-3d` — genera set de activos desde texto (`UC-3D-03`)
+- `studio workflows` — lista casos disponibles
+- `studio que hace imagen-a-3d` — descripcion de un caso
+
 Tambien existe modo tecnico:
 
 - `studio`
@@ -249,7 +258,81 @@ scripts/apps/comfyui.sh open-ui
 
 En la practica, reiniciar ComfyUI equivale a reiniciar `comfyui.service`.
 
-## Primeras pruebas utiles
+## Operacion diaria de Hunyuan3D
+
+La linea 3D nativa corre como una aplicacion separada de `ComfyUI`, con su
+propio `venv` en `~/Hunyuan3D-2/.venv`.
+
+Para instalar por primera vez (clona repo, crea venv, descarga pesos `~25 GB`):
+
+```bash
+bash scripts/apps/install-hunyuan3d.sh
+```
+
+Para arrancar la **web UI** (interfaz grafica en el navegador):
+
+```bash
+cd ~/Hunyuan3D-2
+source .venv/bin/activate
+python3 gradio_app.py \
+  --model_path tencent/Hunyuan3D-2mini \
+  --subfolder hunyuan3d-dit-v2-mini-turbo \
+  --texgen_model_path tencent/Hunyuan3D-2 \
+  --low_vram_mode \
+  --enable_flashvdm
+```
+
+Web UI disponible en: `http://127.0.0.1:7860`
+
+Para arrancar el **servidor API** (automatizacion y runner):
+
+```bash
+cd ~/Hunyuan3D-2
+source .venv/bin/activate
+python3 api_server.py \
+  --host 127.0.0.1 \
+  --port 8081 \
+  --model_path tencent/Hunyuan3D-2mini
+```
+
+API disponible en: `http://127.0.0.1:8081`  
+Endpoint principal: `POST /generate` (JSON con imagen en `base64`)  
+Estado de un job: `GET /status/{uid}`
+
+Para arrancar como **servicio systemd de usuario** (opcional):
+
+```bash
+# Activar una sola vez
+systemctl --user enable --now hunyuan3d.service
+
+# Operacion diaria
+systemctl --user status hunyuan3d.service
+systemctl --user start hunyuan3d.service
+systemctl --user restart hunyuan3d.service
+systemctl --user stop hunyuan3d.service
+
+# Ver logs
+journalctl --user -u hunyuan3d.service -f
+```
+
+Para verificar la instalacion y ejecutar una corrida smoke:
+
+```bash
+bash scripts/apps/hunyuan3d-smoke-validation.sh
+```
+
+El smoke corre 4 gates: instalacion, API en `:8081`, generacion de un `glb`
+y confirmacion de importacion en Blender.
+
+Notas de convivencia con `ComfyUI`:
+
+- `ComfyUI` escucha en `:8188`; `Hunyuan3D` en `:7860` (web UI) y `:8081` (API)
+- cada app tiene su propio `venv` — no se mezclan dependencias
+- se pueden ejecutar a la vez sin conflicto de puertos ni de GPU si se alterna el acceso
+
+Documentacion detallada: [`docs/hunyuan3d/installation.md`](/home/eric/Documents/OpenClaw/docs/hunyuan3d/installation.md)
+
+
 
 ```bash
 scripts/bootstrap/show-config.sh

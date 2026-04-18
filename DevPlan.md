@@ -399,13 +399,13 @@ Tareas:
 - [done] 9.3 Definir perfiles de hardware objetivo para la linea 3D, distinguiendo baseline local, perfil adaptable y referencia de alto VRAM o remota, pero tomando `SF3D` como baseline real del `MVP` en `ComfyUI`
 - [done] 9.4 Definir los contratos de entrada y salida para la linea 3D: prompt, imagenes de referencia, alpha o mascara si aplica, categoria de activo (`objeto`, `personaje`, `envolvente`), escala aproximada, orientacion, unidades, pivot coherente, formatos de exportacion (`glb`, `obj`, `fbx` si aplica), texturas y convencion de carpetas
 - [done] 9.5 Auditar custom nodes, modelos y dependencias auxiliares requeridas por el baseline `SF3D`, separando lo que queda dentro del `MVP` de `ComfyUI` y lo que pasa a linea futura externa como `Hunyuan3D`
-- [pending] 9.6 Descargar, ubicar y documentar los assets necesarios para el baseline `SF3D` elegido y dejar aparte, sin bloquear el `MVP`, los requisitos de una futura linea `Hunyuan3D` oficial
+- [done] 9.6 Descargar, ubicar y documentar los assets necesarios para el baseline `SF3D` elegido y dejar aparte, sin bloquear el `MVP`, los requisitos de una futura linea `Hunyuan3D` oficial
 - [done] 9.7 Definir la interfaz objetivo por caso de uso, con sesion guiada principal, modo experto opcional, presets operativos y mensajes legibles para usuario no tecnico, pero tratando `imagen -> 3D` como ruta directa y `texto -> 3D` como puente a imagen semilla
 - [done] 9.8 Diseñar la taxonomia de casos de uso 3D del producto y asignar identificadores estables, proponiendo al menos `UC-3D-01` objeto/personaje desde texto, `UC-3D-02` objeto/personaje desde imagen, `UC-3D-03` set de activos o escena interior/exterior desde texto y `UC-3D-04` set de activos o escena interior/exterior desde imagen
-- [pending] 9.9 Diseñar, derivar y validar un workflow general de generacion de objetos y personajes 3D para este sistema, tomando `SF3D` como motor principal del `MVP` y priorizando una salida que ya pueda inspeccionarse, catalogarse como `asset` y aprovecharse en `Blender`
+- [done] 9.9 Diseñar, derivar y validar un workflow general de generacion de objetos y personajes 3D para este sistema, tomando `SF3D` como motor principal del `MVP` y priorizando una salida que ya pueda inspeccionarse, catalogarse como `asset` y aprovecharse en `Blender`
 - [done] 9.9.1 Especificar el workflow general para `UC-3D-01` y `UC-3D-02`, su contrato funcional, sus limites de producto y su relacion con `9.13`, `9.14` y `9.15`, ya realineados a `SF3D`
 - [done] 9.9.2 Derivar una primera variante `V1` para `UC-3D-01` y otra para `UC-3D-02` en `ComfyUIWorkflows/local/`, alineadas con `SF3D` y sustituyendo como baseline `MVP` a los experimentos previos basados en `Hunyuan`
-- [pending] 9.9.3 Ejecutar una validacion real local de ambas variantes `SF3D`, conservando artefactos, importandolos en `Blender` y dejando documentado que partes ya funcionan de verdad en este sistema
+- [done] 9.9.3 Ejecutar una validacion real local de ambas variantes `SF3D`, conservando artefactos, importandolos en `Blender` y dejando documentado que partes ya funcionan de verdad en este sistema
 - [done] 9.10 Definir el minimo de calidad aceptable para objetos y personajes: malla cerrada o reparable, orientacion coherente, escala controlable, pivot util para composicion, texturas exportables y tiempo de generacion razonable en el baseline local
 - [pending] 9.11 Diseñar, derivar y validar un workflow general de generacion de escenas 3D, priorizando composicion por activos y envolventes generados con `SF3D` y `Blender`, y dejando la escena monolitica como ruta secundaria o comparativa
 - [done] 9.11.1 Especificar el workflow general para `UC-3D-03` y `UC-3D-04`, dejando explicito si cada variante entrega escena completa, `blockout` navegable, set de activos desagregado por categorias o propuesta hibrida lista para ensamblar en `Blender`
@@ -448,12 +448,12 @@ Entregables por tarea:
 - [done] 9.3 `docs/comfyui/3d-hardware-profiles.md`
 - [done] 9.4 `docs/comfyui/3d-io-contract.md`
 - [done] 9.5 `configs/comfyui/3d-custom-nodes-manifest.md`
-- [pending] 9.6 `configs/comfyui/3d-models-manifest.md`
+- [done] 9.6 `configs/comfyui/3d-models-manifest.md`
 - [done] 9.7 `docs/comfyui/3d-interface.md`
 - [done] 9.8 `docs/comfyui/3d-usecase-map.md`
 - [done] 9.9.1 `docs/comfyui/general-3d-object-workflow.md`
 - [done] 9.9.2 workflows derivados `V1` `SF3D` versionados en `ComfyUIWorkflows/local/`
-- [pending] 9.9.3 evidencia y resultados de corrida real local para `UC-3D-01` y `UC-3D-02`, incluyendo `docs/comfyui/general-3d-object-workflow-results.md`
+- [done] 9.9.3 evidencia y resultados de corrida real local para `UC-3D-01` y `UC-3D-02`, incluyendo `docs/comfyui/general-3d-object-workflow-results.md`
 - [done] 9.10 criterios de calidad y aceptacion en `docs/comfyui/3d-quality-bar.md`
 - [done] 9.11.1 `docs/comfyui/general-3d-scene-workflow.md`
 - [done] 9.11.2 workflows derivados `V1` alineados con composicion por activos en `ComfyUIWorkflows/local/`
@@ -464,6 +464,80 @@ Entregables por tarea:
 - [done] 9.15 `docs/comfyui/3d-whatsapp-extension.md`
 - [done] 9.16 `docs/comfyui/3d-troubleshooting.md`
 - [done] 9.17 `docs/comfyui/3d-fallback-paths.md`
+
+## Fase 10: Linea 3D nativa con `Hunyuan3D` fuera de `ComfyUI`
+
+Objetivo:
+Tras la fase 9, conservar lo que si quedo claro del trabajo 3D
+(`UC-3D-*`, contrato de I/O, puente a `Blender`, validaciones y lenguaje de
+producto), pero trasladar la ejecucion principal de `image -> 3D` a una linea
+nativa basada en `Hunyuan3D`, operada fuera de `ComfyUI` mediante su propia
+`web UI` y/o `API` local. La meta no es reabrir la exploracion, sino sustituir
+la ambiguedad de los wrappers 3D en `ComfyUI` por una aplicacion separada, mas
+limpia de depurar y mas coherente con la calidad visual buscada.
+
+Hipotesis operativa:
+
+- la fase 9 deja una base util de taxonomia, contratos y handoff, pero no
+  demuestra una calidad visual suficiente para sostener `SF3D` como apuesta
+  principal de producto
+- el problema mas costoso hoy no es solo de compatibilidad tecnica, sino de
+  ambiguedad operativa: mezclar `ComfyUI` de imagen/video con un stack 3D
+  fragil complica diagnostico, mantenimiento y comunicacion de producto
+- una linea nativa `Hunyuan3D` separada permite tener dos aplicaciones
+  conviviendo sin confusion: `ComfyUI` para imagen/video y `Hunyuan3D` para 3D
+- para el baseline local, importa mas cerrar una ruta clara y visualmente
+  defendible que insistir en que todo viva dentro de `ComfyUI`
+- `SF3D` y los workflows 3D de `ComfyUI` deben conservarse como benchmark
+  tecnico, evidencia historica o fallback secundario, no como promesa vigente
+  del producto 3D
+
+Tareas:
+
+- [done] 10.1 Consolidar la lectura final de la fase 9, distinguiendo `pass tecnico` de `fail visual`, y dejar por escrito el criterio oficial que justifica el replanteo
+- [done] 10.2 Elegir la variante nativa objetivo de `Hunyuan3D` para la maquina local, explicitando si el baseline realista es `mini`, `turbo`, `shape-only` u otra combinacion y dejando fuera de alcance el camino que no quepa de verdad en el hardware disponible
+- [done] 10.3 Definir la arquitectura operativa de la nueva linea: proceso local, `web UI`, `API`, carpetas de artefactos, logs y convivencia con `ComfyUI`
+- [done] 10.4 Transponer `UC-3D-01`, `UC-3D-02`, `UC-3D-03` y `UC-3D-04` a la nueva linea nativa, manteniendo alias de producto y separando con claridad lo que sigue siendo `texto -> imagen` de lo que pasa a `imagen -> 3D`
+- [done] 10.5 Redefinir perfiles de hardware, tiempos y barra de calidad para la linea nativa, distinguiendo ejecucion local, texturizado, `shape-only` y perfiles remotos si fueran necesarios
+- [done] 10.6 Preparar una instalacion reproducible de `Hunyuan3D` nativo, con dependencias, pesos, comando de arranque y aislamiento suficiente para no romper la instalacion principal de `ComfyUI`
+- [done] 10.7 Reusar y adaptar el contrato de entrada y salida de la fase 9 para la nueva linea, manteniendo formatos, nomenclatura, puente a `Blender` y criterios de catalogacion
+- [done] 10.8 Diseñar la interfaz operativa de la linea nativa para usuario no tecnico, dejando claro cuando se usa la `web UI`, cuando se usa la `API` y que mensajes de estado debe recibir el operador
+- [done] 10.9 Preparar una bateria de smoke tests y validaciones revisables para la aplicacion nativa, incluyendo logs, evidencia y comparativas honestas frente al baseline `SF3D`
+- [done] 10.10 Ejecutar una validacion real local de `UC-3D-02` y `UC-3D-01` sobre `Hunyuan3D` nativo, con artefactos conservados, importacion en `Blender` y lectura visual explicita
+- [done] 10.11 Replantear `UC-3D-03` y `UC-3D-04` como composicion por activos, `blockout` o envolventes sobre la nueva linea, evitando volver a vender escena monolitica donde no la haya
+- [done] 10.12 Reescribir troubleshooting, fallbacks y mensajes de producto para reflejar que la ruta 3D principal ya no vive en `ComfyUI`
+- [done] 10.13 Integrar la linea nativa con `Blender`, `runner` y futuros puntos de automatizacion, sin ocultar que el motor 3D corre en una aplicacion separada
+- [done] 10.14 Cerrar la decision `go/no-go` sobre retirar `SF3D` del camino principal del producto y relegarlo a benchmark tecnico, anexo historico o contingencia secundaria
+
+Regla de cierre para la linea 3D nativa:
+
+- la fase 10 no se cierra por instalar `Hunyuan3D`; necesita al menos una
+  corrida real `imagen -> 3D` con calidad visual claramente superior a la
+  obtenida en la fase 9
+- la nueva linea debe convivir con `ComfyUI` sin compartir el mismo runtime
+  fragil ni crear confusion de operador sobre que aplicacion resuelve que
+- las validaciones deben distinguir de forma explicita entre ejecucion
+  tecnica, handoff a `Blender` y calidad visual util de producto
+- `UC-3D-03` y `UC-3D-04` pueden cerrarse primero como `asset_set`,
+  `blockout` o envolvente util; no deben presentarse como escena final limpia
+  si la tecnologia no llega ahi
+
+Entregables por tarea:
+
+- [done] 10.1 `docs/hunyuan3d/phase-10-native-transition.md`
+- [done] 10.4 `docs/hunyuan3d/usecase-map.md`
+- [done] 10.2 `docs/hunyuan3d/hardware-profiles.md`
+- [done] 10.3 `docs/hunyuan3d/native-runtime-architecture.md`
+- [done] 10.5 ampliacion de `docs/hunyuan3d/hardware-profiles.md` con tiempos objetivo y barra de calidad
+- [done] 10.6 `docs/hunyuan3d/installation.md` + `scripts/apps/install-hunyuan3d.sh` + `configs/systemd-user/hunyuan3d.service.template`
+- [done] 10.7 `docs/hunyuan3d/io-contract.md`
+- [done] 10.8 `docs/hunyuan3d/interface.md`
+- [done] 10.9 `docs/hunyuan3d/smoke-validation.md` + `scripts/apps/hunyuan3d-smoke-validation.sh`
+- [done] 10.10 `docs/hunyuan3d/validation-results.md` (smoke `PASS=10 FAIL=0`, glb `842 KB`, `23.376` vertices, inferencia `3.2 s`)
+- [done] 10.11 `docs/hunyuan3d/scene-composition.md`
+- [done] 10.12 `docs/hunyuan3d/troubleshooting.md` + `docs/hunyuan3d/fallback-paths.md`
+- [done] 10.13 `src/openclaw_studio/runners/hunyuan3d.py` + registro en `registry.py` + `docs/hunyuan3d/runner-integration.md`
+- [done] 10.14 `docs/hunyuan3d/sf3d-decision.md`
 
 ## Riesgos a controlar
 
@@ -483,6 +557,7 @@ Entregables por tarea:
 5. Integracion con Blender y ComfyUI
 6. Productizacion de workflows ComfyUI para render de video e imagen
 7. Productizacion de workflows ComfyUI para generacion de objetos y escenas 3D
-8. Capa de acciones seguras para WhatsApp
-9. UX sin consola
-10. Backup, update y validacion final
+8. Linea 3D nativa separada de ComfyUI
+9. Capa de acciones seguras para WhatsApp
+10. UX sin consola
+11. Backup, update y validacion final
