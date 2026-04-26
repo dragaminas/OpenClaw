@@ -14,6 +14,7 @@ HUNYUAN3D_API_PORT="${HUNYUAN3D_API_PORT:-8081}"
 HUNYUAN3D_GRADIO_PORT="${HUNYUAN3D_GRADIO_PORT:-7860}"
 HUNYUAN3D_MODEL_PATH="${HUNYUAN3D_MODEL_PATH:-tencent/Hunyuan3D-2mini}"
 HUNYUAN3D_SUBFOLDER="${HUNYUAN3D_SUBFOLDER:-hunyuan3d-dit-v2-mini-turbo}"
+HUNYUAN3D_TEXGEN_MODEL_PATH="${HUNYUAN3D_TEXGEN_MODEL_PATH:-tencent/Hunyuan3D-2}"
 
 api_url="http://${HUNYUAN3D_HOST}:${HUNYUAN3D_API_PORT}"
 gradio_url="http://${HUNYUAN3D_HOST}:${HUNYUAN3D_GRADIO_PORT}"
@@ -84,6 +85,8 @@ case "$cmd" in
         kv "service_file" "not installed"
       fi
       kv "model_path" "$HUNYUAN3D_MODEL_PATH"
+      kv "subfolder" "$HUNYUAN3D_SUBFOLDER"
+      kv "texgen_model_path" "$HUNYUAN3D_TEXGEN_MODEL_PATH"
       kv "gradio_url" "$gradio_url"
       kv "api_url" "$api_url"
       if tcp_port_is_listening "$HUNYUAN3D_HOST" "$HUNYUAN3D_GRADIO_PORT"; then
@@ -187,7 +190,7 @@ case "$cmd" in
     if ! tcp_port_is_listening "$HUNYUAN3D_HOST" "$HUNYUAN3D_GRADIO_PORT"; then
       warn "La web UI no esta activa en $gradio_url"
       warn "Arrancala con: scripts/apps/hunyuan3d.sh start-service"
-      warn "  o manualmente: cd ~/Hunyuan3D-2 && source .venv/bin/activate && python3 gradio_app.py --model_path $HUNYUAN3D_MODEL_PATH --subfolder $HUNYUAN3D_SUBFOLDER --low_vram_mode --enable_flashvdm"
+      warn "  o manualmente: cd ~/Hunyuan3D-2 && source .venv/bin/activate && python3 gradio_app.py --model_path $HUNYUAN3D_MODEL_PATH --subfolder $HUNYUAN3D_SUBFOLDER --texgen_model_path $HUNYUAN3D_TEXGEN_MODEL_PATH --low_vram_mode --enable_flashvdm"
     fi
     if open_browser "$open_target_url"; then
       printf 'Hunyuan3D web UI abierta en el navegador: %s\n' "$open_target_url"
@@ -212,6 +215,11 @@ case "$cmd" in
   smoke-test)
     print_header "Hunyuan3D smoke"
     bash "$SCRIPT_DIR/hunyuan3d-smoke-validation.sh"
+    ;;
+
+  benchmark-quality)
+    print_header "Hunyuan3D benchmark-quality"
+    bash "$SCRIPT_DIR/hunyuan3d-benchmark-quality.sh" "${2:-}"
     ;;
 
   compile-extensions)
@@ -276,6 +284,6 @@ case "$cmd" in
     ;;
 
   *)
-    die "Uso: $0 [status|check-port|url|install|compile-extensions|start-service|stop-service|restart-service|wait-ready|open-ui|service-status|smoke-test]"
+    die "Uso: $0 [status|check-port|url|install|compile-extensions|start-service|stop-service|restart-service|wait-ready|open-ui|service-status|smoke-test|benchmark-quality]"
     ;;
 esac

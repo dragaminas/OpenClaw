@@ -1,0 +1,21 @@
+[Unit]
+Description=Thermal monitor (user service)
+After=default.target
+
+[Service]
+Type=simple
+WorkingDirectory=__REPO_ROOT__
+ExecStart=/bin/bash __REPO_ROOT__/scripts/doctor/thermal-monitor.sh run
+Restart=always
+RestartSec=5
+Environment=HOME=__WORK_HOME__
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+Environment=THERMAL_MONITOR_INTERVAL_SEC=__THERMAL_MONITOR_INTERVAL_SEC__
+Environment=THERMAL_MONITOR_LOG_DIR=__THERMAL_MONITOR_LOG_DIR__
+Environment=THERMAL_MONITOR_CPU_WARN_C=__THERMAL_MONITOR_CPU_WARN_C__
+Environment=THERMAL_MONITOR_CPU_CRIT_C=__THERMAL_MONITOR_CPU_CRIT_C__
+Environment=THERMAL_MONITOR_GPU_WARN_C=__THERMAL_MONITOR_GPU_WARN_C__
+Environment=THERMAL_MONITOR_GPU_CRIT_C=__THERMAL_MONITOR_GPU_CRIT_C__
+
+[Install]
+WantedBy=default.target

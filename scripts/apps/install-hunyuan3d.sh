@@ -10,6 +10,7 @@
 # Variables de entorno respetadas:
 #   HUNYUAN3D_DIR   — ruta de instalacion (por defecto ~/Hunyuan3D-2)
 #   SKIP_MODEL_DOWNLOAD — si se define, omite la descarga de pesos
+#   MODEL_REPO      — repo HF a precachear (por defecto tencent/Hunyuan3D-2mini)
 
 set -e
 
@@ -22,7 +23,7 @@ REPO_URL="https://github.com/Tencent-Hunyuan/Hunyuan3D-2.git"
 HUNYUAN3D_DIR="${HUNYUAN3D_DIR:-$HOME/Hunyuan3D-2}"
 VENV_DIR="$HUNYUAN3D_DIR/.venv"
 LOGS_DIR="$HOME/logs/hunyuan3d"
-MODEL_REPO="tencent/Hunyuan3D-2mini"
+MODEL_REPO="${MODEL_REPO:-tencent/Hunyuan3D-2mini}"
 
 log_info() { echo "[install-hunyuan3d] INFO: $*"; }
 log_ok()   { echo "[install-hunyuan3d] OK:   $*"; }
@@ -79,7 +80,7 @@ log_info "Instalando dependencias auxiliares ..."
 "$PIP" install -q \
     "huggingface_hub>=0.19" \
     "trimesh" \
-    "gradio" \
+    "gradio>=5,<6" \
     "sentencepiece" \
     "tiktoken"
 
@@ -107,7 +108,7 @@ if [[ -n "${SKIP_MODEL_DOWNLOAD:-}" ]]; then
 else
     log_info "Descargando pesos de $MODEL_REPO a ~/.cache/huggingface/hub ..."
     log_info "Esto puede tardar varios minutos la primera vez."
-    "$PYTHON" - <<'PYEOF'
+    MODEL_REPO="$MODEL_REPO" "$PYTHON" - <<'PYEOF'
 from huggingface_hub import snapshot_download
 import os
 
@@ -215,7 +216,77 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 12. Descargar model-viewer.min.js local (elimina dependencia de CDN externo)
+# 12. Parche loader shape: fallback de .safetensors a .ckpt para Hunyuan3D-2.1
+# ---------------------------------------------------------------------------
+SHAPE_PIPELINES_FILE="$HUNYUAN3D_DIR/hy3dgen/shapegen/pipelines.py"
+if [[ -f "$SHAPE_PIPELINES_FILE" ]]; then
+    if grep -q "falling back to checkpoint file" "$SHAPE_PIPELINES_FILE"; then
+        log_ok "Parche fallback .safetensors/.ckpt ya aplicado en pipelines.py."
+    else
+        log_info "Aplicando parche fallback .safetensors/.ckpt en pipelines.py ..."
+        SHAPE_PIPELINES_FILE="$SHAPE_PIPELINES_FILE" python3 - <<'PYEOF'
+import os
+from pathlib import Path
+
+path = Path(os.environ["SHAPE_PIPELINES_FILE"])
+txt = path.read_text()
+old = """        # load ckpt
+        if use_safetensors:
+            ckpt_path = ckpt_path.replace('.ckpt', '.safetensors')
+        if not os.path.exists(ckpt_path):
+            raise FileNotFoundError(f"Model file {ckpt_path} not found")
+        logger.info(f"Loading model from {ckpt_path}")
+"""
+new = """        # load ckpt
+        if use_safetensors:
+            safetensors_path = ckpt_path
+            if ckpt_path.endswith('.ckpt'):
+                safetensors_path = ckpt_path.replace('.ckpt', '.safetensors')
+                ckpt_fallback_path = ckpt_path
+            else:
+                ckpt_fallback_path = ckpt_path.replace('.safetensors', '.ckpt')
+
+            if os.path.exists(safetensors_path):
+                ckpt_path = safetensors_path
+            elif os.path.exists(ckpt_fallback_path):
+                logger.warning(
+                    f"Safetensors checkpoint {safetensors_path} not found; "
+                    f"falling back to checkpoint file {ckpt_fallback_path}"
+                )
+                ckpt_path = ckpt_fallback_path
+                use_safetensors = False
+            else:
+                raise FileNotFoundError(f"Model file {safetensors_path} not found")
+        elif not os.path.exists(ckpt_path):
+            safetensors_fallback_path = ckpt_path.replace('.ckpt', '.safetensors')
+            if os.path.exists(safetensors_fallback_path):
+                logger.warning(
+                    f"Checkpoint file {ckpt_path} not found; "
+                    f"falling back to safetensors {safetensors_fallback_path}"
+                )
+                ckpt_path = safetensors_fallback_path
+                use_safetensors = True
+            else:
+                raise FileNotFoundError(f"Model file {ckpt_path} not found")
+        logger.info(f"Loading model from {ckpt_path}")
+"""
+if old not in txt:
+    raise SystemExit("No se encontro el bloque esperado en pipelines.py")
+path.write_text(txt.replace(old, new))
+print("Parche aplicado.")
+PYEOF
+        if grep -q "falling back to checkpoint file" "$SHAPE_PIPELINES_FILE"; then
+            log_ok "Parche fallback .safetensors/.ckpt aplicado en $SHAPE_PIPELINES_FILE."
+        else
+            log_err "El parche fallback .safetensors/.ckpt no pudo aplicarse automaticamente."
+        fi
+    fi
+else
+    log_err "No se encontro $SHAPE_PIPELINES_FILE – omitiendo parche fallback .safetensors/.ckpt."
+fi
+
+# ---------------------------------------------------------------------------
+# 13. Descargar model-viewer.min.js local (elimina dependencia de CDN externo)
 # ---------------------------------------------------------------------------
 # gradio_app.py copia assets/model-viewer.min.js a gradio_cache/outputs/ al
 # arrancar. Sin este archivo los iframes del viewer 3D no cargan nada.
@@ -235,7 +306,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 13. Parche de rutas estaticas: /static → /outputs en gradio_app.py y templates
+# 14. Parche de rutas estaticas: /static → /outputs en gradio_app.py y templates
 # ---------------------------------------------------------------------------
 # FastAPI.mount("/static") toma precedencia sobre la ruta interna de Gradio,
 # provocando 404 en fuentes IBMPlexSans, CSS y JS del cliente Gradio.
@@ -290,7 +361,72 @@ PYEOF
 fi
 
 # ---------------------------------------------------------------------------
-# 14. Resumen final
+# 15. Parche compatibilidad Gradio 6: conservar CSS/theme al montar FastAPI
+# ---------------------------------------------------------------------------
+# Hunyuan3D usa gr.mount_gradio_app(app, demo, path="/"). En Gradio 6 el
+# theme/css definidos en gr.Blocks() se trasladaron al mount/launch; si no se
+# pasan, la app puede renderizar una pagina aparentemente correcta pero con el
+# cliente de Gradio inconsistente o sin reaccionar a clicks.
+if grep -q "_mount_params = inspect.signature(gr.mount_gradio_app)" "$GRADIO_APP" 2>/dev/null; then
+    log_ok "Parche compatibilidad Gradio 6 ya aplicado en gradio_app.py."
+else
+    log_info "Aplicando parche compatibilidad Gradio 6 en gradio_app.py ..."
+    GRADIO_APP="$GRADIO_APP" python3 - <<'PYEOF'
+import os
+from pathlib import Path
+
+path = Path(os.environ["GRADIO_APP"])
+txt = path.read_text()
+
+if "import inspect" not in txt:
+    txt = txt.replace("import shutil\n", "import shutil\nimport inspect\n", 1)
+
+txt = txt.replace("    return demo\n", "    return demo, custom_css\n")
+
+old = """    demo = build_app()
+    app = gr.mount_gradio_app(app, demo, path="/")
+    uvicorn.run(app, host=args.host, port=args.port, workers=1)
+"""
+new = """    demo, _grad_css = build_app()
+    _mount_params = inspect.signature(gr.mount_gradio_app).parameters
+    _mount_kwargs = {}
+    if "css" in _mount_params and _grad_css:
+        _mount_kwargs["css"] = _grad_css
+    if "theme" in _mount_params:
+        _mount_kwargs["theme"] = gr.themes.Base()
+    app = gr.mount_gradio_app(app, demo, path="/", **_mount_kwargs)
+    uvicorn.run(app, host=args.host, port=args.port, workers=1,
+                log_level="info", access_log=True)
+"""
+if old in txt:
+    txt = txt.replace(old, new)
+else:
+    old_gradio6 = """    demo, _grad_css = build_app()
+    # Gradio 6 moved theme/css from gr.Blocks() to mount_gradio_app()/launch().
+    # gr.mount_gradio_app() overrides blocks.css with "" if css is not passed.
+    # Pass both explicitly so the Base theme and custom_css are actually applied.
+    app = gr.mount_gradio_app(app, demo, path="/",
+                               css=_grad_css if _grad_css else None,
+                               theme=gr.themes.Base())
+    uvicorn.run(app, host=args.host, port=args.port, workers=1,
+                log_level="info", access_log=True)
+"""
+    if old_gradio6 not in txt:
+        raise SystemExit("No se encontro el bloque esperado de montaje Gradio")
+    txt = txt.replace(old_gradio6, new)
+
+path.write_text(txt)
+print("[install-hunyuan3d] parche Gradio 6 aplicado.")
+PYEOF
+    if grep -q "_mount_params = inspect.signature(gr.mount_gradio_app)" "$GRADIO_APP" 2>/dev/null; then
+        log_ok "Parche compatibilidad Gradio 6 aplicado correctamente."
+    else
+        log_err "El parche compatibilidad Gradio 6 no pudo aplicarse automaticamente."
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# 16. Resumen final
 # ---------------------------------------------------------------------------
 echo ""
 log_ok "=========================================================="
