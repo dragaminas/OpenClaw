@@ -258,6 +258,126 @@ scripts/apps/comfyui.sh open-ui
 
 En la practica, reiniciar ComfyUI equivale a reiniciar `comfyui.service`.
 
+## Trellis2 GGUF Q4
+
+Trellis2 se mantiene en un laboratorio aislado para no contaminar el runtime
+principal de `ComfyUI`.
+
+Runtime:
+
+```text
+/home/eric/ComfyUI-trellis2-lab
+```
+
+Preparar el layout ejecutable, pesos `Q4_K_M` y wheels CUDA compatibles con la
+RTX 3090:
+
+```bash
+cd /home/eric/Documents/OpenClaw
+bash scripts/apps/comfyui-trellis2-gguf-prepare-layout.sh
+```
+
+Validar preflight:
+
+```bash
+cd /home/eric/Documents/OpenClaw
+bash scripts/apps/comfyui-trellis2-gguf-validation.sh
+```
+
+Levantar la interfaz web del laboratorio:
+
+```bash
+cd /home/eric/ComfyUI-trellis2-lab
+.venv/bin/python main.py --listen 127.0.0.1 --port 8190 --disable-auto-launch
+```
+
+URL:
+
+```text
+http://127.0.0.1:8190
+```
+
+Si se levanta en paralelo para pruebas API, usar otro puerto y una base SQLite
+separada:
+
+```bash
+cd /home/eric/ComfyUI-trellis2-lab
+.venv/bin/python main.py \
+  --listen 127.0.0.1 \
+  --port 8191 \
+  --disable-auto-launch \
+  --database-url sqlite:////tmp/comfyui-trellis2-q4-texture.db
+```
+
+Workflows definidos hasta ahora:
+
+- `Trellis2_High_Quality_GGUF.json` — workflow PixelArtistry high-quality:
+  `GGUF Q4_K_M`, refinado, texturizado 4096 y preview 3D
+- `Trellis2_High_Quality_GGUF_Q8.json` — misma ruta PixelArtistry con
+  `GGUF Q8_0`
+- `Trellis2_High_Quality_FP16.json` — misma ruta PixelArtistry con pesos
+  `.safetensors` sin cuantizar
+- `Trellis2Multiviews_GGUF.json` — workflow PixelArtistry multiview:
+  dos vistas de entrada, `GGUF Q4_K_M`, unwrap/rasterizer y preview 3D
+- `MeshOnly.json` — mesh desde imagen, sin textura final
+- `MeshOnly_HighQuality.json` — mesh de mayor calidad
+- `MeshOnly_HighQuality_NoCascade.json` — mesh high quality sin cascade
+- `MeshOnly_LowPoly.json` — mesh low-poly
+- `MeshOnly_MultiView.json` — mesh usando multivista
+- `MeshTexturing.json` — aplica textura a un mesh existente
+- `MeshTexturing_MultiView.json` — texturizado multivista de un mesh existente
+- `MeshWithTexturing.json` — imagen a mesh con rama de textura
+- `MeshWithTexturing_LowPoly.json` — imagen a mesh texturizado low-poly
+- `MeshWithTexturing_MultiView.json` — imagen a mesh texturizado multivista
+- `Projection_Hy20_Qwen_2Views.json` — proyeccion/texturizado multivista con 2 vistas
+- `Projection_Hy20_Qwen_4Views.json` — proyeccion/texturizado multivista con 4 vistas
+- `Projection_Hy20_Qwen_6Views.json` — proyeccion/texturizado multivista con 6 vistas
+- `RefineMesh_MeshOnly.json` — refinado de mesh
+
+Ubicacion de los workflows de ejemplo:
+
+```text
+/home/eric/ComfyUI-trellis2-lab/custom_nodes/ComfyUI-Trellis2/example_workflows/
+```
+
+Workflow validado por API para `11.5`:
+
+```text
+image -> Trellis2 GGUF Q4_K_M -> texture_slat -> textured glb
+```
+
+La variante manual `OpenClaw_Q4_Textured_Refined_GLB.json` fue retirada porque
+produce geometria claramente peor que el workflow PixelArtistry.
+
+La ruta correcta para conservar texturas en el GLB es:
+
+```text
+Trellis2ImageCondGenerator
+Trellis2SparseGenerator
+Trellis2ShapeGenerator
+Trellis2TexSlatGenerator
+Trellis2DecodeLatents(texture_slat)
+Trellis2MeshWithVoxelToTrimesh
+Trellis2MeshRefiner
+Trellis2OvoxelExportToGLB
+Trellis2ExportMesh
+```
+
+Evidencia local actual:
+
+```text
+/home/eric/ComfyUI-trellis2-lab/output/openclaw/e2e_trellis_gguf_q4_textured_ovoxel_00001_.glb
+```
+
+Ese GLB contiene `PBRMaterial`, UVs, `baseColorTexture` `1024x1024 RGBA` y
+`metallicRoughnessTexture` `1024x1024 RGB`.
+
+Documentacion especifica:
+
+- [`docs/comfyui/trellis2-gguf-interface.md`](/home/eric/Documents/OpenClaw/docs/comfyui/trellis2-gguf-interface.md)
+- [`docs/comfyui/trellis2-gguf-validation-results.md`](/home/eric/Documents/OpenClaw/docs/comfyui/trellis2-gguf-validation-results.md)
+- [`docs/comfyui/trellis2-gguf-quality-investigation.md`](/home/eric/Documents/OpenClaw/docs/comfyui/trellis2-gguf-quality-investigation.md)
+
 ## Operacion diaria de Hunyuan3D
 
 La linea 3D nativa corre como una aplicacion separada de `ComfyUI`, con su

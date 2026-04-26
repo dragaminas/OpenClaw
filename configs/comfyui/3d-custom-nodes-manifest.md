@@ -30,7 +30,9 @@ Custom nodes presentes hoy:
 
 Custom nodes 3D prioritarios ausentes hoy:
 
-- ninguno del baseline `MVP`
+- ninguno del baseline historico `MVP`
+- para la investigacion nueva `Trellis2 GGUF`: `visualbruno/ComfyUI-Trellis2`
+  y soporte `GGUF` modular equivalente al usado por la via del video
 
 ## Clasificacion
 
@@ -39,6 +41,8 @@ Custom nodes 3D prioritarios ausentes hoy:
 | `stable-fast-3d` oficial | baseline `MVP` para `single image -> 3D` | presente y cargando nodos | bloqueante resuelto | es la ruta correcta para esta fase |
 | `ComfyUI-3D-Pack` | suite comparativa para `SF3D`, `Hunyuan` y otros stacks | presente pero `IMPORT FAILED` | secundaria | hoy cae por `pytorch3d`, no debe bloquear el `MVP` |
 | `openclaw-hunyuan3d-lite` | runtime historico de exploracion | presente | historica | solo conserva evidencia previa, no cierra la fase |
+| `ComfyUI-Trellis2` | candidato `Trellis2 GGUF` para calidad visual | ausente | investigacion | debe probarse primero en entorno aislado |
+| soporte `ComfyUI-GGUF` modular | carga de cuantizaciones Trellis2 low-VRAM | ausente | investigacion | ruta comunitaria/WIP; validar antes de integrarla |
 | visor `Preview 3D` compatible | preview en canvas | no verificado | recomendada | no bloquea export, si bloquea inspeccion comoda |
 | toolchain `gcc/g++` | compilaciones auxiliares en Linux | no auditado aun | experimental | relevante sobre todo para nodos que compilan extensiones |
 

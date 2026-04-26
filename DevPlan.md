@@ -539,6 +539,50 @@ Entregables por tarea:
 - [done] 10.13 `src/openclaw_studio/runners/hunyuan3d.py` + registro en `registry.py` + `docs/hunyuan3d/runner-integration.md`
 - [done] 10.14 `docs/hunyuan3d/sf3d-decision.md`
 
+## Fase 11: Reapertura 3D en `ComfyUI` con `Trellis2 GGUF` por Calidad Visual
+
+Objetivo:
+Investigar `TRELLIS.2` con cuantizaciones `GGUF` dentro de `ComfyUI` como
+candidato real para la ruta principal de generacion 3D local, reabriendo la
+decision anterior si la mejora visual compensa la complejidad tecnica. La
+prioridad de esta fase no es instalar otro stack por curiosidad, sino comprobar
+si la calidad observada en la via `Trellis2 GGUF` supera claramente lo probado
+con `SF3D` y `Hunyuan3D-2mini-Turbo`.
+
+Hipotesis operativa:
+
+- la calidad visual manda: si `Trellis2 GGUF` produce assets claramente mejores
+  en el hardware local, debe tener opcion de desplazar la ruta vigente
+- mantener la generacion 3D dentro de `ComfyUI` puede reducir friccion a largo
+  plazo, porque la carga/descarga de modelos y el encadenado con imagen,
+  limpieza, multivista, remesh, texturizado y exportacion viven en el mismo
+  grafo
+- la separacion nativa de `Hunyuan3D` sigue siendo valida como ruta estable ya
+  integrada, pero no debe bloquear una alternativa de mayor calidad si aparece
+- el riesgo principal no es conceptual, sino reproducibilidad: `TRELLIS.2`
+  oficial apunta a perfiles de VRAM altos, y la via low-VRAM depende de
+  cuantizaciones y wrappers comunitarios recientes
+
+Tareas:
+
+- [done] 11.1 Registrar la motivacion, fuentes tecnicas, riesgos y criterios de go/no-go para `Trellis2 GGUF` como nueva investigacion de calidad dentro de `ComfyUI`
+- [done] 11.2 Preparar un entorno `ComfyUI` experimental aislado para `Trellis2 GGUF`, sin contaminar el runtime principal ya validado
+- [done] 11.3 Auditar custom nodes, wheels y dependencias requeridas por `visualbruno/ComfyUI-Trellis2` y el soporte `GGUF` modular
+- [done] 11.4 Descargar solo el set minimo de modelos `Trellis2 GGUF` para una prueba `512` low-VRAM, evitando bajar la suite completa a ciegas
+- [done] 11.5 Derivar y comprobar un workflow minimo `UC-3D-02` `image -> Trellis2 GGUF Q4_K_M -> textured glb` y una variante opcional con limpieza de fondo
+- [in progress] 11.6 Ejecutar una comparativa local con el mismo fixture usado por `SF3D` y con al menos una imagen creativa real
+- [pending] 11.7 Importar outputs en `Blender`, registrar vertices/caras/texturas, y conservar artefactos revisables
+- [in progress] 11.8 Comparar visualmente `SF3D`, `Hunyuan3D-2mini-Turbo` y `Trellis2 GGUF` bajo el mismo criterio de producto; decision cualitativa actual favorece claramente Trellis
+- [in progress] 11.9 Cerrar decision `go/no-go`: mantener `Hunyuan3D` nativo, mover el producto 3D de vuelta a `ComfyUI` con `Trellis2 GGUF`, o conservar ambas rutas por perfil
+
+Entregables por tarea:
+
+- [done] 11.1 `docs/comfyui/trellis2-gguf-quality-investigation.md`
+- [done] 11.2-11.3 `scripts/apps/comfyui-trellis2-gguf-validation.sh`
+- [done] 11.5 `docs/comfyui/trellis2-gguf-interface.md` con evidencia API de Q4 texturizado
+- [done] 11.4 evidencia local de modelos minimos en `~/ComfyUI-trellis2-lab/models/trellis2_gguf_minimum/`
+- [in progress] 11.6-11.9 `docs/comfyui/trellis2-gguf-validation-results.md` registra el `.glb` Trellis Q4 texturizado; falta importarlo en `Blender` y cerrar comparativa formal
+
 ## Riesgos a controlar
 
 - confundir "no usar root" con "no tener acceso a discos"

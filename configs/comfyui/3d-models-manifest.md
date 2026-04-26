@@ -62,3 +62,20 @@ Este manifiesto ya no es solo plan de descarga; ahora deja documentado:
 - que el acceso gated ya quedo resuelto
 - que `UC-3D-01` y `UC-3D-02` ya consumieron ese modelo con exito
 - y que cualquier linea futura `Hunyuan3D` debe seguir tratandose aparte
+
+## Investigacion posterior: `Trellis2 GGUF`
+
+Con corte posterior, se abre una investigacion por calidad visual para evaluar
+`TRELLIS.2` con cuantizaciones `GGUF` dentro de `ComfyUI`.
+
+Regla especifica:
+
+- no descargar la suite completa `Aero-Ex/Trellis2-GGUF` a ciegas
+- empezar por el set minimo `512` `Q4_K_M` o equivalente
+- conservar `SF3D` como baseline historico de comparacion
+- comparar contra `Hunyuan3D-2mini-Turbo` con el mismo input antes de cambiar
+  la ruta principal de producto
+
+Referencia operativa:
+
+- `docs/comfyui/trellis2-gguf-quality-investigation.md`

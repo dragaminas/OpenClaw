@@ -18,6 +18,18 @@ La evidencia posterior deja una lectura mas afinada:
 - la linea activa a explorar a continuacion pasa a ser `Hunyuan3D` nativo, ya
   fuera de `ComfyUI`, segun `docs/hunyuan3d/phase-10-native-transition.md`
 
+Actualizacion posterior:
+
+- si la calidad visual de una ruta nueva dentro de `ComfyUI` supera claramente
+  a `SF3D` y a la configuracion local de `Hunyuan3D`, debe reabrirse la
+  decision de arquitectura
+- la investigacion `Trellis2 GGUF` queda documentada en
+  `docs/comfyui/trellis2-gguf-quality-investigation.md`
+- con corte `2026-04-25`, la decision de esa investigacion queda en
+  `no-go_provisional` hasta que el runtime aislado y el set minimo de modelos
+  queden realmente instalados, segun
+  `docs/comfyui/trellis2-gguf-validation-results.md`
+
 ## Corte temporal y alcance
 
 Fecha de corte de esta evaluacion: `2026-04-12`.
@@ -71,6 +83,7 @@ encaje para:
 | `SF3D` | `single image -> mesh` | ruta natural y ligera dentro de `ComfyUI` | alto | mejor candidato para el `MVP` |
 | `Hunyuan 3D` | familia con `text/image -> 3D` | posible, pero con mas friccion y wrappers comunitarios | medio o bajo para baseline local en `ComfyUI` | mejor linea futura fuera del `MVP` de `ComfyUI` |
 | `InstantMesh` | `single image -> mesh` | usable como via secundaria | medio | bueno como proxy o comparativa |
+| `Trellis2 GGUF` | `single/multiview image -> textured mesh` | investigacion nueva, depende de wrappers y GGUF comunitarios | no-go provisional | candidato si la calidad visual justifica la complejidad |
 
 ## `SF3D`
 
